@@ -1,1 +1,1 @@
-# isip_machine_learning_demo
+# IMLD (ISIP Machine Learning Demo)
