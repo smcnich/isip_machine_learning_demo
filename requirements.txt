@@ -1,0 +1,6 @@
+Flask==3.0.3
+imblearn==0.0
+numpy==2.1.1
+pandas==2.2.2
+PyQt5==5.15.11
+scikit_learn==1.5.2
