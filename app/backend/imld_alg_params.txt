@@ -1,0 +1,280 @@
+# file: $NEDC_NFC/util/python/nedc_ml_tools/imld_alg_params.txt
+#
+# A parameter file that defines the parameters for each ML Tools algorithm 
+# to be used in IMLD. Contains parameter blocks for each algorithm and presents
+# all of the possible options. Also allows user to add their own algorithm to
+# IMLD by creating their own parameter block.
+#
+
+# Guide:
+#  The parameters for each algorithm are simple key:value pairs. Each key is
+#  limited to a single, non-spaced word. Each key must be identically named
+#  to its corresponding ML Tools parameter name. The values for each key can
+#  have a few different forms. Before discussing the various value options, it
+#  important to understand how IMLD interprets numeric values and it how 
+#  discerns between float and integer values.
+#
+#
+#  Numerics:
+#   In the IMLD parameter file, providing an integer will limit the user to
+#   strictly whole numbers. Integers are typed into the parameter file as 
+#   whole numbers WITHOUT any decimal points or places:
+#
+#     example: key = 1
+#
+#   Alternative to integers, float numbers can also be used. If a float number
+#   is specified in the parameter file, the user will be able to choose
+#   decimal or non-whole numbers. An important note about floats in the IMLD
+#   parameter file is that if a range of numbers is specifed as a parameters
+#   value, and one of the range values is presented as a float, the user prompt
+#   for that parameter will be floats. Meaning that users will be able to use 
+#   decimal numbers. For this reason it is important to be concise when
+#   presenting numerics in the parameter file. Floats can be written as decimal
+#   numbers WITH decimal points:
+#
+#     example: key = 1.50
+#
+#   If you want to set the parameter value to a whole number but still allow the
+#   user to use floats, be sure to include decimal points and places even if
+#   they are just zeros.
+#
+#     example: key = 1.00
+#
+#  1. Single Values:
+#   A single value can be used as the value for a parameter. This single value
+#   can either numeric or non-numeric. A numeric value would set the default 
+#   value of the parameter to the given number. If a single number is given, the
+#   range will be an "infinite" set of positive numbers. As mentioned, the 
+#   numerics can be float or integer types.
+#
+#     example: key = 1
+#     example: key = 1.0
+#     example: key = *
+#
+#   If a single non-numeric value is needed for any particular reason, this can
+#   also be done. Simply place the single word-like value as the only value
+#   to its key. If this is done, the user will not be able to select anything
+#   other than the given value for that parameter.
+#
+#     example: key = gini
+#
+#  2. List Values:
+#   If a parameter has specific, predetermined options, a list value should be
+#   used. A list is simply a list a values that the user can choose as a
+#   parameter. List can be written as comma-delimited values:
+#
+#     example: scale = none, biased, unbiased, empirical
+#
+#   If the predetermined options are numbers, developer are encouraged to list
+#   the numbers as words (ex. "one"), or use a range value for that parameter.
+#
+#     example: key = one, two, three
+#  
+#  3. Numeric-Range Values:
+#   The third parameter value type is a numeric range. If the developer wants
+#   user to be able to specific a numeric value in between a specific, numeric
+#   range, this is the value to use. A numeric range is comprised of three 
+#   parts; the minimum value, maximum value, and default value. The user will
+#   only be able to choose a number in between the minimum and maximum value. 
+#   The default value is what the text box displays before the user makes any
+#   edits. The range can be written as a list of 3 values, with the first being
+#   the minimum value, the second being the maximum value, and the third being 
+#   the default value:
+#
+#     example: neighbors = 0, 2, 1
+#     example: neighbors = 1, 3, 2
+#
+#  4. Class-Based Numerics:
+#   The final parameter value type can be called a class-based numeric. A class-
+#   based numeric value will automatically populate the parameter box with
+#   options for each of the classes present in the data. If there are 2 classes
+#   present, there will be 4 numeric-boxes for each class. The numeric boxes
+#   have float precision and the name of each box will be the parameter keys
+#   name with the index (ex. weights 2). The class-based numeric return
+#   a list of the values of each class to the parameter.
+#
+#     example: weights = //     
+#
+#  The '*' Character:
+#   The '*', or astericks character can be used in single and numeric range
+#   values. The '*' will automatically populate that value with the amount of
+#   classes present in the training data set. This option is useful when the
+#   developer wants the parameter to default or limit to the number of classes
+#   present in the training data. The '*' character can be inserted into single
+#   and numeric range values just like any number character.
+#
+#     example: neighbors = 0, *, *
+#     example: neighbors = 0, *, 0
+#     example: neighbors = *, *, *
+#     example: neighbors = *
+#
+#  Spaced Non-Numerics:
+#   If the developer would like to assign a non-numeric single, or list value,
+#   but the value has spaces in it, the value can be wrapped in quotations to
+#   encompass the entire value:
+#
+#     example: name = "Principal Components Analysis (PCA)"
+#     example: key = "first value", "second value", "third value"
+#
+#   This feature is particularly useful for the required "name" key for each
+#   parameter.
+#
+#  Important Notes:
+#   There are a couple requirements for each algorithm and its corresponding
+#   parameter blocks:
+#
+#    1. Every parameter block must have a "name" key, preferably a detailed
+#       algorithm name. The "name" parameter will not be included when
+#       instantiating the ML Tools algorithm.
+#
+#    2. Every parameter in the parameter block (other than the "name" key) must
+#       be named indentically to the corresponding ML Tools parameter dictionary
+#       keys. If the keys are not the exact same as the ML Tools dictionary, the
+#       connection to ML Tools will fail and IMLD will crash.
+#
+#  These are the rules and requirments for the IMLD parameter file. If the 
+#  requirments are not strictly adhered, IMLD is prone to undefined behavior and
+#  crashing. Please use this guide and preexisting algorithms as a reference 
+#  when implementing or modifying a algorithm.
+#
+# DO NOT FORGET TO INCLUDE EVERY ALGORITHM IN THE "ALGS" LIST. If an algorithm
+# is not present in that list, it will not be included in IMLD. The sequence
+# of the list is the order in which the algorithms are presented in the 
+# drop-down menu.
+#
+
+# set version information
+#
+version = param_v1.0.0
+
+#------------------------------------------------------------------------------
+#
+# Section 0: a list of all the algorithms
+#
+#------------------------------------------------------------------------------
+
+ALGS = EUCLIDEAN, PCA, QDA, LDA, QLDA, NB, KMEANS, KNN, RNF, SVM, MLP
+
+#------------------------------------------------------------------------------
+#
+# Section 1: discriminant-based algorithms
+#
+#------------------------------------------------------------------------------
+
+EUCLIDEAN {
+ name = "Euclidean Distance (EUCLIDEAN)"
+ weights = //
+}
+
+PCA {
+ name = "Principal Components Analysis (PCA)"
+ prior = ml, map
+ ctype = full, diagonal
+ center = none, tied, untied
+ scale = none, biased, unbiased, empirical
+ n_components = 0, 2, 2
+}
+
+QDA {
+ name = "Quadratic Components Analysis (QDA)"
+ prior = ml, map
+ ctype = full, diagonal
+ center = none, tied, untied
+ scale = none, biased, unbiased, empirical
+ n_components = 0, 2, 2
+}
+
+LDA {
+ name = "Linear Discriminant Analysis (LDA)"
+ prior = ml, map
+ ctype = full, diagonal
+ center = none, tied, untied
+ scale = none, biased, unbiased, empirical
+}
+
+QLDA {
+ name = "Quadratic Linear Discriminate Analysis (QLDA)"
+ prior = ml, map
+ ctype = full, diagonal
+ center = none, tied, untied
+ scale = none, biased, unbiased, empirical
+}
+
+NB {
+ name = "Naive Bayes (NB)"
+ prior = ml, map
+}
+
+#------------------------------------------------------------------------------
+#
+# Section 2: nonparametric models
+#
+#------------------------------------------------------------------------------
+
+KNN {
+ name = "K Nearest Neighbor (KNN)"
+ neighbor = 5
+}
+
+RNF {
+ name = "Random Forest (RNF)"
+ estimator = 100
+ max_depth = 5
+ criterion = gini, entropy, log_loss
+ random_state = 0
+}
+
+SVM {
+ name = "Support Vector Machines (SVM)"
+ c = 0, 1.0, 10000.0
+ gamma = 0, 0.1, 10000.0
+ kernel = linear, poly, rbf, sigmoid, precomputed
+}
+
+KMEANS {
+ name = "K-Means (KMEANS)"
+ n_cluster = 8
+ n_init = 3
+ random_state = 0
+ max_iter = 100
+}
+
+
+#------------------------------------------------------------------------------
+#
+# Section 3: neural network-based models
+#
+#------------------------------------------------------------------------------
+
+MLP {
+ name = "Multilayer Perceptron (MLP)"
+ hidden_size = 3
+ activation = relu, identity, logistic, tanh
+ solver = adam, lbfgs, sgd
+ batch_size = auto
+ learning_rate = constant, invscaling, adaptive
+ learning_rate_init = 0, 0.009, 10000.0
+ random_state = 0
+ momentum = 0, 0.9, 1.0
+ validation_fraction = 0, 0.1, 1.0
+ max_iter = 0, 20, 10000
+ shuffle = False, True
+ early_stopping = False, True
+}
+
+#------------------------------------------------------------------------------
+#
+# Section 4: custom algorithms
+#
+#------------------------------------------------------------------------------
+
+#TEMPLATE {
+# name = "TEMPLATE"
+# param = 0 
+#}
+
+#------------------------------------------------------------------------------
+#
+# end of file
+#
+#------------------------------------------------------------------------------

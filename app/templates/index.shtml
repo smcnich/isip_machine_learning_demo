@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<!-----------------------------------------------------------------------------
+ file: $ISIP_WEB/projects/imld/app/index.shtml
+
+ revision history:
+  20240309 (SM): Initial version
+------------------------------------------------------------------------------>
+
+<html lang="en">
+
+ <!---------------- define the contents of the html head tag ----------------->
+ <!--                                                                       -->
+ <head>
+
+  <!-- display the page title -->
+  <!--                        -->
+  <title>
+   IMLD - The ISIP Machine Learning Demo
+  </title>
+
+  <!-- set up overall window scaling -->
+  <!--                               -->     
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+  <!-- define site information for search engines -->
+  <!--                                            -->
+  <meta name="description" content="Machine Learning Demonstration">
+  <meta name="author" content="Shane McNicholas">
+  <meta name="keywords"
+   content="Machine Learning, Big Data, Deep Learning, Pattern Recognition">
+    
+  <!-- Load bootstrap -->
+  <!--                -->
+  <link type = "text/css" rel="stylesheet" href="index.css">
+
+ </head>
+
+ <!------------------------ define the html page body ------------------------>
+ <!--                                                                       -->
+ <body>
+
+  <!---------------------- define the html page header ----------------------->
+  <!--                                                                      -->
+  <header>
+
+  </header>
+
+  <div>
+   <h1>Under Construction</h1>
+   <h2>The new home of IMLD</h2>
+  </div>
+
+ <!-- end of body -->
+ <!--             -->
+ </body>
+
+<!-- end of file -->
+<!--             -->
+</html>

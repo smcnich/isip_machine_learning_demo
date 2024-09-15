@@ -1,0 +1,56 @@
+:root{
+    --main-color: #9B58FA;
+    --secondary-color: #7441BA;
+    --complementary-1: #FAF557;
+}
+
+* {
+  margin: 0;
+}
+
+html, body{
+    height: 100%;
+    width: 100%;
+    overflow: overlay;
+    scroll-behavior: smooth;
+    display: flex;
+    justify-content: center;
+}
+
+/* scrollbar  */
+::-webkit-scrollbar {
+    width: 20px;
+    background: transparent;
+    z-index: 2;
+    cursor: pointer !important;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+    cursor: pointer !important;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    border: 6px solid transparent;
+    background-clip: content-box;
+    cursor: pointer !important;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+    cursor: pointer !important;
+  }
+/* scrollbar end */
+
+div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+div h1, h2 {
+    padding: 10px 10px 10px 10px;
+}
