@@ -51,6 +51,10 @@ def generate_two_gaussian(params:dict) -> tuple:
                              'npts2'  (int)     : the number of points to generate
                              'mean2' (list)     : the mean values for the two toroidal distributions
                              'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'x_min' (int)     : the minimum x value for the data
+                             'x_max' (int)     : the maximum x value for the data
+                             'y_min' (int)     : the minimum y value for the data
+                             'y_max' (int)     : the maximum y value for the data
                              }
 
     return:
@@ -88,6 +92,10 @@ def generate_four_gaussian(params:dict) -> tuple:
                              'npts4'  (int)     : the number of points to generate
                              'mean4' (list)     : the mean values for the two toroidal distributions
                              'cov4'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'x_min' (int)     : the minimum x value for the data
+                             'x_max' (int)     : the maximum x value for the data
+                             'y_min' (int)     : the minimum y value for the data
+                             'y_max' (int)     : the maximum y value for the data
                              }
 
     return:
@@ -119,6 +127,10 @@ def generate_ovlp_gaussian(params:dict) -> tuple:
                              'npts2'  (int)     : the number of points to generate
                              'mean2' (list)     : the mean values for the two toroidal distributions
                              'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'x_min' (int)     : the minimum x value for the data
+                             'x_max' (int)     : the maximum x value for the data
+                             'y_min' (int)     : the minimum y value for the data
+                             'y_max' (int)     : the maximum y value for the data
                              }
 
     return:
@@ -150,6 +162,10 @@ def generate_two_ellipses(params:dict) -> tuple:
                              'npts2'  (int)     : the number of points to generate
                              'mean2' (list)     : the mean values for the two toroidal distributions
                              'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'x_min' (int)     : the minimum x value for the data
+                             'x_max' (int)     : the maximum x value for the data
+                             'y_min' (int)     : the minimum y value for the data
+                             'y_max' (int)     : the maximum y value for the data
                              }
 
     return:
@@ -187,6 +203,10 @@ def generate_four_ellipses(params:dict) -> tuple:
                              'npts4'  (int)     : the number of points to generate
                              'mean4' (list)     : the mean values for the two toroidal distributions
                              'cov4'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'x_min' (int)     : the minimum x value for the data
+                             'x_max' (int)     : the maximum x value for the data
+                             'y_min' (int)     : the minimum y value for the data
+                             'y_max' (int)     : the maximum y value for the data
                              }
 
     return:
@@ -218,6 +238,10 @@ def generate_rotated_ellipses(params:dict) -> tuple:
                              'npts2'  (int)     : the number of points to generate
                              'mean2' (list)     : the mean values for the two toroidal distributions
                              'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'x_min' (int)     : the minimum x value for the data
+                             'x_max' (int)     : the maximum x value for the data
+                             'y_min' (int)     : the minimum y value for the data
+                             'y_max' (int)     : the maximum y value for the data
                              }
 
     return:
