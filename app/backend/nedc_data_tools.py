@@ -38,14 +38,20 @@ def generate_distribution(name:str, *, params:dict=None) -> tuple:
 TODO (Kayla): create a function that generates two gaussian masses, each of different labels.
               base this function on imld_data_gen.py line 61.
 '''
-def generate_two_gaussian(npts=None, mean=None, cov=None) -> tuple:
+def generate_two_gaussian(params:dict) -> tuple:
     '''
     function generate_two_gaussian
 
     args:
-     npts (int): the number of points to generate
-     mean (list): the mean values for the two gaussian distributions
-     cov (list): the covariance matrices for the two gaussian distributions
+     params (dict): a dictionary containing the parameters for the distribution.
+                    params = {
+                             'npts1'  (int)     : the number of points to generate
+                             'mean1' (list)     : the mean values for the two toroidal distributions
+                             'cov1'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'npts2'  (int)     : the number of points to generate
+                             'mean2' (list)     : the mean values for the two toroidal distributions
+                             'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             }
 
     return:
      X (np.ndarray): a 2D array containing all of the data points generated.
@@ -63,14 +69,26 @@ def generate_two_gaussian(npts=None, mean=None, cov=None) -> tuple:
 TODO (Kayla): create a function that generates four gaussian masses, each of different labels.
               base this function on imld_data_gen.py line 133.
 '''
-def generate_four_gaussian(npts=None, mean=None, cov=None) -> tuple:
+def generate_four_gaussian(params:dict) -> tuple:
     '''
     function generate_four_gaussian
 
     args:
-     npts (int): the number of points to generate
-     mean (list): the mean values for the four overlapping gaussian distributions
-     cov (list): the covariance matrices for the four overlapping gaussian distributions
+     params (dict): a dictionary containing the parameters for the distribution.
+                    params = {
+                             'npts1'  (int)     : the number of points to generate
+                             'mean1' (list)     : the mean values for the two toroidal distributions
+                             'cov1'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'npts2'  (int)     : the number of points to generate
+                             'mean2' (list)     : the mean values for the two toroidal distributions
+                             'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'npts3'  (int)     : the number of points to generate
+                             'mean3' (list)     : the mean values for the two toroidal distributions
+                             'cov3'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'npts4'  (int)     : the number of points to generate
+                             'mean4' (list)     : the mean values for the two toroidal distributions
+                             'cov4'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             }
 
     return:
      X (np.ndarray): a 2D array containing all of the data points generated.
@@ -88,14 +106,20 @@ def generate_four_gaussian(npts=None, mean=None, cov=None) -> tuple:
 TODO (Kayla): create a function that generates two overlapping gaussian masses, each of 
               different labels. base this function on imld_data_gen.py line 238.
 '''
-def generate_ovlp_gaussian(npts=None, mean=None, cov=None) -> tuple:
+def generate_ovlp_gaussian(params:dict) -> tuple:
     '''
     function generate_ovlp_gaussian
 
     args:
-     npts (int): the number of points to generate
-     mean (list): the mean values for the two gaussian distributions
-     cov (list): the covariance matrices for the two gaussian distributions
+     params (dict): a dictionary containing the parameters for the distribution.
+                    params = {
+                             'npts1'  (int)     : the number of points to generate
+                             'mean1' (list)     : the mean values for the two toroidal distributions
+                             'cov1'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'npts2'  (int)     : the number of points to generate
+                             'mean2' (list)     : the mean values for the two toroidal distributions
+                             'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             }
 
     return:
      X (np.ndarray): a 2D array containing all of the data points generated.
@@ -113,14 +137,20 @@ def generate_ovlp_gaussian(npts=None, mean=None, cov=None) -> tuple:
 TODO (Kayla): create a function that generates two ellipses masses, each of 
               different labels. base this function on imld_data_gen.py line 308.
 '''
-def generate_two_ellipses(npts=None, mean=None, cov=None) -> tuple:
+def generate_two_ellipses(params:dict) -> tuple:
     '''
     function generate_two_ellipses
 
     args:
-     npts (int): the number of points to generate
-     mean (list): the mean values for the two ellipses distributions
-     cov (list): the covariance matrices for the two ellipses distributions
+     params (dict): a dictionary containing the parameters for the distribution.
+                    params = {
+                             'npts1'  (int)     : the number of points to generate
+                             'mean1' (list)     : the mean values for the two toroidal distributions
+                             'cov1'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'npts2'  (int)     : the number of points to generate
+                             'mean2' (list)     : the mean values for the two toroidal distributions
+                             'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             }
 
     return:
      X (np.ndarray): a 2D array containing all of the data points generated.
@@ -138,14 +168,26 @@ def generate_two_ellipses(npts=None, mean=None, cov=None) -> tuple:
 TODO (Ray): create a function that generates four ellipses masses, each of 
               different labels. base this function on imld_data_gen.py line 372.
 '''
-def generate_four_ellipses(npts=None, mean=None, cov=None) -> tuple:
+def generate_four_ellipses(params:dict) -> tuple:
     '''
     function generate_four_ellipses
 
     args:
-     npts (int): the number of points to generate
-     mean (list): the mean values for the four ellipses distributions
-     cov (list): the covariance matrices for the four ellipses distributions
+     params (dict): a dictionary containing the parameters for the distribution.
+                    params = {
+                             'npts1'  (int)     : the number of points to generate
+                             'mean1' (list)     : the mean values for the two toroidal distributions
+                             'cov1'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'npts2'  (int)     : the number of points to generate
+                             'mean2' (list)     : the mean values for the two toroidal distributions
+                             'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'npts3'  (int)     : the number of points to generate
+                             'mean3' (list)     : the mean values for the two toroidal distributions
+                             'cov3'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'npts4'  (int)     : the number of points to generate
+                             'mean4' (list)     : the mean values for the two toroidal distributions
+                             'cov4'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             }
 
     return:
      X (np.ndarray): a 2D array containing all of the data points generated.
@@ -163,14 +205,20 @@ def generate_four_ellipses(npts=None, mean=None, cov=None) -> tuple:
 TODO (Ray): create a function that generates rotated ellipses masses, each of 
               different labels. base this function on imld_data_gen.py line 477.
 '''
-def generate_rotated_ellipses(npts=None, mean=None, cov=None) -> tuple:
+def generate_rotated_ellipses(params:dict) -> tuple:
     '''
     function generate_rotated_ellipses
 
     args:
-     npts (int): the number of points to generate
-     mean (list): the mean values for the two rotated ellipses distributions
-     cov (list): the covariance matrices for the two rotated ellipses distributions
+     params (dict): a dictionary containing the parameters for the distribution.
+                    params = {
+                             'npts1'  (int)     : the number of points to generate
+                             'mean1' (list)     : the mean values for the two toroidal distributions
+                             'cov1'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'npts2'  (int)     : the number of points to generate
+                             'mean2' (list)     : the mean values for the two toroidal distributions
+                             'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             }
 
     return:
      X (np.ndarray): a 2D array containing all of the data points generated.
@@ -188,14 +236,22 @@ def generate_rotated_ellipses(npts=None, mean=None, cov=None) -> tuple:
 TODO (Kayla): create a function that generates two toroidal masses, each of 
               different labels. base this function on imld_data_gen.py line 545.
 '''
-def generate_toroidal(npts=None, mean=None, cov=None) -> tuple:
+def generate_toroidal(params:dict) -> tuple:
     '''
     function generate_toroidal
 
     args:
-     npts (int): the number of points to generate
-     mean (list): the mean values for the two toroidal distributions
-     cov (list): the covariance matrices for the two toroidal distributions
+     params (dict): a dictionary containing the parameters for the distribution.
+                    params = {
+                             'mean' (list)     : the mean values for the two toroidal distributions
+                             'cov'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'npts_mass' (int) : the number of points to generate
+                             'npts_ring' (int) : the number of points to generate for the ring
+                             'x_min' (int)     : the minimum x value for the data
+                             'x_max' (int)     : the maximum x value for the data
+                             'y_min' (int)     : the minimum y value for the data
+                             'y_max' (int)     : the maximum y value for the data
+                             }
 
     return:
      X (np.ndarray): a 2D array containing all of the data points generated.
@@ -213,14 +269,20 @@ def generate_toroidal(npts=None, mean=None, cov=None) -> tuple:
 TODO (Shane): create a function that generates two masses that create the yin yang, 
               each of different labels. base this function on imld_data_gen.py line 661.
 '''
-def generate_yin_yang(npts=None, mean=None, cov=None) -> tuple:
+def generate_yin_yang(params:dict) -> tuple:
     '''
     function generate_yin_yang
 
     args:
-     npts (int): the number of points to generate
-     mean (list): the mean values for the yin yang distributions
-     cov (list): the covariance matrices for the yin yang distributions
+     params (dict): a dictionary containing the parameters for the distribution.
+                    params = {
+                                'npts_yin' (int) : the number of points to generate for the yin
+                                'npts_yang' (int): the number of points to generate for the yang
+                                'x_min' (int)    : the minimum x value for the data
+                                'x_max' (int)    : the maximum x value for the data
+                                'y_min' (int)    : the minimum y value for the data
+                                'y_max' (int)    : the maximum y value for the data
+                             }
 
     return:
      X (np.ndarray): a 2D array containing all of the data points generated.
