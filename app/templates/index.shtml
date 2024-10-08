@@ -34,9 +34,18 @@
     
   <!-- Load bootstrap -->
   <!--                -->
-  <link type = "text/css" rel="stylesheet" href="index.css">
+  <link type = "text/css" rel="stylesheet" href="static/index.css">
+
+  <!-- Load the web component -->
+  <script src="static/components/ShareBtn.js"></script>
 
  </head>
+  <style>
+   @font-face {
+    font-family: 'Inter';
+    src: url('static/fonts/Inter_24pt-Regular.ttf') format('ttf');
+   }
+  </style>
 
  <!------------------------ define the html page body ------------------------>
  <!--                                                                       -->
@@ -45,12 +54,32 @@
   <!---------------------- define the html page header ----------------------->
   <!--                                                                      -->
   <header>
-
+   <h1>The ISIP Machine Learning Demo</h1>
+   <div>
+    <h2>Contact</h2>
+    <share-btn></share-btn>
+   </div>
   </header>
 
-  <div>
-   <h1>Under Construction</h1>
-   <h2>The new home of IMLD</h2>
+  <div class="main">
+   <div class="col" id="main-col">
+    <div class="plots">
+     <div class="card plot">
+      <h3>Train</h3>
+     </div>
+     <div class="card plot">
+      <h3>Eval</h3>
+     </div>
+    </div>
+    <div class="card" id="process-log">
+     <h3>Process Log</h3>
+    </div>
+   </div>
+   <div class="col" id="tool-col">
+    <div class="card" id="alg-card">
+     <h3>Algorithm Toolbar</h3>
+    </div>
+   </div>
   </div>
 
  <!-- end of body -->
