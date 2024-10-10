@@ -38,6 +38,7 @@
 
   <!-- Load the web component -->
   <script src="static/components/ShareBtn.js"></script>
+  <script src="static/components/ToolbarBtn.js"></script>
 
  </head>
   <style>
@@ -61,13 +62,7 @@
 
   <!---------------------- define the page toolbar ----------------------->
   <div class="toolbar">
-   <button>File</button>
-   <button>Edit</button>
-   <button>View</button>
-   <button>Classes</button>
-   <button>Patterns</button>
-   <button>Data</button>
-   <button>Help</button>
+    <toolbar-btn></toolbar-btn>
   </div>
 
   <!---------------------- define the main body -------------------->
