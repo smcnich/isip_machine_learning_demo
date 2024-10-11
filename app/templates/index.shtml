@@ -39,6 +39,7 @@
   <!-- Load the web component -->
   <script src="static/components/ShareBtn.js"></script>
   <script src="static/components/ToolbarBtn.js"></script>
+  <script src="static/components/ProcessLog.js"></script>
 
  </head>
   <style>
@@ -87,7 +88,8 @@
 
     <!---------------------- define a row for the process log -------------------->
     <div class="card" id="process-log">
-     <h3>Process Log</h3>
+      <h3>Process Log</h3>
+      <process-log></process-log>
     </div>
    </div>
 

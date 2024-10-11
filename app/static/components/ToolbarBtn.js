@@ -204,10 +204,10 @@ class ToolbarBtn extends HTMLElement {
           <div class="dropdown">
             <button class="dropdownbutton">Two Gaussian</button>
             <button class="dropdownbutton">Four Gaussian</button>
-            <button class="dropdownbutton">Overlapping Gaussian</button>
+            <button class="dropdownbutton separator">Overlapping Gaussian</button>
             <button class="dropdownbutton">Two Ellipses</button>
             <button class="dropdownbutton">Four Ellipses</button>
-            <button class="dropdownbutton">Rotated Ellipses</button>
+            <button class="dropdownbutton separator">Rotated Ellipses</button>
             <button class="dropdownbutton">Toroidal</button>
             <button class="dropdownbutton">Yin-Yang</button>
           </div>
