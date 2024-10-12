@@ -1,66 +1,196 @@
 class ToolbarBtn extends HTMLElement {
   constructor() {
+    /*
+    method: ToolbarBtn::constructor
+
+    args:
+     None
+
+    returns:
+     ToolbarBtn instance
+
+    description:
+     This is the constructor for the ToolbarBtn class. It initializes the component, 
+     creates a shadow root for encapsulation, and binds the handleOutsideClick 
+     method to the current context to ensure it has the correct 'this' reference 
+     when invoked as an event handler.
+    */
+
+    // Call the parent constructor (HTMLElement)
     super();
+
+    // Create a shadow root for the component
     this.attachShadow({ mode: 'open' });
+
+    // Bind the handleOutsideClick method to the current instance
     this.handleOutsideClick = this.handleOutsideClick.bind(this);
   }
+  //
+  // end of method
 
   async connectedCallback() {
+    /*
+    method: ToolbarBtn::connectedCallback
+
+    args:
+     None
+
+    return:
+     None
+
+    description:
+     This method is called when the component is added to the DOM. It renders the 
+     component's HTML and CSS, adds click event listeners for the menu buttons, 
+     and attaches an event listener to the document for handling clicks outside 
+     the component to close any open dropdowns.
+    */
+
+    // Render the component to the webpage
     this.render();
+
+    // Add click event listeners to the menu buttons
     this.addClickEvents();
+
+    // Attach an event listener to the document for outside clicks
     document.addEventListener('click', this.handleOutsideClick);
   }
+  //
+  // end of method
+
 
   disconnectedCallback() {
+    /*
+    method: ToolbarBtn::disconnectedCallback
+
+    args:
+     None
+
+    return:
+     None
+
+    description:
+     This method is called when the component is removed from the DOM.
+     It removes the event listener for outside clicks to prevent memory leaks.
+    */
+
+    // Remove the event listener for outside clicks
     document.removeEventListener('click', this.handleOutsideClick);
   }
+  //
+  // end of method
 
   handleOutsideClick(event) {
+    /*
+    method: ToolbarBtn::handleOutsideClick
+
+    args:
+     event: MouseEvent - The click event that triggered the handler.
+
+    return:
+     None
+
+    description:
+     This method checks if a click event occurred outside the shadow root
+     of the component. If so, it calls closeAllDropdowns to close any open dropdowns.
+    */
+
+    // Check if the click was outside the component's shadow root
     if (!this.shadowRoot.contains(event.target)) {
-      this.closeAllDropdowns();
+        this.closeAllDropdowns();
     }
   }
+  //
+  // end of method
 
   closeAllDropdowns() {
+    /*
+    method: ToolbarBtn::closeAllDropdowns
+
+    args:
+     None
+
+    return:
+     None
+
+    description:
+     This method closes all dropdown menus within the component and 
+     removes the 'active' class from all menu buttons, ensuring that 
+     only one dropdown can be open at a time.
+    */
+
     // Close all dropdowns and remove the 'active' class from all buttons
     this.shadowRoot.querySelectorAll('.dropdown').forEach(dropdown => {
-      dropdown.style.display = 'none';
+        dropdown.style.display = 'none';
     });
     this.shadowRoot.querySelectorAll('.menubutton').forEach(button => {
-      button.classList.remove('active');
+        button.classList.remove('active');
     });
   }
+  //
+  // end of method
 
   addClickEvents() {
+    /*
+    method: ToolbarBtn::addClickEvents
+
+    args:
+     None
+
+    return:
+     None
+
+    description:
+     This method adds click event listeners to all menu buttons. When a button 
+     is clicked, it toggles the visibility of the associated dropdown and 
+     ensures that only one dropdown is open at a time by calling closeAllDropdowns.
+    */
+
     const buttons = this.shadowRoot.querySelectorAll('.menubutton');
 
     buttons.forEach(button => {
-      button.addEventListener('click', (event) => {
-        event.stopPropagation();  // Prevent the click from bubbling to the window
+        button.addEventListener('click', (event) => {
+            event.stopPropagation();  // Prevent the click from bubbling to the window
 
-        const dropdown = button.nextElementSibling;
+            const dropdown = button.nextElementSibling;
 
-        // Toggle dropdown visibility
-        if (dropdown) {
-          const isVisible = dropdown.style.display === 'block';
+            // Toggle dropdown visibility
+            if (dropdown) {
+                const isVisible = dropdown.style.display === 'block';
 
-          // Close all other dropdowns and deactivate buttons
-          this.closeAllDropdowns();
+                // Close all other dropdowns and deactivate buttons
+                this.closeAllDropdowns();
 
-          // If the dropdown was not already visible, open it and mark the button as active
-          if (!isVisible) {
-            dropdown.style.display = 'block';
-            button.classList.add('active');
-          }
-        } else {
-          // Close all if it's just a button without a dropdown
-          this.closeAllDropdowns();
-        }
-      });
+                // If the dropdown was not already visible, open it and mark the button as active
+                if (!isVisible) {
+                    dropdown.style.display = 'block';
+                    button.classList.add('active');
+                }
+            } else {
+                // Close all if it's just a button without a dropdown
+                this.closeAllDropdowns();
+            }
+        });
     });
   }
+  //
+  // end of method
 
   render() {
+    /*
+    method: ToolbarBtn::render
+      
+    args:
+      None
+
+    return:
+      None
+
+    description:
+      This method renders the component to the webpage by setting the innerHTML of the
+      shadow root to what is in the string below.
+    */
+
+    // WRITE YOUR HTML AND CSS HERE
     this.shadowRoot.innerHTML = `
       <style>
         /* Global Styles */
@@ -219,7 +349,12 @@ class ToolbarBtn extends HTMLElement {
       </div>
     `;
   }
+  //
+  // end of method
+
 }
+//
+// end of class 
 
 // Register the custom element
 customElements.define('toolbar-btn', ToolbarBtn);
