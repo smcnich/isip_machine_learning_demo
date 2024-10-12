@@ -78,63 +78,86 @@ class ProcessLog extends HTMLElement {
       */
 
        // WRITE YOUR HTML AND CSS HERE
-      this.shadowRoot.innerHTML = `
-        <style>
+       this.shadowRoot.innerHTML = `
+       <style>
+         .scroll-bg {
+           width: 96%; /* Adjust the width to 100% or any specific percentage */
+           height: 100%; /* Adjust the height to fit the parent */
+           margin-bottom: 2%; /* Padding effect from the bottom */
+           margin-left: 2%;
+           box-sizing: border-box; /* Ensures margins don’t overflow the container */
+         }
+     
+         .scroll-div {
+           width: 100%;
+           height: auto;
+           background: white;
+           overflow-y: auto;
+           max-height: 19vh;
+         }
+     
+         .scroll-object {
+           font-family: 'Inter', sans-serif;
+           font-size: 1.5em;
+           padding-right: 0.7em;
+         }
+     
+         /* WebKit Browsers (Chrome, Safari) Custom Scrollbar */
+         .scroll-div::-webkit-scrollbar {
+            width: 1em;
+         }
 
-        .scroll-bg {
-          background: blue;
-          width: 96%; /* Adjust the width to 100% or any specific percentage */
-          height: 100%; /* Adjust the height to fit the parent */
-          margin-bottom: 1%; /* Padding effect from the bottom */
-          margin-left: 2%;
-          box-sizing: border-box; /* Ensures margins don’t overflow the container */
-        }
+         .scroll-div::-webkit-scrollbar {
+            background: #c9c9c9;
+            border-radius: 100vw;
+         }
 
-        .scroll-div {
-          width: 100%;
-          height: auto;
-          background: white;
-          overflow-y: auto;
-          max-height: 19vh;
-        }
+         .scroll-div::-webkit-scrollbar-thumb {
+            background: #7441BA;
+            border-radius: 100vw;
+         }
 
-        </style>
-
-        <!-- Add your HTML here -->
-        <div>
-          <div class="scroll-bg">
-            <div class="scroll-div">
-              <div class="scroll-object">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                Fusce vel nunc gravida, volutpat risus ut, condimentum ante. 
-                Donec efficitur tempus fermentum. Ut quis nibh vitae purus semper finibus. 
-                Pellentesque id malesuada est, non blandit ex. 
-                Praesent condimentum a tellus vel dignissim. 
-                Morbi mollis urna at nisl facilisis, nec molestie risus vulputate. 
-                Praesent rhoncus diam nulla, tempor pharetra erat consectetur quis. 
-                Quisque quam purus, viverra eu mi sollicitudin, sodales fringilla risus. 
-                Morbi maximus purus vel odio venenatis, vel tempor nisi tincidunt.
-                Maecenas eget lacus id tellus elementum porta. Integer eleifend diam nisl, 
-                vitae mollis purus dapibus et. Curabitur non nisl non tellus mattis tincidunt 
-                nec at dolor. Donec sagittis nulla a quam dapibus molestie. Phasellus elementum 
-                rutrum neque ut volutpat. Suspendisse sed ex nec nulla feugiat facilisis. 
-                Aliquam egestas quam ac massa lobortis, scelerisque consequat urna imperdiet.
-                Vivamus ullamcorper facilisis metus, eget sagittis turpis blandit sit amet. 
-                Mauris a malesuada justo, nec lobortis nisi. Vestibulum massa orci, faucibus 
-                sed cursus non, laoreet at neque. Curabitur eleifend, mi nec tristique ornare, 
-                magna eros fermentum orci, vel pretium purus sapien eget ligula. Praesent 
-                rhoncus tortor et sem laoreet gravida. Maecenas aliquet lacinia hendrerit. 
-                Pellentesque lobortis, leo id lobortis laoreet, felis tellus viverra nisl, 
-                vitae tincidunt risus magna non mauris. Curabitur id augue mollis, imperdiet 
-                lorem et, congue mi. Duis fermentum at eros eu convallis. In id consequat sapien, 
-                vitae hendrerit urna. Praesent sodales ultricies risus, non pretium sem malesuada ac. 
-                Aliquam id tincidunt ante, non tristique sem. Integer et libero tincidunt, 
-                rutrum nisi id, congue nisi.
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
+         .scroll-div::-webkit-scrollbar-thumb:hover {
+            background: #512e82;
+            border-radius: 100vw;
+         } 
+     
+       </style>
+     
+       <!-- Add your HTML here -->
+       <div>
+         <div class="scroll-bg">
+           <div class="scroll-div">
+             <div class="scroll-object">
+               Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+               Fusce vel nunc gravida, volutpat risus ut, condimentum ante. 
+               Donec efficitur tempus fermentum. Ut quis nibh vitae purus semper finibus. 
+               Pellentesque id malesuada est, non blandit ex. Praesent condimentum a tellus vel dignissim.
+               Morbi mollis urna at nisl facilisis, nec molestie risus vulputate. 
+               Praesent rhoncus diam nulla, tempor pharetra erat consectetur quis. 
+               Quisque quam purus, viverra eu mi sollicitudin, sodales fringilla risus. 
+               Morbi maximus purus vel odio venenatis, vel tempor nisi tincidunt.
+               Maecenas eget lacus id tellus elementum porta. Integer eleifend diam nisl, 
+               vitae mollis purus dapibus et. Curabitur non nisl non tellus mattis tincidunt 
+               nec at dolor. Donec sagittis nulla a quam dapibus molestie. Phasellus elementum 
+               rutrum neque ut volutpat. Suspendisse sed ex nec nulla feugiat facilisis. 
+               Aliquam egestas quam ac massa lobortis, scelerisque consequat urna imperdiet.
+               Vivamus ullamcorper facilisis metus, eget sagittis turpis blandit sit amet. 
+               Mauris a malesuada justo, nec lobortis nisi. Vestibulum massa orci, faucibus 
+               sed cursus non, laoreet at neque. Curabitur eleifend, mi nec tristique ornare, 
+               magna eros fermentum orci, vel pretium purus sapien eget ligula. Praesent 
+               rhoncus tortor et sem laoreet gravida. Maecenas aliquet lacinia hendrerit. 
+               Pellentesque lobortis, leo id lobortis laoreet, felis tellus viverra nisl, 
+               vitae tincidunt risus magna non mauris. Curabitur id augue mollis, imperdiet 
+               lorem et, congue mi. Duis fermentum at eros eu convallis. In id consequat sapien, 
+               vitae hendrerit urna. Praesent sodales ultricies risus, non pretium sem malesuada ac. 
+               Aliquam id tincidunt ante, non tristique sem. Integer et libero tincidunt, 
+               rutrum nisi id, congue nisi.
+             </div>
+           </div>
+         </div>
+       </div>
+     `;
     }
     //
     // end of method
