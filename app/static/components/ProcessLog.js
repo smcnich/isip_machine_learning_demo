@@ -79,8 +79,8 @@ class ProcessLog extends HTMLElement {
               height: auto;
               background: white;
               overflow-y: auto;
-              max-height: 19vh;
-              min-width: 110vh;
+              height: 19vh;
+              width: 110vh;
           }
       
           .scroll-object {
@@ -134,7 +134,7 @@ class ProcessLog extends HTMLElement {
                       Evaluation Error Rate = 0.00% <br>
                       Confusion Matrix: <br>
                         Ref/Hyp:     Class0          Class1     <br>
-                        Class0: 10000 (100.00%)     0 (  0.00%)
+                        Class0: 10000 (100.00%)     0 (  0.00%) <br>
                         Class1:     0 (  0.00%) 10000 (100.00%)
                   </div>
               </div>

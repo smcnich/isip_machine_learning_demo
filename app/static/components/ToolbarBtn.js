@@ -257,7 +257,7 @@ class ToolbarBtn extends HTMLElement {
           font-family: 'Inter', sans-serif;
           font-weight: 100;
           font-size: 1em;
-          padding: 5px 20px;
+          padding: 0.5vh 1vw;
           margin: 0 10px;
           border: none;
           border-bottom: 2px solid #FFFFFF;

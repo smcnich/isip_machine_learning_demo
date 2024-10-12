@@ -98,7 +98,7 @@ class ShareBtn extends HTMLElement {
             color: var(--secondary-color);
             font-family: 'Inter', sans-serif;
             font-weight: 100;
-            font-size: 1.25em;
+            font-size: clamp(16px, 2vh, 40px);
             margin-right: 10px;
           }
           
