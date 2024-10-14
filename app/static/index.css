@@ -87,7 +87,7 @@ div h1, h2 {
   color: var(--complementary-4);
   font-family: 'Inter', sans-serif;
   font-weight: 100;
-  font-size: 1em;
+  font-size: 1.15em;
   padding: 5px 20px 5px 20px;
   margin: 0 10px 0 10px;
   border-bottom: 2px solid var(--secondary-color);
@@ -177,6 +177,8 @@ div h1, h2 {
 /* style the plot cards */
 .card.plot {
   height: 100%;
+  max-width: 30vw;
+  max-height: 60vh;
 }
 
 .card.plot:first-child {

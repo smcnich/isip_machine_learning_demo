@@ -38,14 +38,15 @@
 
   <!-- Load the web component -->
   <script src="static/components/ShareBtn.js"></script>
-
+  <script src="static/components/Plot.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
  </head>
-  <style>
-   @font-face {
-    font-family: 'Inter';
-    src: url('static/fonts/Inter_24pt-Regular.ttf') format('ttf');
-   }
-  </style>
+ <style>
+  @font-face {
+   font-family: 'Inter';
+   src: url('static/fonts/Inter_24pt-Regular.ttf') format('ttf');
+  }
+ </style>
 
  <!------------------------ define the html page body ------------------------>
  <body>
@@ -82,11 +83,13 @@
      <!---------------------- define a card for the train plot -------------------->
      <div class="card plot">
       <h3>Train</h3>
+      <plot-card></plot-card>
      </div>
 
      <!---------------------- define a card for the eval plot -------------------->
      <div class="card plot">
       <h3>Eval</h3>
+      <plot-card></plot-card>
      </div>
     </div>
 
