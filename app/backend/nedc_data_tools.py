@@ -2,6 +2,10 @@ import numpy as np
 import math
 import imld_constants_datagen as icd
 
+# get the dependencies from the app directory
+#
+import nedc_data_tools as ndt
+
 def generate_distribution(name:str, *, params:dict=None) -> tuple:
     '''
     function: generate_distribution
@@ -217,7 +221,42 @@ def generate_four_ellipses(params:dict) -> tuple:
     description:
      generate four ellipses masses, each of different labels.
     '''
-    return
+
+    np.random.seed(1)
+
+    # grab all parameters
+    npts0 = params['npts0']
+    mean0 = params['mean0']
+    cov0 = params['cov0']
+
+    npts1 = params['npts1']
+    mean1 = params['mean1']
+    cov1 = params['cov1']
+    
+    npts2 = params['npts2']
+    mean2 = params['mean2']
+    cov2 = params['cov2']
+    
+    npts3 = params['npts3']
+    mean3 = params['mean3']
+    cov3 = params['cov3']    
+
+    # Generate multivariate normal distribution for the current ellipse
+    class_0 = np.random.multivariate_normal(mean0, cov0, npts0)
+    class_1 = np.random.multivariate_normal(mean1, cov1, npts1)
+    class_2 = np.random.multivariate_normal(mean2, cov2, npts2)
+    class_3 = np.random.multivariate_normal(mean3, cov3, npts3)       
+    
+    # Generate labels
+    class_0_label = [0] * npts0  # Label for class 0
+    class_1_label = [1] * npts1  # Label for class 0
+    class_2_label = [2] * npts2  # Label for class 0
+    class_3_label = [3] * npts3  # Label for class 0
+    
+    X = np.vstack((class_0, class_1, class_2, class_3))
+    y = class_0_label + class_1_label + class_2_label + class_3_label
+     
+    return X, y
 #
 # end of method
 
@@ -252,7 +291,31 @@ def generate_rotated_ellipses(params:dict) -> tuple:
     description:
      generate two rotated ellipses masses, each of different labels.
     '''
-    return
+    
+    np.random.seed(1)
+
+    # grab all parameters
+    npts0 = params['npts0']
+    mean0 = params['mean0']
+    cov0 = params['cov0']
+
+    npts1 = params['npts1']
+    mean1 = params['mean1']
+    cov1 = params['cov1']
+    
+    # Generate multivariate normal distribution for the current ellipse
+    class_0 = np.random.multivariate_normal(mean0, cov0, npts0)
+    class_1 = np.random.multivariate_normal(mean1, cov1, npts1)
+    
+    # Generate labels
+    class_0_label = [0] * npts0  # Label for class 0
+    class_1_label = [1] * npts1  # Label for class 0
+    
+    
+    X = np.vstack((class_0, class_1))
+    y = class_0_label + class_1_label
+     
+    return X, y
 #
 # end of method
 
@@ -330,3 +393,4 @@ DIST_MAP = {
             'toroidal'           : generate_toroidal,
             'yin yang'           : generate_yin_yang
            }
+
