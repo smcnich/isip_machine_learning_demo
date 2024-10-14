@@ -34,23 +34,73 @@
     
   <!-- Load bootstrap -->
   <!--                -->
-  <link type = "text/css" rel="stylesheet" href="index.css">
+  <link type = "text/css" rel="stylesheet" href="static/index.css">
+
+  <!-- Load the web component -->
+  <script src="static/components/ShareBtn.js"></script>
+  <script src="static/components/ToolbarBtn.js"></script>
+  <script src="static/components/ProcessLog.js"></script>
 
  </head>
+  <style>
+   @font-face {
+    font-family: 'Inter';
+    src: url('static/fonts/Inter_24pt-Regular.ttf') format('ttf');
+   }
+  </style>
 
  <!------------------------ define the html page body ------------------------>
- <!--                                                                       -->
  <body>
 
   <!---------------------- define the html page header ----------------------->
-  <!--                                                                      -->
   <header>
-
+   <h1>The ISIP Machine Learning Demo</h1>
+   <div>
+    <h2>Contact</h2>
+    <share-btn></share-btn>
+   </div>
   </header>
 
-  <div>
-   <h1>Under Construction</h1>
-   <h2>The new home of IMLD</h2>
+  <!---------------------- define the page toolbar ----------------------->
+  <div class="toolbar">
+    <toolbar-btn></toolbar-btn>
+  </div>
+
+  <!---------------------- define the main body -------------------->
+  <div class="main">
+
+   <!---------------------- define the main features column -------------------->
+   <div class="col" id="main-col">
+
+    <!---------------------- define a row for the plots -------------------->
+    <div class="plots">
+
+     <!---------------------- define a card for the train plot -------------------->
+     <div class="card plot">
+      <h3>Train</h3>
+     </div>
+
+     <!---------------------- define a card for the eval plot -------------------->
+     <div class="card plot">
+      <h3>Eval</h3>
+     </div>
+    </div>
+
+    <!---------------------- define a row for the process log -------------------->
+    <div class="card" id="process-log">
+      <h3>Process Log</h3>
+      <process-log></process-log>
+    </div>
+   </div>
+
+   <!---------------------- define the algorithm toolbar column -------------------->
+   <div class="col" id="tool-col">
+
+    <!---------------------- define a card for the algorithm toolbar -------------------->
+    <div class="card" id="alg-card">
+     <h3>Algorithm Toolbar</h3>
+    </div>
+   </div>
   </div>
 
  <!-- end of body -->

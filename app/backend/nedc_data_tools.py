@@ -55,10 +55,10 @@ def generate_two_gaussian(params:dict) -> tuple:
                              'npts2'  (int)     : the number of points to generate
                              'mean2' (list)     : the mean values for the two toroidal distributions
                              'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (int)     : the minimum x value for the data
-                             'x_max' (int)     : the maximum x value for the data
-                             'y_min' (int)     : the minimum y value for the data
-                             'y_max' (int)     : the maximum y value for the data
+                             'x_min' (float)    : the minimum x value for the data
+                             'x_max' (float)    : the maximum x value for the data
+                             'y_min' (float)    : the minimum y value for the data
+                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -96,10 +96,10 @@ def generate_four_gaussian(params:dict) -> tuple:
                              'npts4'  (int)     : the number of points to generate
                              'mean4' (list)     : the mean values for the two toroidal distributions
                              'cov4'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (int)     : the minimum x value for the data
-                             'x_max' (int)     : the maximum x value for the data
-                             'y_min' (int)     : the minimum y value for the data
-                             'y_max' (int)     : the maximum y value for the data
+                             'x_min' (float)    : the minimum x value for the data
+                             'x_max' (float)    : the maximum x value for the data
+                             'y_min' (float)    : the minimum y value for the data
+                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -131,10 +131,10 @@ def generate_ovlp_gaussian(params:dict) -> tuple:
                              'npts2'  (int)     : the number of points to generate
                              'mean2' (list)     : the mean values for the two toroidal distributions
                              'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (int)     : the minimum x value for the data
-                             'x_max' (int)     : the maximum x value for the data
-                             'y_min' (int)     : the minimum y value for the data
-                             'y_max' (int)     : the maximum y value for the data
+                             'x_min' (float)    : the minimum x value for the data
+                             'x_max' (float)    : the maximum x value for the data
+                             'y_min' (float)    : the minimum y value for the data
+                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -166,10 +166,10 @@ def generate_two_ellipses(params:dict) -> tuple:
                              'npts2'  (int)     : the number of points to generate
                              'mean2' (list)     : the mean values for the two toroidal distributions
                              'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (int)     : the minimum x value for the data
-                             'x_max' (int)     : the maximum x value for the data
-                             'y_min' (int)     : the minimum y value for the data
-                             'y_max' (int)     : the maximum y value for the data
+                             'x_min' (float)    : the minimum x value for the data
+                             'x_max' (float)    : the maximum x value for the data
+                             'y_min' (float)    : the minimum y value for the data
+                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -207,10 +207,10 @@ def generate_four_ellipses(params:dict) -> tuple:
                              'npts4'  (int)     : the number of points to generate
                              'mean4' (list)     : the mean values for the two toroidal distributions
                              'cov4'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (int)     : the minimum x value for the data
-                             'x_max' (int)     : the maximum x value for the data
-                             'y_min' (int)     : the minimum y value for the data
-                             'y_max' (int)     : the maximum y value for the data
+                             'x_min' (float)    : the minimum x value for the data
+                             'x_max' (float)    : the maximum x value for the data
+                             'y_min' (float)    : the minimum y value for the data
+                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -277,10 +277,10 @@ def generate_rotated_ellipses(params:dict) -> tuple:
                              'npts2'  (int)     : the number of points to generate
                              'mean2' (list)     : the mean values for the two toroidal distributions
                              'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (int)     : the minimum x value for the data
-                             'x_max' (int)     : the maximum x value for the data
-                             'y_min' (int)     : the minimum y value for the data
-                             'y_max' (int)     : the maximum y value for the data
+                             'x_min' (float)    : the minimum x value for the data
+                             'x_max' (float)    : the maximum x value for the data
+                             'y_min' (float)    : the minimum y value for the data
+                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -334,10 +334,10 @@ def generate_toroidal(params:dict) -> tuple:
                              'cov'  (2D list)  : the covariance matrices for the two toroidal distributions
                              'npts_mass' (int) : the number of points to generate
                              'npts_ring' (int) : the number of points to generate for the ring
-                             'x_min' (int)     : the minimum x value for the data
-                             'x_max' (int)     : the maximum x value for the data
-                             'y_min' (int)     : the minimum y value for the data
-                             'y_max' (int)     : the maximum y value for the data
+                             'x_min' (float)   : the minimum x value for the data
+                             'x_max' (float)   : the maximum x value for the data
+                             'y_min' (float)   : the minimum y value for the data
+                             'y_max' (float)   : the maximum y value for the data
                              }
 
     return:
@@ -365,10 +365,11 @@ def generate_yin_yang(params:dict) -> tuple:
                     params = {
                                 'npts_yin' (int) : the number of points to generate for the yin
                                 'npts_yang' (int): the number of points to generate for the yang
-                                'x_min' (int)    : the minimum x value for the data
-                                'x_max' (int)    : the maximum x value for the data
-                                'y_min' (int)    : the minimum y value for the data
-                                'y_max' (int)    : the maximum y value for the data
+                                'ovlp' (float)   : the overlap between the yin and yang
+                                'x_min' (float)  : the minimum x value for the data
+                                'x_max' (float)  : the maximum x value for the data
+                                'y_min' (float)  : the minimum y value for the data
+                                'y_max' (float)  : the maximum y value for the data
                              }
 
     return:
@@ -379,7 +380,99 @@ def generate_yin_yang(params:dict) -> tuple:
     description:
      generate two masses that create a yin yang, each of different labels.
     '''
-    return
+
+    np.random.seed(1)
+
+    # the boundary, mean and std of the plot
+    #
+    xmean = params['x_min'] + 0.5 * (params['x_max'] - params['x_min'])
+    ymean = params['y_min'] + 0.5 * (params['y_max'] - params['y_min'])
+    stddev_center = 1.5 * (params['x_max'] - params['x_min']) / 2
+
+    # creating empty lists to save coordinates of points
+    #
+    yin = []
+    yang = []
+
+    # calculate the radius of each class on the plot
+    #
+    radius1 = 1.5 * ((params['x_max'] - params['x_min']) / 4)
+    radius2 = 0.75 * ((params['x_max'] - params['x_min']) / 4)
+
+    # define the number of samples in each class by checking the user-specified
+    # values and setting defaults if there are none
+    #
+    n_yin = params['npts_yin']
+    n_yang = params['npts_yang']
+
+    print(xmean)
+    print(ymean)
+    print(radius1)
+    print(radius2)
+
+    # producing some random numbers based on a Gaussian distirbution and then
+    # calculating the points distance to each class, choosing the closest set.
+    # the loop will exit when both classes has been generated
+    #
+    n_yin_counter = 0
+    n_yang_counter = 0
+    while ((n_yin_counter < n_yin) or (n_yang_counter < n_yang)):
+
+        # generate points with Gaussian distribution
+        #
+        xpt = np.random.normal(xmean, stddev_center, 1)[0]
+        ypt = np.random.normal(ymean, stddev_center, 1)[0]
+
+        # calculate radius for each generated point
+        #
+        distance1 = np.sqrt(xpt ** 2 + ypt ** 2)
+        distance2 = np.sqrt(xpt ** 2 + (ypt + radius2) ** 2)
+        distance3 = np.sqrt(xpt ** 2 + (ypt - radius2) ** 2)
+        
+        if distance1 <= radius1:
+
+          if (xpt >= -radius1) & (xpt <= 0):
+
+            if (((distance1 <= radius1) or (distance2 <= radius2)) 
+                and (distance3 > radius2)):
+
+                if n_yin_counter < n_yin:
+                    yin.append([xpt, ypt])
+                    n_yin_counter += 1
+
+                elif n_yang_counter < n_yang:
+                    yang.append([xpt, ypt])
+                    n_yang_counter += 1
+
+            if (xpt > 0.0) & (xpt <= radius1):
+
+                if (((distance1 <= radius1) or (distance3 <= radius2)) 
+                    and (distance2 > radius2)):
+
+                    if n_yang_counter < n_yang:
+                        yang.append([xpt, ypt])
+                        n_yang_counter += 1
+
+                elif n_yin_counter < n_yin:
+                    yin.append([xpt, ypt])
+                    n_yin_counter += 1
+
+    # translate each sample in yin and yang for the origin to the
+    # center of the plot. for implementing overlap, the overlap
+    # parameter multiply to one of the plot center points. So the
+    # the overlap parameter interferes in translation process.
+    #
+    yang = np.array(yang) + np.array([xmean, ymean])
+    yin = np.array(yin) + np.array([xmean, ymean]) * (1 + params['ovlp'])
+
+    # combine the yin and yang classes and create the labels
+    #
+    X = np.concatenate((yin, yang), axis=0)
+    y = ['Class0'] * n_yin + ['Class1'] * n_yang
+
+    # exit gracefully
+    #
+    return X, y
 #
 # end of method
 
