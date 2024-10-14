@@ -34,7 +34,7 @@ header h1 {
   padding-left: 10px;
   font-family: 'Inter', sans-serif;
   font-weight: 100;
-  font-size: 1.25em;
+  font-size: clamp(16px, 2vh, 40px);
 }
 
 header div{
@@ -48,7 +48,7 @@ header div h2 {
   color: var(--secondary-color);
   font-family: 'Inter', sans-serif;
   font-weight: 100;
-  font-size: 1.25em;
+  font-size: clamp(16px, 2vh, 40px);
   transition: text-shadow 0.3s ease;
 }
 
