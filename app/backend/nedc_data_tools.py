@@ -69,9 +69,27 @@ def generate_two_gaussian(params:dict) -> tuple:
     description:
      generate two gaussian masses, each of different labels.
     '''
-    return
+    # get parameters
+    npts1, mean1, cov1 = params['npts1'], params['mean1'], params['cov1']
+    npts2, mean2, cov2 = params['npts2'], params['mean2'], params['cov2']
+    
+    # gaussian distribution for class 0
+    class_0_data = np.random.multivariate_normal(mean1, cov1, npts1)
+    class_0_labels = [0] * npts1  # Label for class 0
+    
+    # gaussian distribution for class 1
+    class_1_data = np.random.multivariate_normal(mean2, cov2, npts2)
+    class_1_labels = [1] * npts2  # Label for class 1
+    
+    # concatenate data w labels
+    X = np.vstack((class_0_data, class_1_data))
+    y = class_0_labels + class_1_labels
+    
+    return X, y
+
 #
 # end of method
+
 
 '''
 TODO (Kayla): create a function that generates four gaussian masses, each of different labels.
@@ -110,9 +128,33 @@ def generate_four_gaussian(params:dict) -> tuple:
     description:
      generate four gaussian masses, each of different labels.
     '''
-    return
+    # get parameters
+    npts1, mean1, cov1 = params['npts1'], params['mean1'], params['cov1']
+    npts2, mean2, cov2 = params['npts2'], params['mean2'], params['cov2']
+    npts3, mean3, cov3 = params['npts3'], params['mean3'], params['cov3']
+    npts4, mean4, cov4 = params['npts4'], params['mean4'], params['cov4']
+    
+    # gaussian distributions for each class
+    class_0_data = np.random.multivariate_normal(mean1, cov1, npts1)
+    class_0_labels = [0] * npts1  # Label for class 0
+    
+    class_1_data = np.random.multivariate_normal(mean2, cov2, npts2)
+    class_1_labels = [1] * npts2  # Label for class 1
+    
+    class_2_data = np.random.multivariate_normal(mean3, cov3, npts3)
+    class_2_labels = [2] * npts3  # Label for class 2
+    
+    class_3_data = np.random.multivariate_normal(mean4, cov4, npts4)
+    class_3_labels = [3] * npts4  # Label for class 3
+    
+    # concatenate data w labels
+    X = np.vstack((class_0_data, class_1_data, class_2_data, class_3_data))
+    y = class_0_labels + class_1_labels + class_2_labels + class_3_labels
+    
+    return X, y
 #
 # end of method
+
 
 '''
 TODO (Kayla): create a function that generates two overlapping gaussian masses, each of 
@@ -145,7 +187,22 @@ def generate_ovlp_gaussian(params:dict) -> tuple:
     description:
      generate two gaussian masses, overlapping each other.
     '''
-    return
+    # get parameters
+    npts1, mean1, cov1 = params['npts1'], params['mean1'], params['cov1']
+    npts2, mean2, cov2 = params['npts2'], params['mean2'], params['cov2']
+    
+    # gaussian distributions for each class
+    class_0_data = np.random.multivariate_normal(mean1, cov1, npts1)
+    class_0_labels = [0] * npts1  # Label for class 0
+    
+    class_1_data = np.random.multivariate_normal(mean2, cov2, npts2)
+    class_1_labels = [1] * npts2  # Label for class 1
+    
+    # concatenate data w labels
+    X = np.vstack((class_0_data, class_1_data))
+    y = class_0_labels + class_1_labels
+    
+    return X, y
 #
 # end of method
 
@@ -180,9 +237,26 @@ def generate_two_ellipses(params:dict) -> tuple:
     description:
      generate two ellipses masses, each of different labels.
     '''
-    return
+    # get parameters
+    npts1, mean1, cov1 = params['npts1'], params['mean1'], params['cov1']
+    npts2, mean2, cov2 = params['npts2'], params['mean2'], params['cov2']
+    
+    # generate data for class 0
+    class_0_data = np.random.multivariate_normal(mean1, cov1, npts1)
+    class_0_labels = [0] * npts1  # Label for class 0
+    
+    # generate data for class 1
+    class_1_data = np.random.multivariate_normal(mean2, cov2, npts2)
+    class_1_labels = [1] * npts2  # Label for class 1
+    
+    # concatenate data w labels
+    X = np.vstack((class_0_data, class_1_data))
+    y = class_0_labels + class_1_labels
+    
+    return X, y
 #
 # end of method
+
 
 '''
 TODO (Ray): create a function that generates four ellipses masses, each of 
