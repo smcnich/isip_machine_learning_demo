@@ -207,10 +207,6 @@ def generate_four_ellipses(params:dict) -> tuple:
                              'npts4'  (int)     : the number of points to generate
                              'mean4' (list)     : the mean values for the two toroidal distributions
                              'cov4'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (float)    : the minimum x value for the data
-                             'x_max' (float)    : the maximum x value for the data
-                             'y_min' (float)    : the minimum y value for the data
-                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -277,10 +273,6 @@ def generate_rotated_ellipses(params:dict) -> tuple:
                              'npts2'  (int)     : the number of points to generate
                              'mean2' (list)     : the mean values for the two toroidal distributions
                              'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (float)    : the minimum x value for the data
-                             'x_max' (float)    : the maximum x value for the data
-                             'y_min' (float)    : the minimum y value for the data
-                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -334,10 +326,6 @@ def generate_toroidal(params:dict) -> tuple:
                              'cov'  (2D list)  : the covariance matrices for the two toroidal distributions
                              'npts_mass' (int) : the number of points to generate
                              'npts_ring' (int) : the number of points to generate for the ring
-                             'x_min' (float)   : the minimum x value for the data
-                             'x_max' (float)   : the maximum x value for the data
-                             'y_min' (float)   : the minimum y value for the data
-                             'y_max' (float)   : the maximum y value for the data
                              }
 
     return:

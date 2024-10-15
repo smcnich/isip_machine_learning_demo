@@ -56,7 +56,9 @@ class Plot extends HTMLElement {
       // render the component to the webpage
       this.render();
 
-      this.examplePlot();
+      window.addEventListener('DOMContentLoaded', () => {
+        this.examplePlot();
+      });
     }
     //
     // end of method
@@ -107,7 +109,15 @@ class Plot extends HTMLElement {
           xanchor: 'center',
           yanchor: 'bottom',
           orientation: 'h'
-        }
+        },
+        margin: { 
+          t: 10,
+          b: 10,
+          l: 40,
+          r: 10
+        },
+        width: this.parentElement.clientWidth - 50,
+        height: this.parentElement.clientHeight - 50
       };
 
       const config = {
@@ -115,7 +125,8 @@ class Plot extends HTMLElement {
         modeBarButtonsToRemove: ['zoom2d', 'select2d', 'lasso2d', 'toggleSpikelines', 
                                  'hoverClosestCartesian', 'hoverCompareCartesian'],
         responsive: true,
-        showLink: false
+        showLink: false,
+        cursor: 'pointer'
       };
 
       Plotly.newPlot(plotDiv, data, layout, config);
@@ -123,8 +134,8 @@ class Plot extends HTMLElement {
       // event listener for resizing the plot
       window.addEventListener('resize', () => {
         const update = {
-          width: this.parentElement.clientWidth,
-          height: this.parentElement.clientHeight
+          width: this.parentElement.clientWidth - 50,
+          height: this.parentElement.clientHeight - 50
         };
         Plotly.relayout(plotDiv, update);
       });
@@ -148,13 +159,6 @@ class Plot extends HTMLElement {
        // WRITE YOUR HTML AND CSS HERE
       this.innerHTML = `
         <style>
-
-          #plot {
-            height: 100%;
-            width: auto;
-            cursor: default;
-          }
-
           .modebar {
             display: flex;
             flex-direction: row;
