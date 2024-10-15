@@ -159,6 +159,10 @@ class Plot extends HTMLElement {
        // WRITE YOUR HTML AND CSS HERE
       this.innerHTML = `
         <style>
+          .js-plotly-plot .plotly .cursor-crosshair {
+            cursor: default;
+          }
+
           .modebar {
             display: flex;
             flex-direction: row;

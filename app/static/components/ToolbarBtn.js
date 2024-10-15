@@ -225,6 +225,7 @@ class ToolbarBtn extends HTMLElement {
           background-color: white;
           min-width: 150px;
           border: 1px solid #ccc;
+          z-index: 2;
         }
 
         /* Dropdown Button Styles */
