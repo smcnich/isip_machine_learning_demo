@@ -43,6 +43,7 @@
   <script src="static/components/Plot.js"></script>
   <script src="static/components/AlgoTool.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="static/components/InfoIcon.js"></script>
  </head>
  <style>
   @font-face {
@@ -79,22 +80,34 @@
 
      <!---------------------- define a card for the train plot -------------------->
      <div class="card plot">
-      <h3>Train</h3>
+      <div class="card-title-container"> 
+        <h3 class="card-title">Train</h3>
+        <info-icon class="info-icon"></info-icon>
+      </div>
       <plot-card></plot-card>
-     </div>
+     </div>    
 
      <!---------------------- define a card for the eval plot -------------------->
      <div class="card plot">
-      <h3>Eval</h3>
+      <div class="card-title-container">
+        <h3 class="card-title">Eval</h3>
+        <info-icon class="info-icon"></info-icon>
+      </div>
       <plot-card></plot-card>
      </div>
+
+
     </div>
 
     <!---------------------- define a row for the process log -------------------->
     <div class="card" id="process-log">
-      <h3>Process Log</h3>
+      <div class="card-title-container">
+        <h3 class="card-title">Process Log</h3>
+        <info-icon class="info-icon"></info-icon>
+      </div>
       <process-log></process-log>
     </div>
+   
    </div>
 
    <!---------------------- define the algorithm toolbar column -------------------->
@@ -103,9 +116,10 @@
     <!---------------------- define a card for the algorithm toolbar -------------------->
     <div class="card" id="alg-card">
      <h3>Algorithm Toolbar</h3>
-     <algorithm-toolbar></algorithm-toolbar>
     </div>
+
    </div>
+
   </div>
 
  <!-- end of body -->
