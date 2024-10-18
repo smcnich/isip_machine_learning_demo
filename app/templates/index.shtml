@@ -115,7 +115,11 @@
 
     <!---------------------- define a card for the algorithm toolbar -------------------->
     <div class="card" id="alg-card">
-     <h3>Algorithm Toolbar</h3>
+     <div class="card-title-container">
+      <h3>Algorithm Toolbar</h3>
+      <info-icon class="info-icon"></info-icon>
+     </div>
+     <algorithm-toolbar></algorithm-toolbar>
     </div>
 
    </div>
