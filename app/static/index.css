@@ -189,15 +189,8 @@ div h1, h2 {
 .card-title-container {
   flex-direction: row; /* Make sure to use flex */
   align-items: center; /* Center items vertically */
+  justify-content: center; /* Center items horizontally */
   width: auto; /* Ensure it takes only the needed width */
-}
-
-.card-title {
-  margin-right: 6px;   
-}
-
-.info-icon {
-  margin-top: 15px;
 }
 
 /* style the process log card */

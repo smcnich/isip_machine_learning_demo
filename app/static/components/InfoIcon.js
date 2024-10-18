@@ -23,6 +23,8 @@ class InfoIcon extends HTMLElement {
             cursor: pointer;
             display: inline-block;
             transition: filter 0.3s, box-shadow 0.3s;
+            margin-top: 15px;
+            margin-left: 5px;
           }
 
           /* Hover effect to change color */
