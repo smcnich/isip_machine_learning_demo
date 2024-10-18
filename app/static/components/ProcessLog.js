@@ -80,7 +80,7 @@ class ProcessLog extends HTMLElement {
               background: white;
               overflow-y: auto;
               height: 19vh;
-              width: 110vh;
+              width: 60vw;
           }
       
           .scroll-object {

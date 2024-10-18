@@ -123,7 +123,8 @@ class Plot extends HTMLElement {
       const config = {
         displayLogo: false,
         modeBarButtonsToRemove: ['zoom2d', 'select2d', 'lasso2d', 'toggleSpikelines', 
-                                 'hoverClosestCartesian', 'hoverCompareCartesian'],
+                                 'hoverClosestCartesian', 'hoverCompareCartesian', 'pan2d',
+                                'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'],
         responsive: true,
         showLink: false,
         cursor: 'pointer'

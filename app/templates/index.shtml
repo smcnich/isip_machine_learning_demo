@@ -41,6 +41,7 @@
   <script src="static/components/ToolbarBtn.js"></script>
   <script src="static/components/ProcessLog.js"></script>
   <script src="static/components/Plot.js"></script>
+  <script src="static/components/AlgoTool.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
  </head>
  <style>
@@ -102,6 +103,7 @@
     <!---------------------- define a card for the algorithm toolbar -------------------->
     <div class="card" id="alg-card">
      <h3>Algorithm Toolbar</h3>
+     <algorithm-toolbar></algorithm-toolbar>
     </div>
    </div>
   </div>
