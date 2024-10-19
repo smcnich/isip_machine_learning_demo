@@ -51,7 +51,7 @@ class Toolbar_DropdownClear extends HTMLElement {
           display: none; /* Initially hidden */
           position: absolute;
           top: 0; /* Aligns with the top of the button */
-          left: calc(100% + 1.5px); /* Positions to the right of the button */
+          left: calc(100% + 0.7px); /* Positions to the right of the button */
           background-color: white;
           z-index: 1000; /* Ensure it's on top */
           min-width: 150px; /* Match button width */
