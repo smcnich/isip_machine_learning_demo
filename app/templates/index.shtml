@@ -38,12 +38,21 @@
 
   <!-- Load the web component -->
   <script src="static/components/ShareBtn.js"></script>
-  <script src="static/components/ToolbarBtn.js"></script>
+  <script src="static/components/MainToolbar.js"></script>
   <script src="static/components/ProcessLog.js"></script>
   <script src="static/components/Plot.js"></script>
   <script src="static/components/AlgoTool.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="static/components/InfoIcon.js"></script>
+  <script src="static/components/Toolbar_Button.js"></script>
+  <script src="static/components/Toolbar_OpenFileButton.js"></script>
+  <script src="static/components/Toolbar_SaveFileButton.js"></script>
+  <script src="static/components/Toolbar_CheckboxButton.js"></script>
+  <script src="static/components/Toolbar_PopupButton.js"></script>
+  <script src="static/components/Toolbar_DropdownClear.js"></script>
+  <script src="static/components/Toolbar_DropdownData.js"></script>
+  <script src="static/components/Toolbar_DropdownSettings.js"></script>
+
  </head>
  <style>
   @font-face {
@@ -66,7 +75,7 @@
 
   <!---------------------- define the page toolbar ----------------------->
   <div class="toolbar">
-    <toolbar-btn></toolbar-btn>
+    <main-toolbar></main-toolbar>
   </div>
 
   <!---------------------- define the main body -------------------->

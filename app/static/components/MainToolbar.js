@@ -1,4 +1,4 @@
-class ToolbarBtn extends HTMLElement {
+class MainToolbar extends HTMLElement {
   constructor() {
     /*
     method: ToolbarBtn::constructor
@@ -284,63 +284,68 @@ class ToolbarBtn extends HTMLElement {
         <div class="menu">
           <button class="menubutton">File</button>
           <div class="dropdown">
-            <button class="dropdownbutton">Load Train Data</button>
-            <button class="dropdownbutton separator">Load Eval Data</button>
-            <button class="dropdownbutton">Save Train As...</button>
-            <button class="dropdownbutton separator">Save Eval As...</button>
-            <button class="dropdownbutton">Load Model</button>
-            <button class="dropdownbutton separator">Load Parameters</button>
-            <button class="dropdownbutton">Save Model As...</button>
-            <button class="dropdownbutton">Save Parameters As...</button>
+            <toolbar-openfile-button label="Load Train Data"></toolbar-openfile-button>
+            <toolbar-openfile-button label="Load Eval Data"></toolbar-openfile-button>
+            <div class="separator"></div>
+            <toolbar-savefile-button label="Save Train As..."></toolbar-savefile-button>
+            <toolbar-savefile-button label="Save Eval As..."></toolbar-savefile-button>
+            <div class="separator"></div>
+            <toolbar-openfile-button label="Load Model"></toolbar-openfile-button>
+            <toolbar-openfile-button label="Load Parameters"></toolbar-openfile-button>
+            <div class="separator"></div>
+            <toolbar-savefile-button label="Save Model As..."></toolbar-savefile-button>
+            <toolbar-savefile-button label="Save Parameters As..."></toolbar-savefile-button>
           </div>
         </div>
 
         <div class="menu">
           <button class="menubutton">Edit</button>
           <div class="dropdown">
-            <button class="dropdownbutton separator">Settings</button>
-            <button class="dropdownbutton">Clear Process Log</button>
-            <button class="dropdownbutton">Clear Train</button>
-            <button class="dropdownbutton">Clear Eval</button>
-            <button class="dropdownbutton separator">Clear All</button>
-            <button class="dropdownbutton">Reset</button>
+            <toolbar-dropdown-settings label="Settings"></toolbar-dropdown-settings>
+            <div class="separator"></div>
+            <toolbar-button label="Process Log"></toolbar-button>
+            <toolbar-dropdown-clear label="Clear Train"></toolbar-dropdown-clear>
+            <toolbar-dropdown-clear label="Clear Eval"></toolbar-dropdown-clear>
+            <toolbar-button label="Clear All"></toolbar-button>
+            <div class="separator"></div>
+            <toolbar-button label="Reset"></toolbar-button>
           </div>
         </div>
 
         <div class="menu">
           <button class="menubutton">View</button>
           <div class="dropdown">
-            <button class="dropdownbutton">Print Confusion Matrix</button>
+            <toolbar-checkbox-button label="Print Confusion Matrix"></toolbar-checkbox-button>
           </div>
         </div>
 
         <div class="menu">
           <button class="menubutton">Classes</button>
           <div class="dropdown">
-            <button class="dropdownbutton">Add Class</button>
-            <button class="dropdownbutton">Delete Class</button>
+            <toolbar-popup-button label="Add Class"></toolbar-popup-button>
+            <toolbar-popup-button label="Delete Class"></toolbar-popup-button>
           </div>
         </div>
 
         <div class="menu">
           <button class="menubutton">Patterns</button>
           <div class="dropdown">
-            <button class="dropdownbutton">Draw Points</button>
-            <button class="dropdownbutton">Draw Gaussian</button>
+            <toolbar-checkbox-button label="Draw Points"></toolbar-checkbox-button>
+            <toolbar-checkbox-button label="Draw Gaussian"></toolbar-checkbox-button>
           </div>
         </div>
 
         <div class="menu">
           <button class="menubutton">Data</button>
           <div class="dropdown">
-            <button class="dropdownbutton">Two Gaussian</button>
-            <button class="dropdownbutton">Four Gaussian</button>
-            <button class="dropdownbutton separator">Overlapping Gaussian</button>
-            <button class="dropdownbutton">Two Ellipses</button>
-            <button class="dropdownbutton">Four Ellipses</button>
-            <button class="dropdownbutton separator">Rotated Ellipses</button>
-            <button class="dropdownbutton">Toroidal</button>
-            <button class="dropdownbutton">Yin-Yang</button>
+            <toolbar-dropdown-data label="Two Gaussian"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Four Gaussian"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Overlapping Gaussian"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Two Ellipses"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Four Ellipses"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Rotated Ellipses"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Toroidal"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Yin Yang"></toolbar-dropdown-data>
           </div>
         </div>
 
@@ -358,4 +363,4 @@ class ToolbarBtn extends HTMLElement {
 // end of class 
 
 // Register the custom element
-customElements.define('toolbar-btn', ToolbarBtn);
+customElements.define('main-toolbar', MainToolbar);
