@@ -378,12 +378,19 @@ def generate_toroidal(params:dict) -> tuple:
     args:
      params (dict): a dictionary containing the parameters for the distribution.
                     params = {
+<<<<<<< HEAD
                              'mean' (list)      : the mean values for the two toroidal distributions
                              'cov'  (2D list)   : the covariance matrices for the two toroidal distributions
                              'npts_mass' (int)  : the number of points to generate
                              'npts_ring' (int)  : the number of points to generate for the ring
                              'inner_rad' (float): 
                              'outer_rad' (float):
+=======
+                             'mean' (list)     : the mean values for the two toroidal distributions
+                             'cov'  (2D list)  : the covariance matrices for the two toroidal distributions
+                             'npts_mass' (int) : the number of points to generate
+                             'npts_ring' (int) : the number of points to generate for the ring
+>>>>>>> 65e8200ce14baf66090cc91600b9ab0fab00f40c
                              }
 
     return:

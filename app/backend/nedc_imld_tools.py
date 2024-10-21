@@ -1,4 +1,5 @@
 import nedc_ml_tools as mlt
+import nedc_ml_tools_data as mltd
 
 def imld_callback(name:str, *, status:float=None, data:dict=None, msg:str=None) -> bool:
     '''
@@ -73,13 +74,13 @@ def create_model(alg_name:str, *, params=None) -> mlt.Alg:
 
 # TODO: create the wrapper to train an algorithm, given data. make sure to
 #       include error checking. see nedc_ml_tools.py line 1478.
-def train(model:mlt.Alg, data:mlt.MLToolData):
+def train(model:mlt.Alg, data:mltd.MLToolsData):
     '''
     function: train
 
     args:
      model (mlt.Alg): the ML Tools algorithm to train
-     data (mlt.MLToolData): the data to train the model on
+     data (mltd.MLToolsData): the data to train the model on
 
     return:
      model (dict): a dictionary containing the model (data dependent)
@@ -98,13 +99,13 @@ def train(model:mlt.Alg, data:mlt.MLToolData):
 
 # TODO: create the wrapper to predict the labels of data from a given model.
 #       make sure to include error checking. see nedc_ml_tools.py line 1547
-def predict(model:mlt.Alg, data:mlt.MLToolData):
+def predict(model:mlt.Alg, data:mltd.MLToolsData):
     '''
     function: predict
 
     args:
      model (mlt.Alg): the ML Tools trained model to use for predictions
-     data (mlt.MLToolData): the data to predict
+     data (mltd.MLToolsData): the data to predict
 
     return:
      labels (list): a list of the predicted labels.
@@ -124,13 +125,13 @@ def predict(model:mlt.Alg, data:mlt.MLToolData):
 TODO: create the wrapper to score the predicted labels compared to the
       actual labels of a dataset. see nedc_ml_tools.py line 1730.
 '''
-def score(num_classes:int, data:mlt.MLToolData, hyp_labels:list):
+def score(num_classes:int, data:mltd.MLToolsData, hyp_labels:list):
     '''
     function: score
 
     args:
      num_classes (int): the number of classes
-     data (mlt.MLToolData): the input data including reference labels
+     data (mltd.MLToolsData): the input data including reference labels
      hyp_labels (list): the hypothesis labels
 
     return:
