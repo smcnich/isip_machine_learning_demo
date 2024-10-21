@@ -1,10 +1,8 @@
+# get the dependencies from the app directory
+#
 import numpy as np
 import math
 import imld_constants_datagen as icd
-
-# get the dependencies from the app directory
-#
-import nedc_data_tools as ndt
 
 def generate_distribution(name:str, *, params:dict=None) -> tuple:
     '''
@@ -55,10 +53,6 @@ def generate_two_gaussian(params:dict) -> tuple:
                              'npts2'  (int)     : the number of points to generate
                              'mean2' (list)     : the mean values for the two toroidal distributions
                              'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (float)    : the minimum x value for the data
-                             'x_max' (float)    : the maximum x value for the data
-                             'y_min' (float)    : the minimum y value for the data
-                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -114,10 +108,6 @@ def generate_four_gaussian(params:dict) -> tuple:
                              'npts4'  (int)     : the number of points to generate
                              'mean4' (list)     : the mean values for the two toroidal distributions
                              'cov4'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (float)    : the minimum x value for the data
-                             'x_max' (float)    : the maximum x value for the data
-                             'y_min' (float)    : the minimum y value for the data
-                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -173,10 +163,6 @@ def generate_ovlp_gaussian(params:dict) -> tuple:
                              'npts2'  (int)     : the number of points to generate
                              'mean2' (list)     : the mean values for the two toroidal distributions
                              'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (float)    : the minimum x value for the data
-                             'x_max' (float)    : the maximum x value for the data
-                             'y_min' (float)    : the minimum y value for the data
-                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -223,10 +209,6 @@ def generate_two_ellipses(params:dict) -> tuple:
                              'npts2'  (int)     : the number of points to generate
                              'mean2' (list)     : the mean values for the two toroidal distributions
                              'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (float)    : the minimum x value for the data
-                             'x_max' (float)    : the maximum x value for the data
-                             'y_min' (float)    : the minimum y value for the data
-                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -281,10 +263,6 @@ def generate_four_ellipses(params:dict) -> tuple:
                              'npts4'  (int)     : the number of points to generate
                              'mean4' (list)     : the mean values for the two toroidal distributions
                              'cov4'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (float)    : the minimum x value for the data
-                             'x_max' (float)    : the maximum x value for the data
-                             'y_min' (float)    : the minimum y value for the data
-                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -351,10 +329,6 @@ def generate_rotated_ellipses(params:dict) -> tuple:
                              'npts2'  (int)     : the number of points to generate
                              'mean2' (list)     : the mean values for the two toroidal distributions
                              'cov2'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'x_min' (float)    : the minimum x value for the data
-                             'x_max' (float)    : the maximum x value for the data
-                             'y_min' (float)    : the minimum y value for the data
-                             'y_max' (float)    : the maximum y value for the data
                              }
 
     return:
@@ -369,13 +343,13 @@ def generate_rotated_ellipses(params:dict) -> tuple:
     np.random.seed(1)
 
     # grab all parameters
-    npts0 = params['npts0']
-    mean0 = params['mean0']
-    cov0 = params['cov0']
+    npts0 = params['npts1']
+    mean0 = params['mean1']
+    cov0 = params['cov1']
 
-    npts1 = params['npts1']
-    mean1 = params['mean1']
-    cov1 = params['cov1']
+    npts1 = params['npts2']
+    mean1 = params['mean2']
+    cov1 = params['cov2']
     
     # Generate multivariate normal distribution for the current ellipse
     class_0 = np.random.multivariate_normal(mean0, cov0, npts0)
@@ -404,14 +378,12 @@ def generate_toroidal(params:dict) -> tuple:
     args:
      params (dict): a dictionary containing the parameters for the distribution.
                     params = {
-                             'mean' (list)     : the mean values for the two toroidal distributions
-                             'cov'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'npts_mass' (int) : the number of points to generate
-                             'npts_ring' (int) : the number of points to generate for the ring
-                             'x_min' (float)   : the minimum x value for the data
-                             'x_max' (float)   : the maximum x value for the data
-                             'y_min' (float)   : the minimum y value for the data
-                             'y_max' (float)   : the maximum y value for the data
+                             'mean' (list)      : the mean values for the two toroidal distributions
+                             'cov'  (2D list)   : the covariance matrices for the two toroidal distributions
+                             'npts_mass' (int)  : the number of points to generate
+                             'npts_ring' (int)  : the number of points to generate for the ring
+                             'inner_rad' (float): 
+                             'outer_rad' (float):
                              }
 
     return:
@@ -422,7 +394,30 @@ def generate_toroidal(params:dict) -> tuple:
     description:
      generate two toroidal masses, each of different labels.
     '''
-    return
+    # get parameters
+    mean = params['mean']
+    cov = params['cov']
+    npts_mass = params['npts_mass']
+    npts_ring = params['npts_ring']
+    inner_rad = params['inner_rad']
+    outer_rad = params['outer_rad']
+
+    # create data points for mass (class 1)
+    class_1_data = np.random.multivariate_normal(mean, cov, npts_mass)
+    class_1_labels = [1] * npts_mass
+
+    # create data points for ring (class 0)
+    ring_radius = np.random.uniform(inner_rad, outer_rad, npts_ring)
+    angle = np.linspace(0,2 * np.pi, npts_ring)
+    class_0_data = np.array([mean[0] + ring_radius * np.cos(angle),
+                         mean[1] + ring_radius * np.sin(angle)]).T
+    class_0_labels = [0] * npts_ring
+
+    # concatenate data w labels
+    X = np.vstack((class_0_data, class_1_data))
+    y = class_0_labels + class_1_labels
+
+    return X, y
 #
 # end of method
 
