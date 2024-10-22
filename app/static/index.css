@@ -171,6 +171,8 @@ div h1, h2 {
 #alg-card {
   width: 100%;
   height: 100%;
+  justify-content: start;
+  align-content: center;
 }
 
 /* style the plot cards */
@@ -191,6 +193,11 @@ div h1, h2 {
   align-items: center; /* Center items vertically */
   justify-content: center; /* Center items horizontally */
   width: auto; /* Ensure it takes only the needed width */
+}
+
+div.card-title-container > info-icon {
+  margin-top: 15px;
+  margin-left: 5px;
 }
 
 /* style the process log card */
