@@ -4,38 +4,6 @@ import numpy as np
 import math
 import imld_constants_datagen as icd
 
-def generate_distribution(name:str, *, params:dict=None) -> tuple:
-    '''
-    function: generate_distribution
-
-    args:
-     name (str)  : the name of the distribution to generate
-     params (dict): a dictionary containing the parameters for the
-                    distribution. [optional]
-
-    return:
-     X (np.ndarray): a 2D array containing all of the data points generated.
-                     should contain the data for both classes.
-     y (list): a list containing the labels for each data point in X
-
-    description:
-     generate a distribution of data points based on the name of the distribution
-     given. the parameters for the distribution are given in a dictionary. the
-     function will return a the X and y vectors for the data generated. this
-     function makes it easier to select distributions to generate data from.
-    '''
-
-    # check if the distribution name is in the map
-    #
-    if name not in DIST_MAP:
-        return None
-    
-    # generate the data based on the distribution name
-    #
-    return DIST_MAP[name](*params)
-#
-# end of method
-
 '''
 TODO (Kayla): create a function that generates two gaussian masses, each of different labels.
               base this function on imld_data_gen.py line 61.
@@ -378,19 +346,12 @@ def generate_toroidal(params:dict) -> tuple:
     args:
      params (dict): a dictionary containing the parameters for the distribution.
                     params = {
-<<<<<<< HEAD
                              'mean' (list)      : the mean values for the two toroidal distributions
                              'cov'  (2D list)   : the covariance matrices for the two toroidal distributions
                              'npts_mass' (int)  : the number of points to generate
                              'npts_ring' (int)  : the number of points to generate for the ring
                              'inner_rad' (float): 
                              'outer_rad' (float):
-=======
-                             'mean' (list)     : the mean values for the two toroidal distributions
-                             'cov'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'npts_mass' (int) : the number of points to generate
-                             'npts_ring' (int) : the number of points to generate for the ring
->>>>>>> 65e8200ce14baf66090cc91600b9ab0fab00f40c
                              }
 
     return:
