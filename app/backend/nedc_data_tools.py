@@ -378,19 +378,12 @@ def generate_toroidal(params:dict) -> tuple:
     args:
      params (dict): a dictionary containing the parameters for the distribution.
                     params = {
-<<<<<<< HEAD
                              'mean' (list)      : the mean values for the two toroidal distributions
                              'cov'  (2D list)   : the covariance matrices for the two toroidal distributions
                              'npts_mass' (int)  : the number of points to generate
                              'npts_ring' (int)  : the number of points to generate for the ring
                              'inner_rad' (float): 
                              'outer_rad' (float):
-=======
-                             'mean' (list)     : the mean values for the two toroidal distributions
-                             'cov'  (2D list)  : the covariance matrices for the two toroidal distributions
-                             'npts_mass' (int) : the number of points to generate
-                             'npts_ring' (int) : the number of points to generate for the ring
->>>>>>> 65e8200ce14baf66090cc91600b9ab0fab00f40c
                              }
 
     return:
@@ -432,7 +425,9 @@ def generate_toroidal(params:dict) -> tuple:
 TODO (Shane): create a function that generates two masses that create the yin yang, 
               each of different labels. base this function on imld_data_gen.py line 661.
 '''
-def generate_yin_yang(params:dict) -> tuple:
+
+
+def generate_yin_yang(params: dict) -> tuple:
     '''
     function generate_yin_yang
 
@@ -442,10 +437,7 @@ def generate_yin_yang(params:dict) -> tuple:
                                 'npts_yin' (int) : the number of points to generate for the yin
                                 'npts_yang' (int): the number of points to generate for the yang
                                 'ovlp' (float)   : the overlap between the yin and yang
-                                'x_min' (float)  : the minimum x value for the data
-                                'x_max' (float)  : the maximum x value for the data
-                                'y_min' (float)  : the minimum y value for the data
-                                'y_max' (float)  : the maximum y value for the data
+                                'radius' (float) : the radius for the yin-yang shape
                              }
 
     return:
@@ -454,103 +446,71 @@ def generate_yin_yang(params:dict) -> tuple:
      y (list): a list containing the labels for each data point in X
 
     description:
-     generate two masses that create a yin yang, each of different labels.
+     generate two masses that create a yin-yang, each of different labels.
     '''
 
     np.random.seed(1)
 
-    # the boundary, mean and std of the plot
-    #
-    xmean = params['x_min'] + 0.5 * (params['x_max'] - params['x_min'])
-    ymean = params['y_min'] + 0.5 * (params['y_max'] - params['y_min'])
-    stddev_center = 1.5 * (params['x_max'] - params['x_min']) / 2
+    # Parameters
+    radius = params['radius']
+    n_yin = params['npts_yin']
+    n_yang = params['npts_yang']
+    overlap = params['ovlp']
 
-    # creating empty lists to save coordinates of points
-    #
+    # Calculate means for yin and yang based on the radius
+    xmean_yin = -radius / 2
+    xmean_yang = radius / 2
+    ymean = 0  # Both classes centered on the x-axis
+
+    # Standard deviation for generating points around the center
+    stddev_center = 0.75 * radius
+
+    # Create empty lists for yin and yang
     yin = []
     yang = []
 
-    # calculate the radius of each class on the plot
-    #
-    radius1 = 1.5 * ((params['x_max'] - params['x_min']) / 4)
-    radius2 = 0.75 * ((params['x_max'] - params['x_min']) / 4)
+    # Calculate inner and outer radii for yin-yang
+    radius1 = 1.5 * radius
+    radius2 = 0.75 * radius
 
-    # define the number of samples in each class by checking the user-specified
-    # values and setting defaults if there are none
-    #
-    n_yin = params['npts_yin']
-    n_yang = params['npts_yang']
-
-    print(xmean)
-    print(ymean)
-    print(radius1)
-    print(radius2)
-
-    # producing some random numbers based on a Gaussian distirbution and then
-    # calculating the points distance to each class, choosing the closest set.
-    # the loop will exit when both classes has been generated
-    #
+    # Counters for generated points
     n_yin_counter = 0
     n_yang_counter = 0
-    while ((n_yin_counter < n_yin) or (n_yang_counter < n_yang)):
 
-        # generate points with Gaussian distribution
-        #
-        xpt = np.random.normal(xmean, stddev_center, 1)[0]
-        ypt = np.random.normal(ymean, stddev_center, 1)[0]
+    while n_yin_counter < n_yin or n_yang_counter < n_yang:
 
-        # calculate radius for each generated point
-        #
+        # Generate points using Gaussian distribution around the respective center
+        xpt = np.random.normal(xmean_yin if n_yin_counter < n_yin else xmean_yang, stddev_center)
+        ypt = np.random.normal(ymean, stddev_center)
+
+        # Calculate distances to determine the class for the point
         distance1 = np.sqrt(xpt ** 2 + ypt ** 2)
         distance2 = np.sqrt(xpt ** 2 + (ypt + radius2) ** 2)
         distance3 = np.sqrt(xpt ** 2 + (ypt - radius2) ** 2)
-        
-        if distance1 <= radius1:
 
-          if (xpt >= -radius1) & (xpt <= 0):
+        # Separate conditions for classifying yin and yang
+        if n_yin_counter < n_yin:
+            if (xpt >= -radius1) and (xpt <= 0) and (((distance1 <= radius1) or (distance2 <= radius2)) and (distance3 > radius2)):
+                yin.append([xpt, ypt])
+                n_yin_counter += 1
 
-            if (((distance1 <= radius1) or (distance2 <= radius2)) 
-                and (distance3 > radius2)):
+        elif n_yang_counter < n_yang:
+            if (xpt > 0.0) and (xpt <= radius1) and (((distance1 <= radius1) or (distance3 <= radius2)) and (distance2 > radius2)):
+                yang.append([xpt, ypt])
+                n_yang_counter += 1
 
-                if n_yin_counter < n_yin:
-                    yin.append([xpt, ypt])
-                    n_yin_counter += 1
+    # Apply overlap by adjusting the translation
+    yang = np.array(yang) + np.array([0, 0])
+    yin = np.array(yin) + np.array([0, 0]) * (1 + overlap)
 
-                elif n_yang_counter < n_yang:
-                    yang.append([xpt, ypt])
-                    n_yang_counter += 1
-
-            if (xpt > 0.0) & (xpt <= radius1):
-
-                if (((distance1 <= radius1) or (distance3 <= radius2)) 
-                    and (distance2 > radius2)):
-
-                    if n_yang_counter < n_yang:
-                        yang.append([xpt, ypt])
-                        n_yang_counter += 1
-
-                elif n_yin_counter < n_yin:
-                    yin.append([xpt, ypt])
-                    n_yin_counter += 1
-
-    # translate each sample in yin and yang for the origin to the
-    # center of the plot. for implementing overlap, the overlap
-    # parameter multiply to one of the plot center points. So the
-    # the overlap parameter interferes in translation process.
-    #
-    yang = np.array(yang) + np.array([xmean, ymean])
-    yin = np.array(yin) + np.array([xmean, ymean]) * (1 + params['ovlp'])
-
-    # combine the yin and yang classes and create the labels
-    #
+    # Combine the yin and yang classes and create the labels
     X = np.concatenate((yin, yang), axis=0)
     y = ['Class0'] * n_yin + ['Class1'] * n_yang
 
-    # exit gracefully
-    #
+    # Return the generated data and labels
     return X, y
-#
-# end of method
+
+
 
 DIST_MAP = {
             'two gaussian'       : generate_two_gaussian,

@@ -683,6 +683,7 @@ class DataGenerator:
         radius1 = 1.5 * ((x_max - x_min) / 4)
         radius2 = .75 * ((x_max - x_min) / 4)
 
+        print((x_max - x_min) / 4)
         # define number of samples in each class by checking for user-specified
         #  values and setting defaults if there are none
         #
