@@ -61,6 +61,48 @@ class AlgoTool extends HTMLElement {
     }
     //
     // end of method
+
+    createParam(key, value) {
+
+      let container = document.createElement('div');
+      container.classList.add('param-container');
+
+      let label_container = document.createElement('div');
+      label_container.classList.add('label-container');
+      
+      let label = document.createElement('label');
+      label.setAttribute('for', key);
+      label.innerText = value['name'];
+
+      label_container.appendChild(label);
+      label_container.appendChild(
+        document.createElement('info-icon')
+      )
+
+      let input;
+
+      if (value['type'] == 'select') {
+        input = document.createElement('select');
+        for (let option of value['options']) {
+          let opt = document.createElement('option');
+          opt.setAttribute('value', option);
+          opt.innerText = option;
+          input.appendChild(opt);
+        }
+      }
+      else {
+        input = document.createElement('input');
+        input.setAttribute('type', value['type']);
+      }
+
+      input.setAttribute('name', key);
+      input.classList.add('input');
+
+      container.appendChild(label_container);
+      container.appendChild(input);
+
+      return container;
+    }
   
     render() {
       /*
@@ -77,7 +119,7 @@ class AlgoTool extends HTMLElement {
        shadow root to what is in the string below.
       */
 
-      let algs = {
+      const algs = {
         'EUCLIDEAN': 'Euclidean Distance',
         'PCA'      : 'Principle Components Analysis',
         'QDA'      : 'Quadratic Discriminant Analysis',
@@ -86,10 +128,16 @@ class AlgoTool extends HTMLElement {
         'NB'       : 'Naive Bayes',
         'KMEANS'   : 'K-Means Clustering',
         'KNN'      : 'K-Nearest Neighbors',
-        'RF'       : 'Random Forest',
+        'RNF'      : 'Random Forest',
         'SVM'      : 'Support Vector Machines',
         'MLP'      : 'Multi-Layer Perceptron',
       };
+
+      const parameters = {
+        'criterion' : {'name' : 'Criterion', 'type' : 'select', 'options' : ['gini', 'entropy', 'log_loss']},
+        'estimator' : {'name' : 'Estimator', 'type' : 'number'},
+        'max_depth' : {'name' : 'Max Depth', 'type' : 'number'}
+      }
 
       // iterate over each alg in the dictionary and create an option element
       let options = '';
@@ -97,29 +145,43 @@ class AlgoTool extends HTMLElement {
         options += `<option value="${key}">${algs[key]} (${key})</option>`;
       };
 
+      let params = '';
+      for (let [key, param] of Object.entries(parameters)) {
+        let cont = this.createParam(key, param);
+        params += cont.outerHTML;
+      }
+
       // WRITE YOUR HTML AND CSS HERE
       this.shadowRoot.innerHTML = `
         <style>
           /* Add your CSS styles here */
 
-          div {
+          :host {
+            height: 100%;
+            width: 100%;
+          }
+
+          .main {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 90%;
-            width: 100%;
-            margin-top: 0.5em;
+            height: 95%;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            margin-left: 1.25rem;
+            margin-right: 1.25rem;
           }
 
-          select {
-            height: 80%;
-            border: 2px solid black;
+          .algo-select {
+            height: 2.5rem;
+            border: 1px solid black;
             border-radius: 5px;
             font-family: 'Inter', sans-serif;
             font-size: 1em;
-            font-weight: 600;
+            font-weight: 100;
             background-color: var(--main-color);
+            margin-top: 1em;
           }
 
           option {
@@ -131,21 +193,23 @@ class AlgoTool extends HTMLElement {
           #button-container {
             display: flex;
             flex-direction: row;
+            justify-content: center;
             margin-bottom: 1em;
             margin-top: 1em;
             width: 100%;
-            height: 20%;
+            height: 10%;
           }
 
           button { 
-            width: 10em;
+            height: 100%;
+            width: 40%;
             font-family: 'Inter', sans-serif;
             font-weight: 600;
             padding-top: 0.5em;
             padding-bottom: 0.5em;
             font-size: 1.25em;
             border-style: solid;
-            border-width: 2px;
+            border-width: 1px;
             border-color: black;
             border-radius: 5px;
           }
@@ -153,8 +217,10 @@ class AlgoTool extends HTMLElement {
           #params {
             width: 100%;
             height: 90%;
-            outline: 1px solid black;
-            margin-top: 0.5em;
+            margin-top: 1.5em;
+            display: flex;
+            flex-direction: column;
+            justify-content: start;
           }
 
           #train {
@@ -166,20 +232,74 @@ class AlgoTool extends HTMLElement {
             background-color: #02B313;
             margin-left: 0.6em;
           }
+
+          .param-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            height: 10%;
+          }
+
+          label {
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            font-weight: 100;
+          }
+
+          .label-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+          }
+
+          div.label-container > info-icon {
+            margin-top: 4px;
+            margin-left: 5px;
+          }
+
+          .input {
+            height: auto;
+            width: 50%;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+          }
+
+          select.input {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9em;
+            font-weight: 100;
+            border: 1px solid #8f8f9d;
+            border-radius: 2px;
+            background-color: var(--secondary-color);
+          }
+
+          input.input {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9em;
+            font-weight: 100;
+            border: 1px solid #8f8f9d;
+            border-radius: 2px;
+            background-color: var(--secondary-color);
+          }
+
         </style>
 
         <!-- Add your HTML here -->
-        <div>
-          <select>
+        <div class="main">
+          <div id="button-container">
+            <button id="train">Train</button>
+            <button id="eval">Evaluate</button>
+          </div>
+          <select class="algo-select">
             <option value="" disabled selected>Select an Algorithm</option>
             ${options}
           <select>
           <div id="params">
-            <h3> params go here </h3>
-          </div>
-          <div id="button-container">
-            <button id="train">Train</button>
-            <button id="eval">Evaluate</button>
+            ${params}
           </div>
         </div>
       `;
