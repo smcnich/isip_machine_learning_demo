@@ -402,13 +402,13 @@ def generate_yin_yang(params: dict) -> tuple:
         overlap = params['ovlp']
 
         # Boundary, mean, and standard deviation of plot
-        xmean = 0.5 * (radius)
-        ymean = 0.5 * (radius)
+        xmean = 0
+        ymean = 0
         stddev_center = 1.5 * (radius) / 2
 
         # Calculate radii for yin-yang regions
-        radius1 = 1.5 * ((radius) / 4)
-        radius2 = 0.75 * ((radius) / 4)
+        radius1 = radius / 2
+        radius2 = radius / 4
 
         # Create empty lists for storing points
         yin = []
@@ -448,8 +448,8 @@ def generate_yin_yang(params: dict) -> tuple:
                         n_yin_counter += 1
 
         # Translate yin and yang points to center them on the plot
-        yang = np.array(yang) + np.array([xmean, ymean])
-        yin = np.array(yin) + np.array([xmean, ymean]) * (1 + overlap)
+        yin = np.array(yin) + np.array([0, overlap * radius2])
+        yang = np.array(yang) - np.array([0, overlap * radius2])
 
         # Return generated data as a dictionary
             # Combine the yin and yang classes and create the labels

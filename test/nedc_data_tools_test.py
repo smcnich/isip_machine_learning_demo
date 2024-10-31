@@ -184,8 +184,8 @@ def test_yin_yang():
     X, y = ndt.generate_yin_yang(params = {
                                     'npts_yin' : 2000,
                                     'npts_yang': 2000,
-                                    'ovlp'     : 0,
-                                    'radius'    : 1.0
+                                    'ovlp'     : 0.1,
+                                    'radius'   : 2.0
                                     })
     
     # assign colors: first 'npts_yin' points are blue, the rest are red
