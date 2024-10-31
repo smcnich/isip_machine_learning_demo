@@ -5,8 +5,6 @@ import sys
 import os
 sys.path.append(os.path.abspath('../IMLD/app/backend'))
 
-# Now you can import the module
-
 # get the dependencies from the app directory
 #
 import nedc_data_tools as ndt
@@ -186,11 +184,15 @@ def test_yin_yang():
     X, y = ndt.generate_yin_yang(params = {
                                     'npts_yin' : 2000,
                                     'npts_yang': 2000,
-                                    'ovlp'     : 0.1,
+                                    'ovlp'     : 0,
                                     'radius'    : 1.0
                                     })
+    
+    # assign colors: first 'npts_yin' points are blue, the rest are red
+    colors = ['blue' if i < 2000 else 'red' for i in range(len(y))]
 
-    plt.scatter(X[:,0], X[:,1])
+  
+    plt.scatter(X[:, 0], X[:, 1], c=colors)
     plt.title('yin yang')
     plt.xlabel('x')
     plt.ylabel('y')
