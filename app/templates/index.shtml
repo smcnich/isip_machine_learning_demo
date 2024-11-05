@@ -44,14 +44,7 @@
   <script src="static/components/AlgoTool.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="static/components/InfoIcon.js"></script>
-  <script src="static/components/Toolbar_Button.js"></script>
-  <script src="static/components/Toolbar_OpenFileButton.js"></script>
-  <script src="static/components/Toolbar_SaveFileButton.js"></script>
-  <script src="static/components/Toolbar_CheckboxButton.js"></script>
-  <script src="static/components/Toolbar_PopupButton.js"></script>
-  <script src="static/components/Toolbar_DropdownClear.js"></script>
-  <script src="static/components/Toolbar_DropdownData.js"></script>
-  <script src="static/components/Toolbar_DropdownSettings.js"></script>
+  <script src="static/components/ToolbarComponents.js"></script>
 
  </head>
  <style>
