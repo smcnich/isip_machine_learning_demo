@@ -65,51 +65,54 @@ class ProcessLog extends HTMLElement {
       // WRITE YOUR HTML AND CSS HERE
       this.shadowRoot.innerHTML = `
       <style>
-          .scroll-bg {
-              display: block;
-              width: 100%; /* Adjust the width to 100% or any specific percentage */
-              height: 100%; /* Adjust the height to fit the parent */
-              margin-bottom: 2%; /* Padding effect from the bottom */
-              margin-left: 0%;
-              box-sizing: border-box; /* Ensures margins don’t overflow the container */
-          }
-      
-          .scroll-div {
-              width: 100%;
-              height: auto;
-              background: white;
-              overflow-y: auto;
-              height: 19vh;
-              width: 60vw;
-          }
-      
-          .scroll-object {
-              width: 100%;
-              box-sizing: border-box;
-              font-family: 'Inter', sans-serif;
-              font-size: 1em;
-              padding-right: 0.7em;
-          }
-      
-          /* WebKit Browsers (Chrome, Safari) Custom Scrollbar */
-          .scroll-div::-webkit-scrollbar {
-              width: 1em;
-          }
+        .scroll-bg {
+            display: block;
+            width: 100%;
+            height: 100%;
+            margin-bottom: 2%;
+            margin-left: 0%;
+            box-sizing: border-box;
+        }
 
-          .scroll-div::-webkit-scrollbar {
-              background: #c9c9c9;
-              border-radius: 100vw;
-          }
+        .scroll-div {
+            width: 100%;
+            height: 19vh;
+            width: 60vw;
+            background: white;
+            overflow-y: auto;
 
-          .scroll-div::-webkit-scrollbar-thumb {
-              background: #7441BA;
-              border-radius: 100vw;
-          }
+            /* Firefox-specific properties for scrollbar */
+            scrollbar-color: #7441BA #c9c9c9; /* Thumb color, Track color */
+            scrollbar-width: thin; /* Set width to thin */
+        }
 
-          .scroll-div::-webkit-scrollbar-thumb:hover {
-              background: #512e82;
-              border-radius: 100vw;
-          } 
+        .scroll-object {
+            width: 100%;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            padding-right: 0.7em;
+        }
+
+        /* WebKit Browsers (Chrome, Safari) Custom Scrollbar */
+        .scroll-div::-webkit-scrollbar {
+            width: 1em;
+        }
+
+        .scroll-div::-webkit-scrollbar-track {
+            background: #c9c9c9;
+            border-radius: 100vw;
+        }
+
+        .scroll-div::-webkit-scrollbar-thumb {
+            background: #7441BA;
+            border-radius: 100vw;
+        }
+
+        .scroll-div::-webkit-scrollbar-thumb:hover {
+            background: #512e82;
+            border-radius: 100vw;
+        }
       </style>
       
       <!-- Add your HTML here -->
