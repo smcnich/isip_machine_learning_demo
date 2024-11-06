@@ -45,6 +45,7 @@
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="static/components/InfoIcon.js"></script>
   <script src="static/components/ToolbarComponents.js"></script>
+  <script src="static/components/ToolbarPopup.js"></script>
 
  </head>
  <style>

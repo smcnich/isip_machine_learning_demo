@@ -80,15 +80,9 @@ class ProcessLog extends HTMLElement {
             width: 60vw;
             background: white;
             overflow-y: auto;
-
-            /* Firefox-specific properties for scrollbar */
-            scrollbar-color: #7441BA #c9c9c9; /* Thumb color, Track color */
-            scrollbar-width: thin; /* Set width to thin */
         }
 
         .scroll-object {
-            width: 100%;
-            box-sizing: border-box;
             font-family: 'Inter', sans-serif;
             font-size: 1em;
             padding-right: 0.7em;
@@ -96,23 +90,20 @@ class ProcessLog extends HTMLElement {
 
         /* WebKit Browsers (Chrome, Safari) Custom Scrollbar */
         .scroll-div::-webkit-scrollbar {
-            width: 1em;
+           width: 0.7em;
         }
-
-        .scroll-div::-webkit-scrollbar-track {
-            background: #c9c9c9;
-            border-radius: 100vw;
+        .scroll-div::-webkit-scrollbar {
+           background: #c9c9c9;
+           border-radius: 100vw;
         }
-
         .scroll-div::-webkit-scrollbar-thumb {
-            background: #7441BA;
-            border-radius: 100vw;
+           background: #7441BA;
+           border-radius: 100vw;
         }
-
         .scroll-div::-webkit-scrollbar-thumb:hover {
-            background: #512e82;
-            border-radius: 100vw;
-        }
+           background: #512e82;
+           border-radius: 100vw;
+        } 
       </style>
       
       <!-- Add your HTML here -->

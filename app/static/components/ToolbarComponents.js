@@ -132,6 +132,12 @@ class Toolbar_DropdownClear extends HTMLElement {
   
       this.shadowRoot.innerHTML = `
         <style>
+
+          .toolbar-item {
+            position: relative;
+            display: inline-block;
+          }
+
           .toolbar-button {
             background-color: white;
             color: black;
@@ -198,12 +204,14 @@ class Toolbar_DropdownClear extends HTMLElement {
             background-color: #c9c9c9; /* Hover effect for dropdown items */
           }
         </style>
-  
-        <button class="toolbar-button">${label}</button>
-        <div class="dropdown-menu" id="dropdown-menu">
-          <toolbar-button label="Clear Data"></toolbar-button>
-          <toolbar-button label="Clear Results"></toolbar-button>
-          <toolbar-button label="Clear All"></toolbar-button>
+        
+        <div class="toolbar-item">
+          <button class="toolbar-button">${label}</button>
+          <div class="dropdown-menu" id="dropdown-menu">
+            <toolbar-button label="Clear Data"></toolbar-button>
+            <toolbar-button label="Clear Results"></toolbar-button>
+            <toolbar-button label="Clear All"></toolbar-button>
+          </div>
         </div>
       `;
     }
@@ -254,11 +262,16 @@ class Toolbar_DropdownData extends HTMLElement {
   
       this.shadowRoot.innerHTML = `
         <style>
+          .toolbar-item {
+            position: relative; /* Anchor point for the dropdown menu */
+            display: inline-block; /* Keep button and dropdown aligned per instance */
+          }
+
           .toolbar-button {
             background-color: white;
             color: black;
             font-family: 'Inter', sans-serif;
-            font-weight: 100; /* Keep the button font weight light */
+            font-weight: 100;
             font-size: 1em;
             padding: 5px 30px;
             border: none;
@@ -267,79 +280,76 @@ class Toolbar_DropdownData extends HTMLElement {
             width: 100%;
             white-space: nowrap;
             text-align: left;
-            position: relative; /* Needed for absolute positioning of dropdown */
           }
-  
-          /* Add the triangle using ::after pseudo-element */
+
           .toolbar-button::after {
-            content: ''; /* Empty content for triangle */
+            content: '';
             position: absolute;
-            right: 10px; /* Distance from the right edge */
+            right: 10px;
             top: 50%;
-            transform: translateY(-50%); /* Vertically center the triangle */
+            transform: translateY(-50%);
             border-width: 5px;
             border-style: solid;
-            border-color: transparent transparent transparent black; /* Creates a right-pointing triangle */
+            border-color: transparent transparent transparent black;
           }
-  
+
           .toolbar-button:hover,
           .toolbar-button.active {
-            background-color: #c9c9c9; /* Highlight color */
+            background-color: #c9c9c9;
           }
-  
-          /* Styling for the header to match button style */
+
           .header {
             color: black;
             font-family: 'Inter', sans-serif;
-            font-weight: bold; /* Set the header font weight to bold */
+            font-weight: bold;
             font-size: 1em;
-            padding: 5px 30px; /* Match button padding */
-            margin: 0; /* Remove default margin */
-            white-space: nowrap; /* Prevent line breaks */
-            cursor: default; /* Indicate that it's not clickable */
+            padding: 5px 30px;
+            margin: 0;
+            white-space: nowrap;
+            cursor: default;
           }
-  
-          /* Dropdown menu styling */
+
           .dropdown-menu {
-            display: none; /* Initially hidden */
+            display: none;
             position: absolute;
-            top: 0px; /* Aligns with the top of the button */
-            left: calc(100% + 0.7px); /* Positions to the right of the button */
+            top: 0;
+            left: calc(100% + 0.7px); /* Align to the right of the toolbar-item container */
             background-color: white;
-            z-index: 1000; /* Ensure it's on top */
-            min-width: 150px; /* Match button width */
+            z-index: 1000;
+            min-width: 150px;
             border: 1px solid #ccc;
           }
-  
+
           .dropdown-menu.show {
-            display: block; /* Show when needed */
+            display: block;
           }
-  
+
           .dropdown-item {
             background-color: white;
             color: black;
             font-family: 'Inter', sans-serif;
-            font-weight: 100; /* Keep item font weight light */
+            font-weight: 100;
             font-size: 1em;
             padding: 5px 20px;
-            border: none;
             cursor: pointer;
-            min-width: 180px;
             white-space: nowrap;
             text-align: left;
           }
-  
+
           .dropdown-item:hover {
-            background-color: #c9c9c9; /* Hover effect for dropdown items */
+            background-color: #c9c9c9;
           }
         </style>
-  
-        <button class="toolbar-button">${label}</button>
-        <div class="dropdown-menu" id="dropdown-menu">
-          <h1 class="header">Set Parameters</h1> <!-- Use the new header class -->
-          <toolbar-popup-button label="Train"></toolbar-popup-button>
-          <toolbar-popup-button label="Eval"></toolbar-popup-button>
+
+        <div class="toolbar-item">
+          <button class="toolbar-button">${label}</button>
+          <div class="dropdown-menu" id="dropdown-menu">
+            <h1 class="header">Set Parameters</h1>
+            <toolbar-popup-button label="Train"></toolbar-popup-button>
+            <toolbar-popup-button label="Eval"></toolbar-popup-button>
+          </div>
         </div>
+
       `;
     }
   
@@ -389,6 +399,12 @@ class Toolbar_DropdownSettings extends HTMLElement {
   
       this.shadowRoot.innerHTML = `
         <style>
+
+          .toolbar-item {
+            position: relative;
+            display: inline-block;
+          }
+
           .toolbar-button {
             background-color: white;
             color: black;
@@ -455,13 +471,15 @@ class Toolbar_DropdownSettings extends HTMLElement {
             background-color: #c9c9c9; /* Hover effect for dropdown items */
           }
         </style>
-  
-        <button class="toolbar-button">${label}</button>
-        <div class="dropdown-menu" id="dropdown-menu">
-          <toolbar-popup-button label="Set Ranges"></toolbar-popup-button>
-          <toolbar-popup-button label="Set Gaussian"></toolbar-popup-button>
-          <toolbar-popup-button label="Set Color"></toolbar-popup-button>
-          <toolbar-checkbox-button label="Normalize Data"></toolbar-checkbox-button>
+
+        <div class="toolbar-item">
+          <button class="toolbar-button">${label}</button>
+          <div class="dropdown-menu" id="dropdown-menu">
+            <toolbar-popup-button label="Set Ranges"></toolbar-popup-button>
+            <toolbar-popup-button label="Set Gaussian"></toolbar-popup-button>
+            <toolbar-popup-button label="Set Color"></toolbar-popup-button>
+            <toolbar-checkbox-button label="Normalize Data"></toolbar-checkbox-button>
+          </div>
         </div>
       `;
     }
@@ -554,163 +572,6 @@ class Toolbar_OpenFileButton extends HTMLElement {
     }
 }
 
-class Toolbar_PopupButton extends HTMLElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: 'open' });
-      this.isPopupOpen = false; // Track the popup state
-    }
-  
-    connectedCallback() {
-      this.render();
-    }
-  
-    render() {
-      const label = this.getAttribute('label') || 'Button'; // Get the label from the attribute
-  
-      this.shadowRoot.innerHTML = `
-        <style>
-          .toolbar-popup-button {
-            background-color: white;
-            color: black;
-            font-family: 'Inter', sans-serif;
-            font-weight: 100;
-            font-size: 1em;
-            padding: 5px 30px;
-            border: none;
-            cursor: pointer;
-            min-width: 220px;
-            white-space: nowrap;
-            text-align: left;
-          }
-  
-          .toolbar-popup-button:hover {
-            background-color: #c9c9c9;
-          }
-  
-          /* Popup styling */
-          .popup {
-            display: none; /* Initially hidden */
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0); /* Start scaled down */
-            width: 300px;
-            height: 200px; /* Increased height */
-            padding: 20px;
-            background-color: white;
-            border-radius: 15px; /* Rounded corners */
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            z-index: 1000; /* Ensure it's on top */
-            opacity: 0; /* Start fully transparent */
-            transition: opacity 0.1s ease, transform 0.s ease; /* Transition for opening/closing */
-          }
-  
-          .popup.show {
-            display: block; /* Show when needed */
-            opacity: 1; /* Fully opaque when shown */
-            transform: translate(-50%, -50%) scale(1); /* Scale to original size */
-          }
-  
-          .popup h2 {
-            margin: 0 0 20px 0;
-          }
-  
-          /* Close button styling */
-          .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: transparent;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            color: #333;
-          }
-  
-          /* Overlay styling */
-          .overlay {
-            display: none; /* Initially hidden */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-            z-index: 999; /* Ensure it's below the popup */
-          }
-  
-          .overlay.show {
-            display: block; /* Show overlay when needed */
-          }
-        </style>
-  
-        <button class="toolbar-popup-button">${label}</button>
-        <div class="overlay" id="overlay"></div>
-        <div class="popup" id="popup">
-          <button class="close-btn" id="close-btn">X</button>
-          <h2>Popup Title</h2>
-          <p>This is the popup content!</p>
-        </div>
-      `;
-  
-      // Get elements
-      const button = this.shadowRoot.querySelector('.toolbar-popup-button');
-      const popup = this.shadowRoot.getElementById('popup');
-      const overlay = this.shadowRoot.getElementById('overlay');
-      const closeBtn = this.shadowRoot.getElementById('close-btn');
-  
-      // Show the popup when clicking the button
-      button.addEventListener('click', (event) => {
-        event.stopPropagation(); // Prevent click event from bubbling up to parent elements
-        this.togglePopup(); // Toggle the popup visibility
-      });
-  
-      // Close the popup when clicking the close button or overlay
-      closeBtn.addEventListener('click', (event) => {
-        event.stopPropagation(); // Prevent bubbling when closing
-        this.closePopup(); // Close the popup
-      });
-      
-      overlay.addEventListener('click', (event) => {
-        event.stopPropagation(); // Prevent bubbling when clicking on overlay
-        this.closePopup(); // Close the popup
-      });
-    }
-  
-    togglePopup() {
-      const popup = this.shadowRoot.getElementById('popup');
-      const overlay = this.shadowRoot.getElementById('overlay');
-  
-      this.isPopupOpen = !this.isPopupOpen;
-  
-      if (this.isPopupOpen) {
-        popup.classList.add('show'); // Add show class to initiate transition
-        overlay.classList.add('show'); // Add show class to overlay
-        popup.style.display = 'block'; // Ensure popup is displayed
-        overlay.style.display = 'block'; // Ensure overlay is displayed
-      } else {
-        this.closePopup(); // Close the popup if it's already open
-      }
-    }
-  
-    closePopup() {
-      const popup = this.shadowRoot.getElementById('popup');
-      const overlay = this.shadowRoot.getElementById('overlay');
-  
-      popup.classList.remove('show'); // Remove show class to initiate transition
-      overlay.classList.remove('show'); // Remove show class from overlay
-  
-      // Wait for the transition to end before hiding elements
-      setTimeout(() => {
-        popup.style.display = 'none'; // Hide after transition
-        overlay.style.display = 'none'; // Hide overlay after transition
-      }, 100); // Match the timeout with the CSS transition duration
-  
-      this.isPopupOpen = false; // Update the popup state
-    }
-}  
-
 class Toolbar_SaveFileButton extends HTMLElement {
     constructor() {
       super();
@@ -785,7 +646,6 @@ customElements.define('toolbar-dropdown-clear', Toolbar_DropdownClear);
 customElements.define('toolbar-dropdown-data', Toolbar_DropdownData);
 customElements.define('toolbar-dropdown-settings', Toolbar_DropdownSettings);
 customElements.define('toolbar-openfile-button', Toolbar_OpenFileButton);
-customElements.define('toolbar-popup-button', Toolbar_PopupButton);
 customElements.define('toolbar-savefile-button', Toolbar_SaveFileButton);
 
 
