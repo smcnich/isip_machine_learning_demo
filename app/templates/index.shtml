@@ -46,6 +46,7 @@
   <script src="static/components/InfoIcon.js"></script>
   <script src="static/components/ToolbarComponents.js"></script>
   <script src="static/components/ToolbarPopup.js"></script>
+  <script src="static/components/DataParameters.js"></script>
 
  </head>
  <style>

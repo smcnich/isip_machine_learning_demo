@@ -259,6 +259,7 @@ class Toolbar_DropdownData extends HTMLElement {
   
     render() {
       const label = this.getAttribute('label') || 'Button'; // Get the label from the attribute
+      const layoutType = this.getAttribute('layout') || 'mucovtwo'; // Dynamically choose the layout
   
       this.shadowRoot.innerHTML = `
         <style>
@@ -345,12 +346,48 @@ class Toolbar_DropdownData extends HTMLElement {
           <button class="toolbar-button">${label}</button>
           <div class="dropdown-menu" id="dropdown-menu">
             <h1 class="header">Set Parameters</h1>
-            <toolbar-popup-button label="Train"></toolbar-popup-button>
-            <toolbar-popup-button label="Eval"></toolbar-popup-button>
+            <div id="dropdown-content"></div>
           </div>
         </div>
 
       `;
+
+      const dropdownContent = this.shadowRoot.getElementById('dropdown-content');
+      this.insertLayout(layoutType, dropdownContent);
+    }
+
+    insertLayout(layoutType, container) {
+
+      const mucovtwo = `
+        <toolbar-popup-button-mucovtwo label="Train"></toolbar-popup-button-mucovtwo>
+        <toolbar-popup-button-mucovtwo label="Eval"></toolbar-popup-button-mucovtwo>
+      `;
+
+      const mucovfour = `
+        <toolbar-popup-button-mucovfour label="Train"></toolbar-popup-button-mucovfour>
+        <toolbar-popup-button-mucovfour label="Eval"></toolbar-popup-button-mucovfour>
+      `;
+
+      const toroidal = `
+        <toolbar-popup-button-toroidal label="Train"></toolbar-popup-button-toroidal>
+        <toolbar-popup-button-toroidal label="Eval"></toolbar-popup-button-toroidal>
+      `;
+
+      const yinyang = `
+        <toolbar-popup-button-yinyang label="Train"></toolbar-popup-button-yinyang>
+        <toolbar-popup-button-yinyang label="Eval"></toolbar-popup-button-yinyang>
+      `;
+
+      if (layoutType == 'mucovfour') {
+        container.innerHTML = mucovfour;
+      } else if (layoutType == 'toroidal') {
+        container.innerHTML = toroidal;
+      } else if (layoutType == 'yinyang') {
+        container.innerHTML = yinyang;
+      } else {
+        container.innerHTML = mucovtwo;
+      }
+
     }
   
     addHoverListeners() {

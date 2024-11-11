@@ -302,12 +302,10 @@ class MainToolbar extends HTMLElement {
           <button class="menubutton">Edit</button>
           <div class="dropdown">
             <toolbar-dropdown-settings label="Settings"></toolbar-dropdown-settings>
-            <div class="separator"></div>
             <toolbar-button label="Process Log"></toolbar-button>
             <toolbar-dropdown-clear label="Clear Train"></toolbar-dropdown-clear>
             <toolbar-dropdown-clear label="Clear Eval"></toolbar-dropdown-clear>
             <toolbar-button label="Clear All"></toolbar-button>
-            <div class="separator"></div>
             <toolbar-button label="Reset"></toolbar-button>
           </div>
         </div>
@@ -338,24 +336,19 @@ class MainToolbar extends HTMLElement {
         <div class="menu">
           <button class="menubutton">Data</button>
           <div class="dropdown">
-            <toolbar-dropdown-data label="Two Gaussian"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Four Gaussian"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Overlapping Gaussian"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Two Ellipses"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Four Ellipses"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Rotated Ellipses"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Toroidal"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Yin Yang"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Two Gaussian" layout="mucovtwo"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Four Gaussian" layout="mucovfour"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Overlapping Gaussian" layout="mucovtwo"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Two Ellipses" layout="mucovtwo"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Four Ellipses" layout="mucovfour"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Rotated Ellipses" layout="mucovtwo"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Toroidal" layout="toroidal"></toolbar-dropdown-data>
+            <toolbar-dropdown-data label="Yin Yang" layout="yinyang"></toolbar-dropdown-data>
           </div>
         </div>
 
         <div class="menu">
           <button class="menubutton">Help</button>
-          <div class="dropdown">
-            <toolbar-button label="User Guide"></toolbar-button>
-            <toolbar-button label="Glossary"></toolbar-button>
-            <toolbar-button label="Updates"></toolbar-button>
-          </div>
         </div>
       </div>
     `;
