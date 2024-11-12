@@ -1,4 +1,21 @@
 class MainToolbar extends HTMLElement {
+  /*
+  class: MainToolbar
+
+  description:
+  This class is designed to create a customizable toolbar component with dropdown menus 
+  for various actions. It extends the HTMLElement class and uses a shadow root for 
+  encapsulating its styles and structure, ensuring that styles do not leak to the outside.
+  It provides the ability to interact with various toolbar buttons and dropdowns, handling 
+  user clicks and interactions.
+
+  To create a new instance of the component, the class should be instantiated by the custom 
+  element `<main-toolbar>`, and it will render a fully interactive toolbar with different 
+  functional sections.
+
+  Additional methods and properties may be added as needed to extend the functionality.
+  */
+
   constructor() {
     /*
     method: ToolbarBtn::constructor
@@ -17,12 +34,15 @@ class MainToolbar extends HTMLElement {
     */
 
     // Call the parent constructor (HTMLElement)
+    //
     super();
 
     // Create a shadow root for the component
+    //
     this.attachShadow({ mode: 'open' });
 
     // Bind the handleOutsideClick method to the current instance
+    //
     this.handleOutsideClick = this.handleOutsideClick.bind(this);
   }
   //
@@ -46,12 +66,15 @@ class MainToolbar extends HTMLElement {
     */
 
     // Render the component to the webpage
+    //
     this.render();
 
     // Add click event listeners to the menu buttons
+    //
     this.addClickEvents();
 
     // Attach an event listener to the document for outside clicks
+    //
     document.addEventListener('click', this.handleOutsideClick);
   }
   //
@@ -74,6 +97,7 @@ class MainToolbar extends HTMLElement {
     */
 
     // Remove the event listener for outside clicks
+    //
     document.removeEventListener('click', this.handleOutsideClick);
   }
   //
@@ -95,6 +119,7 @@ class MainToolbar extends HTMLElement {
     */
 
     // Check if the click was outside the component's shadow root
+    //
     if (!this.shadowRoot.contains(event.target)) {
         this.closeAllDropdowns();
     }
@@ -119,6 +144,7 @@ class MainToolbar extends HTMLElement {
     */
 
     // Close all dropdowns and remove the 'active' class from all buttons
+    //
     this.shadowRoot.querySelectorAll('.dropdown').forEach(dropdown => {
         dropdown.style.display = 'none';
     });
@@ -145,28 +171,40 @@ class MainToolbar extends HTMLElement {
      ensures that only one dropdown is open at a time by calling closeAllDropdowns.
     */
 
+    // Select all menu buttons within the component's shadow root
+    //
     const buttons = this.shadowRoot.querySelectorAll('.menubutton');
 
+    // Add a click event listener to each menu button
+    //
     buttons.forEach(button => {
         button.addEventListener('click', (event) => {
-            event.stopPropagation();  // Prevent the click from bubbling to the window
+            // Stop the event from bubbling up to prevent it from closing dropdown immediately
+            //
+            event.stopPropagation();  
 
+            // Retrieve the dropdown associated with the current button
+            // 
             const dropdown = button.nextElementSibling;
 
-            // Toggle dropdown visibility
+            // Check if the dropdown is currently visible
+            //
             if (dropdown) {
                 const isVisible = dropdown.style.display === 'block';
 
                 // Close all other dropdowns and deactivate buttons
+                //
                 this.closeAllDropdowns();
 
                 // If the dropdown was not already visible, open it and mark the button as active
+                //
                 if (!isVisible) {
                     dropdown.style.display = 'block';
                     button.classList.add('active');
                 }
             } else {
                 // Close all if it's just a button without a dropdown
+                //
                 this.closeAllDropdowns();
             }
         });
@@ -190,16 +228,17 @@ class MainToolbar extends HTMLElement {
       shadow root to what is in the string below.
     */
 
-    // WRITE YOUR HTML AND CSS HERE
+    // Set the inner HTML of the shadow root with toolbar structure, menu items, and dropdowns
+    //
     this.shadowRoot.innerHTML = `
       <style>
-        /* Global Styles */
+        /* Global Styles: Resets default body margin and padding */
         body {
           margin: 0;
           padding: 0;
         }
 
-        /* Toolbar Styles */
+        /* Toolbar Styles: Defines toolbar layout and borders */
         .toolbar {
           background-color: #FFFFFF;
           display: flex;
@@ -210,13 +249,13 @@ class MainToolbar extends HTMLElement {
           border-top: #c9c9c9 1px solid;
         }
 
-        /* Menu and Dropdown Styles */
+        /* Menu and Dropdown Styles: Sets position and styling for menu items and dropdowns */
         .menu {
           position: relative;
           display: inline-block;
         }
 
-        /* Dropdown default state */
+        /* Dropdown default state: Hidden until triggered */
         .dropdown {
           display: none;
           position: absolute;
@@ -228,7 +267,7 @@ class MainToolbar extends HTMLElement {
           z-index: 2;
         }
 
-        /* Dropdown Button Styles */
+        /* Dropdown Button Styles: Styles each option within dropdown menus */
         .dropdownbutton {
           background-color: white;
           color: black;
@@ -243,15 +282,17 @@ class MainToolbar extends HTMLElement {
           text-align: left;
         }
 
+        /* Hover effect for dropdown buttons */
         .dropdownbutton:hover {
           background-color: #c9c9c9
         }
 
+        /* Separator: Thin dividing line between dropdown options */
         .separator {
           border-bottom: 1px solid #ccc; // Thin line
         }
 
-        /* Menu Button Styles */
+        /* Menu Button Styles: Styles for buttons at the top of each dropdown */
         .menubutton {
           background-color: #FFFFFF;
           color: #464646;
@@ -265,13 +306,13 @@ class MainToolbar extends HTMLElement {
           cursor: pointer;
         }
 
-        /* Hover Effect */
+        /* Hover Effect for menu buttons */
         .menubutton:hover {
           color: #808080;
           border-bottom: 2px solid #808080; /* Gray border when hovered */
         }
 
-        /* Active button: stays purple after being clicked */
+        /* Active button: Keeps a button visually active after being clicked */
         .menubutton.active {
           color: #7441BA;
           border-bottom: 2px solid #7441BA;
@@ -281,6 +322,7 @@ class MainToolbar extends HTMLElement {
       </style>
 
       <div class="toolbar">
+        <!-- "File" menu with associated dropdown containing file operations -->
         <div class="menu">
           <button class="menubutton">File</button>
           <div class="dropdown">
@@ -298,6 +340,7 @@ class MainToolbar extends HTMLElement {
           </div>
         </div>
 
+        <!-- "Edit" menu with dropdown for settings and clearing options -->
         <div class="menu">
           <button class="menubutton">Edit</button>
           <div class="dropdown">
@@ -310,6 +353,7 @@ class MainToolbar extends HTMLElement {
           </div>
         </div>
 
+        <!-- "View" menu with dropdown for matrix display options -->
         <div class="menu">
           <button class="menubutton">View</button>
           <div class="dropdown">
@@ -317,6 +361,7 @@ class MainToolbar extends HTMLElement {
           </div>
         </div>
 
+        <!-- "Classes" menu with options to add and delete classes -->
         <div class="menu">
           <button class="menubutton">Classes</button>
           <div class="dropdown">
@@ -325,6 +370,7 @@ class MainToolbar extends HTMLElement {
           </div>
         </div>
 
+        <!-- "Patterns" menu with options for point and Gaussian drawing -->
         <div class="menu">
           <button class="menubutton">Patterns</button>
           <div class="dropdown">
@@ -333,6 +379,7 @@ class MainToolbar extends HTMLElement {
           </div>
         </div>
 
+        <!-- "Data" menu with dropdown for selecting data shapes and layouts -->
         <div class="menu">
           <button class="menubutton">Data</button>
           <div class="dropdown">
@@ -347,6 +394,7 @@ class MainToolbar extends HTMLElement {
           </div>
         </div>
 
+        <!-- "Help" menu with static help button for guidance -->
         <div class="menu">
           <button class="menubutton">Help</button>
         </div>
@@ -361,4 +409,5 @@ class MainToolbar extends HTMLElement {
 // end of class 
 
 // Register the custom element
+//
 customElements.define('main-toolbar', MainToolbar);
