@@ -70,11 +70,16 @@ def test_two_gaussian():
                                     'mean2' : [0.5, -0.5],
                                     'cov2'  : [[0.0333, 0], [0, 0.0333]]           
                                     })
-    plt.scatter(X[:,0], X[:,1])
+    # assign colors: first 'npts1' points are blue, the rest are red
+    colors = ['blue' if i < 10000 else 'red' for i in range(len(y))]
+
+    plt.scatter(X[:,0], X[:,1],c=colors)
+
+    plt.title('two gaussian')
 
     plt.show()
 
-    save_data(X, y, 'two_gaussian.csv')
+    save_data(X, y, 'test/test_data/two_gaussian.csv')
 
 def test_four_gaussian():
     X, y = ndt.generate_four_gaussian(params = {
@@ -91,11 +96,16 @@ def test_four_gaussian():
                                     'mean4' : [0.5, 0.5],
                                     'cov4'  : [[0.0250, 0], [0, 0.0250]]                                              
                                     })
-    plt.scatter(X[:,0], X[:,1])
+    # assign colors: first 'npts1' points are blue, next 'npts2' points are red, next 'npts3' points are green, remaining are yellow
+    colors = ['blue' if i < 10000 else 'red' if i < 20000 else 'green' if i < 30000 else 'yellow' for i in range(len(y))]
+
+    plt.scatter(X[:,0], X[:,1],c=colors)
+
+    plt.title('four gaussian')
 
     plt.show()
 
-    save_data(X, y, 'four_gaussian.csv')   
+    save_data(X, y, 'test/test_data/four_gaussian.csv')   
 
 def test_ovlp_gaussian():
     X, y = ndt.generate_ovlp_gaussian(params = {
@@ -106,11 +116,16 @@ def test_ovlp_gaussian():
                                     'mean2' : [0.14, 0.14],
                                     'cov2'  : [[0.0250, 0], [0, 0.0250]]          
                                     })
-    plt.scatter(X[:,0], X[:,1])
+    # assign colors: first 'npts1' points are blue, the rest are red
+    colors = ['blue' if i < 10000 else 'red' for i in range(len(y))]
+
+    plt.scatter(X[:,0], X[:,1],c=colors)
+
+    plt.title('overlapping gaussian')
 
     plt.show()
 
-    save_data(X, y, 'ovlp_gaussian.csv')
+    save_data(X, y, 'test/test_data/ovlp_gaussian.csv')
 
 def test_two_ellipses():
     X, y = ndt.generate_two_gaussian(params = {
@@ -121,13 +136,18 @@ def test_two_ellipses():
                                     'mean2' : [0.5, -0.5],
                                     'cov2'  : [[0.0333, 0], [0, 0.0043]]           
                                     })
-    plt.scatter(X[:,0], X[:,1])
+    # assign colors: first 'npts1' points are blue, the rest are red
+    colors = ['blue' if i < 10000 else 'red' for i in range(len(y))]
+
+    plt.scatter(X[:,0], X[:,1],c=colors)
+
+    plt.title('two ellipses')
 
     plt.show()
 
-    save_data(X, y, 'two_ellipses.csv')
+    save_data(X, y, 'test/test_data/two_ellipses.csv')
 
-def test_four_ellipses1():
+def test_four_ellipses():
     X, y = ndt.generate_four_gaussian(params = {
                                     'npts1' : 10000,
                                     'mean1' : [-0.5, 0.5],
@@ -142,14 +162,18 @@ def test_four_ellipses1():
                                     'mean4' : [0.5, 0.5],
                                     'cov4'  : [[0.0250, 0], [0, 0.0032]]                                              
                                     })
-    plt.scatter(X[:,0], X[:,1])
+    # assign colors: first 'npts1' points are blue, next 'npts2' points are red, next 'npts3' points are green, remaining are yellow
+    colors = ['blue' if i < 10000 else 'red' if i < 20000 else 'green' if i < 30000 else 'yellow' for i in range(len(y))]
+
+    plt.scatter(X[:,0], X[:,1],c=colors)
+
+    plt.title('four ellipses')
 
     plt.show()
 
-    save_data(X, y, 'four_ellipses.csv')  
+    save_data(X, y, 'test/test_data/four_ellipses.csv')  
     
-
-def test_rotated_ellipses1():
+def test_rotated_ellipses():
     X, y = ndt.generate_rotated_ellipses(params = {
                                     'npts1' : 10000,
                                     'mean1' : [-0.5, 0.5],
@@ -158,11 +182,16 @@ def test_rotated_ellipses1():
                                     'mean2' : [0.5, -0.5],
                                     'cov2'  : [[0.0043, 0], [0, 0.0333]]           
                                     })
-    plt.scatter(X[:,0], X[:,1])
+    # assign colors: first 'npts1' points are blue, the rest are red
+    colors = ['blue' if i < 10000 else 'red' for i in range(len(y))]
+
+    plt.scatter(X[:,0], X[:,1],c=colors)
+
+    plt.title('rotated ellipses')
 
     plt.show()
 
-    save_data(X, y, 'rotated_ellipses.csv')
+    save_data(X, y, 'test/test_data/rotated_ellipses.csv')
 
 def test_toroidal():
     X, y = ndt.generate_toroidal(params = {
@@ -173,89 +202,44 @@ def test_toroidal():
                                     'inner_rad' : 0.65,
                                     'outer_rad' : 0.85
                                     })
+    # assign colors: first 'npts_ring' points are blue, the rest are red
+    colors = ['blue' if i < 2000 else 'red' for i in range(len(y))]
 
-    plt.scatter(X[:,0], X[:,1])
+    plt.scatter(X[:,0], X[:,1],c=colors)
+
+    plt.title('toroidal')
 
     plt.show()
 
-    save_data(X, y, 'toroidal.csv')
+    save_data(X, y, 'test/test_data/toroidal.csv')
 
 def test_yin_yang():
     X, y = ndt.generate_yin_yang(params = {
                                     'npts_yin' : 2000,
                                     'npts_yang': 2000,
-                                    'ovlp'     : 0.1,
+                                    'ovlp'     : 0.0,
                                     'radius'   : 2.0
                                     })
     
     # assign colors: first 'npts_yin' points are blue, the rest are red
     colors = ['blue' if i < 2000 else 'red' for i in range(len(y))]
-
   
     plt.scatter(X[:, 0], X[:, 1], c=colors)
+
     plt.title('yin yang')
-    plt.xlabel('x')
-    plt.ylabel('y')
+
     plt.show()
     
-
-    save_data(X, y, 'yin_yang.csv')
-
-'''
-def test_four_ellipses():
-    # Define the parameters for the four ellipses
-    params = {
-        'npts0': 10000, 'mean0': [-0.5, 0.5], 'cov0': [[0.0333, 0], [0, 0.0043]],  # Narrower along y-axis
-        'npts1': 10000, 'mean1': [0.5, 0.5], 'cov1': [[0.0333, 0], [0, 0.0043]],   # Narrower along y-axis
-        'npts2': 10000, 'mean2': [-0.5, -0.5], 'cov2': [[0.0333, 0], [0, 0.0043]], # Same as ellipse 1
-        'npts3': 10000, 'mean3': [0.5, -0.5], 'cov3': [[0.0333, 0], [0, 0.0043]],  # Same as ellipse 1
-        'x_min': -1, 'x_max': 1, 'y_min': -1, 'y_max': 1
-    }
+    save_data(X, y, 'test/test_data/yin_yang.csv')
 
 
+# uncomment desired test:
 
-    # Generate the data using your generate_four_ellipses function
-    X, y = ndt.generate_four_ellipses(params)
-                                
-    # Create color map for each class
-    colors = ['magenta', 'orange', 'purple', 'green']
-    for i, color in enumerate(colors):
-        plt.scatter(X[np.array(y) == i, 0], X[np.array(y) == i, 1], c=color, s=1, label=f'Class{i}')
-
-    # Set plot limits to match the desired output
-    plt.xlim([-1, 1])
-    plt.ylim([-1, 1])
-    plt.gca().set_aspect('equal', adjustable='box')
-
-    # Display the plot
-    plt.legend()
-    plt.show()
-
-def test_rotated_ellipses():
-    # Define the parameters for the rotated ellipses
-    params = {
-        'npts0': 10000, 'mean0': [-0.5, 0.5], 'cov0': [[0.0333, 0], [0, 0.0043]],  # Narrower along y-axis for class 0
-        'npts1': 10000, 'mean1': [0.5, -0.5], 'cov1': [[0.0043, 0], [0, 0.0333]],  # Narrower along x-axis for class 1
-        'x_min': -1, 'x_max': 1, 'y_min': -1, 'y_max': 1
-    }
-
-    # Generate the data using your generate_rotated_ellipses function
-    X, y = ndt.generate_rotated_ellipses(params)
-                                
-    # Create color map for each class
-    colors = ['magenta', 'orange']
-    for i, color in enumerate(colors):
-        plt.scatter(X[np.array(y) == i, 0], X[np.array(y) == i, 1], c=color, s=1, label=f'Class{i}')
-
-    # Set plot limits to match the desired output
-    plt.xlim([-1, 1])
-    plt.ylim([-1, 1])
-    plt.gca().set_aspect('equal', adjustable='box')
-
-    # Display the plot
-    plt.legend()
-    plt.show()    
-'''
-
-# run test below:
-test_yin_yang()
+#test_two_gaussian()
+#test_four_gaussian()
+#test_ovlp_gaussian()
+#test_two_ellipses()
+#test_four_ellipses()
+#test_rotated_ellipses()
+#test_toroidal()
+#test_yin_yang()

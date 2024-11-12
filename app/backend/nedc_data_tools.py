@@ -401,8 +401,8 @@ def generate_yin_yang(params: dict) -> tuple:
     stddev_center = 1.5 * (radius) / 2
 
     # Calculate radii for yin-yang regions
-    radius1 = radius / 2
-    radius2 = radius / 4
+    radius1 = radius 
+    radius2 = radius / 2
 
     # Create empty lists for storing points
     yin = []
