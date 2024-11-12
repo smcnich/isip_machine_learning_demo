@@ -173,7 +173,8 @@ class Toolbar_PopupButton_MuCovTwo extends HTMLElement {
   }
 
   render() {
-    const label = this.getAttribute('label') || 'Button'; // Get the label from the attribute
+    const label = this.getAttribute('label') || 'Button';
+    const shape = this.getAttribute('shape') || 'two-gaussian';
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -203,14 +204,14 @@ class Toolbar_PopupButton_MuCovTwo extends HTMLElement {
           left: 50%;
           transform: translate(-50%, -50%) scale(0); /* Start scaled down */
           width: 23vw;
-          height: 45vh; /* Increased height */
+          height: 48vh; /* Increased height */
           padding: 20px;
           background-color: white;
           border-radius: 15px; /* Rounded corners */
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
           z-index: 1000; /* Ensure it's on top */
           opacity: 0; /* Start fully transparent */
-          transition: opacity 0.1s ease, transform 0.s ease; /* Transition for opening/closing */
+          transition: opacity 0.1s ease, transform 0.1s ease; /* Transition for opening/closing */
         }
 
         .popup.show {
@@ -220,7 +221,8 @@ class Toolbar_PopupButton_MuCovTwo extends HTMLElement {
         }
 
         .popup h2 {
-          margin: 0 0 20px 0;
+          margin: 0 0 1.5vh 0;
+          font-family: 'Inter', sans-serif;
         }
 
         /* Close button styling */
@@ -250,6 +252,7 @@ class Toolbar_PopupButton_MuCovTwo extends HTMLElement {
         .overlay.show {
           display: block; /* Show overlay when needed */
         }
+
       </style>
 
       <button class="toolbar-popup-button">${label}</button>
@@ -257,9 +260,7 @@ class Toolbar_PopupButton_MuCovTwo extends HTMLElement {
       <div class="popup" id="popup">
         <button class="close-btn" id="close-btn">X</button>
         <h2>Set ${label} Parameters</h2>
-        <num-pts label="Number of Points"></num-pts>
-        <mu-cov label="(1st)"></mu-cov>
-        <mu-cov label="(2nd)"></mu-cov>
+        <mu-cov-two shape=${shape}></mu-cov-two>
       </div>
     `;
 
@@ -281,9 +282,12 @@ class Toolbar_PopupButton_MuCovTwo extends HTMLElement {
       this.closePopup();
     });
 
-    // Add a global click listener to close the popup if clicked outside
+    // Close the popup when clicking outside of it
     document.addEventListener('click', (event) => {
-      if (this.isPopupOpen && !this.contains(event.target)) {
+      // Check if the click is outside the popup and not on the button itself
+      const clickedOutside = !popup.contains(event.target) && !button.contains(event.target);
+
+      if (this.isPopupOpen && clickedOutside) {
         this.closePopup();
       }
     });
@@ -339,6 +343,7 @@ class Toolbar_PopupButton_MuCovFour extends HTMLElement {
 
   render() {
     const label = this.getAttribute('label') || 'Button'; // Get the label from the attribute
+    const shape = this.getAttribute('shape') || 'four-gaussian';
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -368,14 +373,14 @@ class Toolbar_PopupButton_MuCovFour extends HTMLElement {
           left: 50%;
           transform: translate(-50%, -50%) scale(0); /* Start scaled down */
           width: 23vw;
-          height: 74vh; /* Increased height */
+          height: 79vh; /* Increased height */
           padding: 20px;
           background-color: white;
           border-radius: 15px; /* Rounded corners */
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
           z-index: 1000; /* Ensure it's on top */
           opacity: 0; /* Start fully transparent */
-          transition: opacity 0.1s ease, transform 0.s ease; /* Transition for opening/closing */
+          transition: opacity 0.1s ease, transform 0.1s ease; /* Transition for opening/closing */
         }
 
         .popup.show {
@@ -385,7 +390,8 @@ class Toolbar_PopupButton_MuCovFour extends HTMLElement {
         }
 
         .popup h2 {
-          margin: 0 0 20px 0;
+          margin: 0 0 1.5vh 0;
+          font-family: 'Inter', sans-serif;
         }
 
         /* Close button styling */
@@ -422,11 +428,7 @@ class Toolbar_PopupButton_MuCovFour extends HTMLElement {
       <div class="popup" id="popup">
         <button class="close-btn" id="close-btn">X</button>
         <h2>Set ${label} Parameters</h2>
-        <num-pts label="Number of Points"></num-pts>
-        <mu-cov label="(1st)"></mu-cov>
-        <mu-cov label="(2nd)"></mu-cov>
-        <mu-cov label="(3rd)"></mu-cov>
-        <mu-cov label="(4th)"></mu-cov>
+        <mu-cov-four shape=${shape}></mu-cov-four>
       </div>
     `;
 
@@ -448,9 +450,12 @@ class Toolbar_PopupButton_MuCovFour extends HTMLElement {
       this.closePopup();
     });
 
-    // Add a global click listener to close the popup if clicked outside
+    // Close the popup when clicking outside of it
     document.addEventListener('click', (event) => {
-      if (this.isPopupOpen && !this.contains(event.target)) {
+      // Check if the click is outside the popup and not on the button itself
+      const clickedOutside = !popup.contains(event.target) && !button.contains(event.target);
+
+      if (this.isPopupOpen && clickedOutside) {
         this.closePopup();
       }
     });
@@ -535,14 +540,14 @@ class Toolbar_PopupButton_Toroidal extends HTMLElement {
           left: 50%;
           transform: translate(-50%, -50%) scale(0); /* Start scaled down */
           width: 23vw;
-          height: 50vh; /* Increased height */
+          height: 54vh; /* Increased height */
           padding: 20px;
           background-color: white;
           border-radius: 15px; /* Rounded corners */
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
           z-index: 1000; /* Ensure it's on top */
           opacity: 0; /* Start fully transparent */
-          transition: opacity 0.1s ease, transform 0.s ease; /* Transition for opening/closing */
+          transition: opacity 0.1s ease, transform 0.1s ease; /* Transition for opening/closing */
         }
 
         .popup.show {
@@ -552,7 +557,8 @@ class Toolbar_PopupButton_Toroidal extends HTMLElement {
         }
 
         .popup h2 {
-          margin: 0 0 20px 0;
+          margin: 0 0 1.5vh 0;
+          font-family: 'Inter', sans-serif;
         }
 
         /* Close button styling */
@@ -589,10 +595,7 @@ class Toolbar_PopupButton_Toroidal extends HTMLElement {
       <div class="popup" id="popup">
         <button class="close-btn" id="close-btn">X</button>
         <h2>Set ${label} Parameters</h2>
-        <num-pts label="Number of Points"></num-pts>
-        <num-pts label="Number of Points (Ring)"></num-pts>
-        <two-radius></two-radius>
-        <mu-cov label="(1st)"></mu-cov>
+        <mu-cov-toroidal></mu-cov-toroidal>
       </div>
     `;
 
@@ -614,9 +617,12 @@ class Toolbar_PopupButton_Toroidal extends HTMLElement {
       this.closePopup();
     });
 
-    // Add a global click listener to close the popup if clicked outside
+    // Close the popup when clicking outside of it
     document.addEventListener('click', (event) => {
-      if (this.isPopupOpen && !this.contains(event.target)) {
+      // Check if the click is outside the popup and not on the button itself
+      const clickedOutside = !popup.contains(event.target) && !button.contains(event.target);
+
+      if (this.isPopupOpen && clickedOutside) {
         this.closePopup();
       }
     });
@@ -701,14 +707,14 @@ class Toolbar_PopupButton_YinYang extends HTMLElement {
           left: 50%;
           transform: translate(-50%, -50%) scale(0); /* Start scaled down */
           width: 23vw;
-          height: 35vh; /* Increased height */
+          height: 39vh; /* Increased height */
           padding: 20px;
           background-color: white;
           border-radius: 15px; /* Rounded corners */
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
           z-index: 1000; /* Ensure it's on top */
           opacity: 0; /* Start fully transparent */
-          transition: opacity 0.1s ease, transform 0.s ease; /* Transition for opening/closing */
+          transition: opacity 0.1s ease, transform 0.1s ease; /* Transition for opening/closing */
         }
 
         .popup.show {
@@ -718,7 +724,8 @@ class Toolbar_PopupButton_YinYang extends HTMLElement {
         }
 
         .popup h2 {
-          margin: 0 0 20px 0;
+          margin: 0 0 1.5vh 0;
+          font-family: 'Inter', sans-serif;
         }
 
         /* Close button styling */
@@ -755,9 +762,7 @@ class Toolbar_PopupButton_YinYang extends HTMLElement {
       <div class="popup" id="popup">
         <button class="close-btn" id="close-btn">X</button>
         <h2>Set ${label} Parameters</h2>
-        <num-pts label="Number of Points (Ying)"></num-pts>
-        <num-pts label="Number of Points (Yang)"></num-pts>
-        <num-pts label="Radius"></num-pts>
+        <num-pts-yinyang></num-pts-yinyang>
       </div>
     `;
 
@@ -779,13 +784,16 @@ class Toolbar_PopupButton_YinYang extends HTMLElement {
       this.closePopup();
     });
 
-    // Add a global click listener to close the popup if clicked outside
+    // Close the popup when clicking outside of it
     document.addEventListener('click', (event) => {
-      if (this.isPopupOpen && !this.contains(event.target)) {
+      // Check if the click is outside the popup and not on the button itself
+      const clickedOutside = !popup.contains(event.target) && !button.contains(event.target);
+
+      if (this.isPopupOpen && clickedOutside) {
         this.closePopup();
       }
     });
-
+    
     // Stop event propagation on popup to avoid closing when clicking inside it
     popup.addEventListener('click', (event) => {
       event.stopPropagation();
@@ -829,4 +837,5 @@ customElements.define('toolbar-popup-button-mucovtwo', Toolbar_PopupButton_MuCov
 customElements.define('toolbar-popup-button-mucovfour', Toolbar_PopupButton_MuCovFour);
 customElements.define('toolbar-popup-button-toroidal', Toolbar_PopupButton_Toroidal);
 customElements.define('toolbar-popup-button-yinyang', Toolbar_PopupButton_YinYang);
+
 
