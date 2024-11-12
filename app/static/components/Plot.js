@@ -56,38 +56,149 @@ class Plot extends HTMLElement {
       // render the component to the webpage
       this.render();
 
+      // add event listener for when the website loads to create an empty
+      // plot
+      //
       window.addEventListener('DOMContentLoaded', () => {
-        this.examplePlot();
+        this.plot_empty();
+      })
+
+      // add an event listener for when a file is loaded to plot the data
+      //
+      window.addEventListener('file-loaded', (event) => {
+        this.plot(event.detail);
+      });
+
+      // event listener for resizing the plot
+      //
+      window.addEventListener('resize', () => {
+        const update = {
+          width: this.parentElement.clientWidth - 50,
+          height: this.parentElement.clientHeight - 50
+        };
+        Plotly.relayout(plotDiv, update);
       });
     }
     //
     // end of method
 
-    examplePlot() {
+    plot_empty() {
+      /*
+      method: Plot::plot+empty
+
+      args:
+       None
       
+      return:
+       None
+
+      desciption:
+       creates an empty plotly plot.
+      */
+
+      // get the plot div
+      //
       const plotDiv = this.querySelector('#plot');
 
-      const data = [
-        {
-          x: [0.1, 0.2, 0.3, 0.4, 0.5],
-          y: [0.1, 0.2, 0.3, 0.4, 0.5],
-          mode: 'markers',
-          type: 'scatter',
-          name: 'Class 1',
-          marker: { size: 5 },
-          hoverinfo: 'none'
+      // set configuration data
+      //
+      const config = {
+        displayLogo: false,
+        modeBarButtonsToRemove: ['zoom2d', 'select2d', 'lasso2d', 'toggleSpikelines', 
+                                 'hoverClosestCartesian', 'hoverCompareCartesian',
+                                 'autoScale2d'],
+        responsive: true,
+        showLink: false,
+        cursor: 'pointer'
+      };
+
+      // set layout data
+      //
+      const layout = {
+        autosize: true,
+        dragmode: false,
+        xaxis: {
+          range: [-1, 1],
+          dtick: 0.25,
+          zeroline: false,
+          showline: true,
         },
-        {
-          x: [-0.1, -0.2, -0.3, -0.4, -0.5],
-          y: [-0.1, -0.2, -0.3, -0.4, -0.5],
+        yaxis: {
+          range: [-1, 1],
+          dtick: 0.25,
+          zeroline: false,
+          showline: true,
+        },
+        margin: { 
+          t: 10,
+          b: 64, // this value perfectly makes the bottom margin equal to when the legend is there
+          l: 40,
+          r: 10
+        },
+        width: this.parentElement.clientWidth - 50,
+        height: this.parentElement.clientHeight - 50
+      };
+
+      // create the plot
+      //
+      Plotly.newPlot(plotDiv, [], layout, config);
+    }
+
+    plot(data) {
+      /*
+      method: Plot::plot
+
+      args:
+       data (Object): an object containing the data to plot.
+                      ex: 
+                          {
+                            labels: ['label1', 'label2'],
+                            x: [[1, 2, 3], [4, 5, 6]],
+                            y: [[1, 2, 3], [4, 5, 6]]
+                          }
+      
+      return:
+       None
+
+      desciption:
+       creates a plotly plot with the data provided.
+      */
+
+      // get the plot div
+      //
+      const plotDiv = this.querySelector('#plot');
+
+      // iterate over the data and create a trace for each label
+      //
+      let plot_data = []
+      for (let i = 0; i < data.labels.length; i++) {
+        const trace = {
+          x: data.x[i],
+          y: data.y[i],
           mode: 'markers',
-          type: 'scatter',
-          name: 'Class 2',
-          marker: { size: 5 },
+          type: 'scattergl',
+          name: data.labels[i],
+          marker: { size: 2 },
           hoverinfo: 'none'
         }
-      ];
 
+        plot_data.push(trace);
+      };
+
+      // set configuration data
+      //
+      const config = {
+        displayLogo: false,
+        modeBarButtonsToRemove: ['zoom2d', 'select2d', 'lasso2d', 'toggleSpikelines', 
+                                 'hoverClosestCartesian', 'hoverCompareCartesian',
+                                 'autoScale2d'],
+        responsive: true,
+        showLink: false,
+        cursor: 'pointer'
+      };
+
+      // set layout data
+      //
       const layout = {
         autosize: true,
         dragmode: false,
@@ -120,27 +231,12 @@ class Plot extends HTMLElement {
         height: this.parentElement.clientHeight - 50
       };
 
-      const config = {
-        displayLogo: false,
-        modeBarButtonsToRemove: ['zoom2d', 'select2d', 'lasso2d', 'toggleSpikelines', 
-                                 'hoverClosestCartesian', 'hoverCompareCartesian', 'pan2d',
-                                'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'],
-        responsive: true,
-        showLink: false,
-        cursor: 'pointer'
-      };
-
-      Plotly.newPlot(plotDiv, data, layout, config);
-
-      // event listener for resizing the plot
-      window.addEventListener('resize', () => {
-        const update = {
-          width: this.parentElement.clientWidth - 50,
-          height: this.parentElement.clientHeight - 50
-        };
-        Plotly.relayout(plotDiv, update);
-      });
+      // create the plot
+      //
+      Plotly.newPlot(plotDiv, plot_data, layout, config);
     }
+  //
+  // end of method
   
     render() {
       /*

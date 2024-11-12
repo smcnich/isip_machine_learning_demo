@@ -6,13 +6,13 @@ def imld_callback(name:str, *, status:float=None, data:dict=None, msg:str=None) 
     function: imld_callback
 
     args:
-     name (str)     : the name of the callback so the client can identify the return.
-     data (dict)    : a dictionary containing any pieces of data to be returned to the client.
+     name (str)    : the name of the callback so the client can identify the return.
+     data (dict)   : a dictionary containing any pieces of data to be returned to the client.
                       the client should know what to do with this data. the object will not be
                       modified before reaching the client.
-     msg (str)      : a descriptive message that will be returned to the client. should key the
+     msg (str)     : a descriptive message that will be returned to the client. should key the
                       client in on the status of the function.
-     status (float) : a float value representing the percentage of the function that has been
+     status (float): a float value representing the percentage of the function that has been
                       completed. this value should be between 0 and 1.
 
     returns:
@@ -27,10 +27,12 @@ def imld_callback(name:str, *, status:float=None, data:dict=None, msg:str=None) 
     '''
 
     # the function logic will be improved in the future
+    #
     print(f"Status Update: [{name}] {msg} ({status*100}%)")
 
+    # exit gracefully
+    #
     return True
-
 #
 # end of function
     
@@ -40,12 +42,12 @@ def create_model(alg_name:str, *, params=None) -> mlt.Alg:
 
     args:
      alg_name (str): the name of the algorithm to use in the model
-     params (dict): a dictionary containing the parameters for the
-                    algorithm. see ML Tools line 135 for an example.
-                    [optional]
+     params (dict) : a dictionary containing the parameters for the
+                      algorithm. see ML Tools line 135 for an example.
+                      [optional]
 
     return:
-     mlt.Alg: the ML Tools object that was created
+     mlt.Alg       : the ML Tools object that was created
     '''
 
     # create an instance of a ML Tools algorithm
@@ -72,6 +74,38 @@ def create_model(alg_name:str, *, params=None) -> mlt.Alg:
 #
 # end of function
 
+def generate_data(dist_name:str, params:dict):
+    '''
+    function: generate_data
+
+    arguments:
+     dist_name (str) : name of the distribution to generate data from
+     params (dict)   : the parameters for the distribution
+
+    return:
+     mltd.MLToolsData: a MLToolsData object populated with the data from the distribution
+     X (list)        : the data generated from the distribution
+     y (list)        : the labels generated from the distribution
+    
+    description:
+     generate a MLToolsData object given a distribution name and the parameters
+    '''
+
+    # create a ML Tools data object using the class method
+    #
+    data = mltd.MLToolsData.generate_data(dist_name, params)
+
+    # get the data and labels from the ML Tools data object
+    #
+    X = data.data
+    y = data.labels
+
+    # exit gracefully
+    #
+    return data, X, y
+#
+# end of function
+
 # TODO: create the wrapper to train an algorithm, given data. make sure to
 #       include error checking. see nedc_ml_tools.py line 1478.
 def train(model:mlt.Alg, data:mltd.MLToolsData):
@@ -79,21 +113,27 @@ def train(model:mlt.Alg, data:mltd.MLToolsData):
     function: train
 
     args:
-     model (mlt.Alg): the ML Tools algorithm to train
+     model (mlt.Alg)        : the ML Tools algorithm to train
      data (mltd.MLToolsData): the data to train the model on
 
     return:
-     model (dict): a dictionary containing the model (data dependent)
-     score (float): a float value containing a measure of the goodness of fit
-     train_labels (np.ndarray): the predicted labels created during training
-                                evaluation
+     model (mlt.Alg)        : the trained model
+     stats (dict)           : a dictionary of covariance, means and priors
+     score (float)          : f1 score
 
      description:
       train a ML Tools model on a given set of data. The data must be in the
       MLToolData class. Return the trained model, a goodness of fit score, a
       the labels generated while calculating the goodness of fit score.    
     '''
-    return
+
+    # train the model and get the model stats and f1 score
+    #
+    stats, score = model.train(data)
+
+    # exit gracefully
+    #
+    return model, stats, score
 #
 # end of function
 
@@ -104,11 +144,12 @@ def predict(model:mlt.Alg, data:mltd.MLToolsData):
     function: predict
 
     args:
-     model (mlt.Alg): the ML Tools trained model to use for predictions
+     model (mlt.Alg)        : the ML Tools trained model to use for predictions
      data (mltd.MLToolsData): the data to predict
 
     return:
-     labels (list): a list of the predicted labels.
+     model (mlt.Alg)        : the trained model
+     labels (list)          : a list of the predicted labels.
      posteriors (np.ndarray): a float numpy vector with the posterior 
                               probability for each class assignment.
 
@@ -117,7 +158,14 @@ def predict(model:mlt.Alg, data:mltd.MLToolsData):
      of the labels given to each index of the unseen data, and posterior
      probabilities of each class assignment for each index of the array
     '''
-    return
+
+    # predict the labels of the data
+    #
+    labels, posteriors = model.predict(data)
+
+    # exit gracefully
+    #
+    return model, labels, posteriors
 #
 # end of function
 

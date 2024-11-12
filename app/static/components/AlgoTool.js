@@ -253,6 +253,7 @@ class AlgoTool extends HTMLElement {
             flex-direction: row;
             justify-content: space-between;
             align-items: center;
+            margin-left: 1em;
           }
 
           div.label-container > info-icon {
