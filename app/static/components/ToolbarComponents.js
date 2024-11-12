@@ -569,7 +569,7 @@ class Toolbar_OpenFileButton extends HTMLElement {
 
   render() {
     const label = this.getAttribute('label') || 'Button'; // Get the label from the attribute
-    
+
     this.shadowRoot.innerHTML = `
       <style>
         .toolbar-openfile-button {
@@ -596,6 +596,7 @@ class Toolbar_OpenFileButton extends HTMLElement {
     //
     const button = this.shadowRoot.querySelector('.toolbar-openfile-button');
     button.addEventListener('click', () => {
+      this.plotId = this.getAttribute('plotId');
       this.fileInput.click()
     });
   }
@@ -678,6 +679,7 @@ class Toolbar_OpenFileButton extends HTMLElement {
         //
         window.dispatchEvent(new CustomEvent('file-loaded', {
           detail: {
+            plotId: this.plotId,
             labels: labels,
             x: x,
             y: y

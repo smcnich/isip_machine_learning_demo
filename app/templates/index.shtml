@@ -88,7 +88,7 @@
         <h3 class="card-title">Train</h3>
         <info-icon></info-icon>
       </div>
-      <plot-card></plot-card>
+      <plot-card plotId="train"></plot-card>
      </div>    
 
      <!---------------------- define a card for the eval plot -------------------->
@@ -97,7 +97,7 @@
         <h3 class="card-title">Eval</h3>
         <info-icon></info-icon>
       </div>
-      <plot-card></plot-card>
+      <plot-card plotId="eval"></plot-card>
      </div>
 
 
