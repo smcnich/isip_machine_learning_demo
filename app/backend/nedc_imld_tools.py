@@ -1,5 +1,10 @@
+import numpy as np
+
 import nedc_ml_tools as mlt
 import nedc_ml_tools_data as mltd
+from nedc_file_tools import load_parameters
+
+
 
 def imld_callback(name:str, *, status:float=None, data:dict=None, msg:str=None) -> bool:
     '''
@@ -95,14 +100,27 @@ def generate_data(dist_name:str, params:dict):
     #
     data = mltd.MLToolsData.generate_data(dist_name, params)
 
-    # get the data and labels from the ML Tools data object
+    # get the labels from the data
     #
-    X = data.data
-    y = data.labels
+    labels = set(data.labels)
+    
+    # get the indexes of each class
+    #
+    class_idxs = []
+    for label in labels:
+        class_idxs.append(np.where(data.labels == label))
+
+    # format the data into a list of lists. each entry into the list
+    # will be the data for a single class
+    #
+    X, y = [], []
+    for idx in class_idxs:
+        X.append(data.data[idx])
+        y.append(data.labels[idx])
 
     # exit gracefully
     #
-    return data, X, y
+    return list(labels), X, y
 #
 # end of function
 
@@ -199,6 +217,35 @@ def score(num_classes:int, data:mltd.MLToolsData, hyp_labels:list):
     return
 #
 # end of function
+
+def load_alg_params(pfile:str) -> dict:
+    '''
+    function: load_alg_params
+
+    args:
+     pfile (str): the file to load the algorithm parameters from
+     algo (str) : the name of the algorithm to load the parameters
+
+    return:
+     params (dict): a dictionary of the algorithm parameters
+
+    description:
+     load the algorithm parameters from a file and return them as a dictionary
+    '''
+
+    # load the algorithm parameters from the file
+    #
+    algs = load_parameters(pfile, "ALGS")["ALGS"]
+
+    # get the parameters for each algorithm
+    #
+    params = {}
+    for alg in algs:
+        params[alg] = load_parameters(pfile, alg) 
+
+    # exit gracefully
+    #
+    return params
 
 # TODO: [Optional for Sprint 3] create a function that generates the decision surface
 #       for a model. Base it on the prep_decision_surface, predict_decision_surface, and
