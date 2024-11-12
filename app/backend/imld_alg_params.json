@@ -1,0 +1,67 @@
+{
+    "PCA" : {
+        "name": "Principal Component Analysis",
+        "params": {
+            "prior": {
+                "name": "Prior",
+                "type": "select",
+                "options": ["ml", "map"],
+                "default": "ml"
+            },
+            "ctype": {
+                "name": "Covariance Type",
+                "type": "select",
+                "options": ["full", "diagonal"],
+                "default": "full"
+            },
+            "center": {
+                "name": "Center",
+                "type": "select",
+                "options": ["none", "tied", "untied"],
+                "default": "none" 
+            },
+            "scale": {
+                "name": "Scale",
+                "type": "select",
+                "options": ["none", "biased", "unbiased", "empirical"],
+                "default": "none" 
+            },
+            "n_components": {
+                "name": "Number of Components",
+                "type": "int",
+                "range": [0, 2],
+                "default": 2
+            }
+        }
+    },
+
+    "KMEANS" : {
+        "name": "K-Means",
+        "params": {
+            "n_cluster": {
+                "name": "Number of Clusters",
+                "type": "int",
+                "range": [1, "inf"],
+                "default": 8
+            },
+            "n_init": {
+                "name": "Number of Initializations",
+                "type": "int",
+                "range": [1, "inf"],
+                "default": 3
+            },
+            "random_state": {
+                "name": "Random State",
+                "type": "int",
+                "range": [0, "inf"],
+                "default": 0
+            },
+            "max_iter": {
+                "name": "Maximum Iterations",
+                "type": "int",
+                "range": [1, "inf"],
+                "default": 100
+            }
+        }
+    }
+}

@@ -47,6 +47,9 @@
   <script src="static/components/ToolbarComponents.js"></script>
   <script src="static/components/ToolbarPopup.js"></script>
   <script src="static/components/DataForm.js"></script>
+  <script>
+   let plotInfo = {labels: []};
+  </script>
 
  </head>
  <style>

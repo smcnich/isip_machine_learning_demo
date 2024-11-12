@@ -171,6 +171,8 @@ class Plot extends HTMLElement {
       //
       const plotDiv = this.querySelector('#plot');
 
+      document.customProperty
+
       // iterate over the data and create a trace for each label
       //
       let plot_data = []
@@ -237,6 +239,10 @@ class Plot extends HTMLElement {
       // create the plot
       //
       Plotly.newPlot(plotDiv, plot_data, layout, config);
+
+      // input the plot labels so other componenets can access them
+      //
+      plotInfo.labels = data.labels;
     }
   //
   // end of method
@@ -280,4 +286,6 @@ class Plot extends HTMLElement {
   // end of class
 
   // Register the custom element so it can be used in the wepage HTML
-  customElements.define('plot-card', Plot); 
+  //
+  customElements.define('plot-card', Plot);
+  
