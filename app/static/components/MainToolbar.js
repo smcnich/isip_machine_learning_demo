@@ -284,8 +284,8 @@ class MainToolbar extends HTMLElement {
         <div class="menu">
           <button class="menubutton">File</button>
           <div class="dropdown">
-            <toolbar-openfile-button label="Load Train Data"></toolbar-openfile-button>
-            <toolbar-openfile-button label="Load Eval Data"></toolbar-openfile-button>
+            <toolbar-openfile-button label="Load Train Data" plotId="train"></toolbar-openfile-button>
+            <toolbar-openfile-button label="Load Eval Data" plotId="eval"></toolbar-openfile-button>
             <div class="separator"></div>
             <toolbar-savefile-button label="Save Train As..."></toolbar-savefile-button>
             <toolbar-savefile-button label="Save Eval As..."></toolbar-savefile-button>

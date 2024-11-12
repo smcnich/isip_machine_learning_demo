@@ -55,6 +55,7 @@ class Plot extends HTMLElement {
 
       // render the component to the webpage
       this.render();
+      this.plotId = this.getAttribute('plotId');
 
       // add event listener for when the website loads to create an empty
       // plot
@@ -66,7 +67,9 @@ class Plot extends HTMLElement {
       // add an event listener for when a file is loaded to plot the data
       //
       window.addEventListener('file-loaded', (event) => {
-        this.plot(event.detail);
+        if(event.detail.plotId == this.plotId) {
+          this.plot(event.detail);
+        }
       });
 
       // event listener for resizing the plot
@@ -76,7 +79,7 @@ class Plot extends HTMLElement {
           width: this.parentElement.clientWidth - 50,
           height: this.parentElement.clientHeight - 50
         };
-        Plotly.relayout(plotDiv, update);
+        Plotly.relayout(update);
       });
     }
     //
