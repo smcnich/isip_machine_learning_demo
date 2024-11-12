@@ -1,42 +1,42 @@
 class ShareBtn extends HTMLElement {
     /*
-    class: Template
+    class: ShareBtn
 
     description:
-     This class is meant to act as a template for creating custom web components.
-     It extends the HTMLElement class and creates a shadow root for encapsulation.
+     This class defines a custom web component for a "Share" button with an icon and text.
+     It extends HTMLElement and uses a shadow root for encapsulation, ensuring styles and
+     markup are scoped to the component. This component serves as a template for creating 
+     other reusable custom elements by simply updating the content as needed.
 
-     If you want to create a new component, copy this template and make your component
-     with it. Just change the name of the class and the name of the file to match the
-     name of your component. Also, make sure to change the name of the custom element
-     at the end of this file.
-
-     Feel free to add any additional methods or properties to your component as needed.
+     If creating a new component, duplicate this template, rename the class and file 
+     accordingly, and adjust the `customElements.define` statement.
     */
 
     constructor() {
       /*
-      method: Template::constructor
+      method: ShareBtn::constructor
 
       args:
        None
 
       returns:
-       Template instance
+       ShareBtn instance
 
       description:
-       This is the constructor for the Template class. It initializes the component 
-       and creates a shadow root. It gets the HTML and CSS for the component that
-       should be in the same directory as this file.
+       Initializes the ShareBtn component, creating a shadow root for encapsulated styles
+       and markup, and stores the component name in a `name` property.
       */
 
       // Call the parent constructor (HTMLElement)
+      //
       super();
 
       // Create a shadow root for the component
+      //
       this.attachShadow({ mode: 'open' });
 
-      // get the name of the class
+      // Set the component's name property
+      //
       this.name = this.constructor.name;
     }
     //
@@ -44,7 +44,7 @@ class ShareBtn extends HTMLElement {
   
     async connectedCallback() {
       /*
-      method: Template::connectedCallback
+      method: ShareBtn::connectedCallback
 
       args:
        None
@@ -53,10 +53,12 @@ class ShareBtn extends HTMLElement {
        None
 
       description:
-       This method is called when the component is added to the DOM.
+       Called when the component is added to the DOM, triggering the `render` method to
+       inject the HTML and CSS into the shadow root.
       */
 
-      // render the component to the webpage
+      // Render the component to the webpage
+      //
       this.render();
     }
     //
@@ -64,7 +66,7 @@ class ShareBtn extends HTMLElement {
   
     render() {
       /*
-      method: Template::render
+      method: ShareBtn::render
       
       args:
        None
@@ -73,15 +75,16 @@ class ShareBtn extends HTMLElement {
        None
 
       description:
-       This method renders the component to the webpage by setting the innerHTML of the
-       shadow root to what is in the string below.
+       Renders the HTML and CSS for the ShareBtn component by setting the shadow root's
+       `innerHTML`. This defines the layout and appearance of the component.
       */
 
-       // WRITE YOUR HTML AND CSS HERE
+      // Define the HTML structure and CSS styles for the component
+      //
       this.shadowRoot.innerHTML = `
         <style>
 
-          /* Add your CSS styles here */
+          /* Basic styling for the component container */
           div {
             display: flex;
             flex-direction: row;
@@ -89,11 +92,13 @@ class ShareBtn extends HTMLElement {
             transition: filter 0.3s ease;
           }
 
+          /* Adds shadow and pointer cursor on hover */
           div:hover {
             filter: drop-shadow(3px 3px 3px rgb(65, 65, 65));
             cursor: pointer;
           }
         
+          /* Styling for the text inside the button */
           div h2 {
             color: var(--secondary-color);
             font-family: 'Inter', sans-serif;
@@ -102,6 +107,7 @@ class ShareBtn extends HTMLElement {
             margin-right: 10px;
           }
           
+          /* Icon styling within the button */
           div img {
             width: 20px;
             height: 20px;
@@ -109,6 +115,7 @@ class ShareBtn extends HTMLElement {
 
         </style>
 
+        <!-- Component structure: contains a heading and an icon -->
         <div>
           <h2>Share</h2>
           <img src="static/icons/share.svg" alt="share">
@@ -118,9 +125,10 @@ class ShareBtn extends HTMLElement {
     //
     // end of method
   
-  }
-  //
-  // end of class
+}
+//
+// end of class
 
-  // Register the custom element so it can be used in the wepage HTML
-  customElements.define('share-btn', ShareBtn); 
+// Register the custom element
+//
+customElements.define('share-btn', ShareBtn); 
