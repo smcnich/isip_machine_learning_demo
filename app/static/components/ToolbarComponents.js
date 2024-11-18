@@ -640,49 +640,38 @@ class Toolbar_OpenFileButton extends HTMLElement {
         const rows = text.split("\n")
                      .filter(row => !row.trim().startsWith("#"))             
                      .map(row => row.split(","));
-                    
-        // Create an object to store grouped data
-        //
-        const groupedData = {};
     
         // Iterate over the rows and group data by labels
         //
+        let x = [];
+        let y = [];
+        let labels = [];
         rows.forEach(row => {
-    
-          // get the label, x value, and y value from the row
+
+          // make sure the row is not empty
           //
-          const label = row[0];
-          const xValue = parseFloat(row[1]);
-          const yValue = parseFloat(row[2]);
+          if (row[0] != '') {
     
-          // If the label does not exist in the grouped data object, create it
-          //
-          if (!groupedData[label]) {
-            groupedData[label] = { x: [], y: [] };
+            // get the label, x value, and y value from the row
+            //
+            labels.push(row[0]);
+            x.push(parseFloat(row[1]));
+            y.push(parseFloat(row[2]));
           }
-    
-          // Add the x and y values to the grouped data object
-          //
-          groupedData[label].x.push(xValue);
-          groupedData[label].y.push(yValue);
         });
-    
-        // Convert grouped data into arrays for labels, x, and y
-        //
-        const labels = Object.keys(groupedData);
-        const x = labels.map(label => groupedData[label].x);
-        const y = labels.map(label => groupedData[label].y);
     
         // Dispatch a custom event with the loaded file data
         // the Plot.js component will be listening for this event.
         // When the event is dispatched, the Plot.js component will plot the data.
         //
-        window.dispatchEvent(new CustomEvent('file-loaded', {
+        window.dispatchEvent(new CustomEvent('fileLoaded', {
           detail: {
             plotId: this.plotId,
-            labels: labels,
-            x: x,
-            y: y
+            data: {
+              labels: labels,
+              x: x,
+              y: y
+            }
           }
         }));
       };
@@ -705,7 +694,7 @@ class Toolbar_SaveFileButton extends HTMLElement {
     }
   
     render() {
-      const label = this.getAttribute('label') || 'Save File'; // Get the label from the attribute
+      const label = this.getAttribute('label') || 'Save File'; // Get the label from the attribute'
       
       this.shadowRoot.innerHTML = `
         <style>
@@ -734,28 +723,91 @@ class Toolbar_SaveFileButton extends HTMLElement {
       // Add click event listener to the button to trigger the save file dialog
       const button = this.shadowRoot.querySelector('.toolbar-openfile-button');
       button.addEventListener('click', () => {
+        this.plotId = this.getAttribute('plotId');
         this.openSaveFileDialog(); // Call openSaveFileDialog on button click
       });
     }
   
     async openSaveFileDialog() {
       try {
-        const options = {
-          suggestedName: 'myfile.txt', // Default filename
-          types: [
-            {
-              description: 'Text Files',
-              accept: { 'text/plain': ['.txt'] }, // Accept text files
-            },
-          ],
-        };
-  
-        const handle = await window.showSaveFilePicker(options); // Open save file dialog
-        const writable = await handle.createWritable(); // Create a writable stream
-        await writable.write('Hello, world!'); // Write data to the file (example)
-        await writable.close(); // Close the stream
-        console.log('File saved:', handle.name);
-      } catch (err) {
+
+        // create an event to get the data from the Plot.js component
+        //
+        window.dispatchEvent(new CustomEvent('getData', {
+          detail: {
+            ref: this,
+            plotId: this.plotId
+          }
+        }));
+
+        // write the csv row for each sample
+        //
+        let x, y, label;
+        let text = '';
+        for (let i = 0; i < this.data.labels.length; i++) {
+          label = this.data.labels[i];
+          x = this.data.x[i];
+          y = this.data.y[i];
+          
+          text += `${label}, ${x}, ${y}\n`;
+        }
+
+        /*
+        raw browser JavaScript cannot write files to the user's computer
+        due to security restrictions. additional libraries would need to
+        be used. below is a roundabout way to save
+        files to the users computer using a Blob object and a dummy link.
+        unfortunately, due to the restrictions the user will not be able
+        to choose the file name and where to save the file. the file will
+        be saved to the default download location set by the browser. the
+        below is taken from the following stackoverflow post:
+
+        https://stackoverflow.com/questions/2048026/open-file-dialog-box-in-javascript
+        */
+
+        // create an object that will hold the link to the CSV file
+        //
+        let textFile;
+
+        // create a Blob object from the text that will be stored at
+        // the link
+        //
+        let blob = new Blob([text], {type: 'text/csv'});
+
+        // If we are replacing a previously generated file we need to
+        // manually revoke the object URL to avoid memory leaks.
+        //
+        if (textFile !== null) {
+          window.URL.revokeObjectURL(textFile);
+        }
+
+        // create a download URL for the blob (csv file)
+        //
+        textFile = window.URL.createObjectURL(blob);
+
+        // create a link element and add a download attribute
+        // connect the href to the download URL
+        // append the link to the document body
+        // this link is never displayed on the page.
+        // it acts as a dummy link that starts a download
+        //
+        var link = document.createElement('a');
+        link.setAttribute('download', `imld_${this.plotId}.csv`);
+        link.href = textFile;
+        document.body.appendChild(link);
+
+        // wait for the link to be added to the document
+        // then simulate a click event on the link
+        // the dummy link created above will start the download
+        // when a click event is dispatched
+        //
+        window.requestAnimationFrame(function () {
+          var event = new MouseEvent('click');
+          link.dispatchEvent(event);
+          document.body.removeChild(link);
+        }); 
+      } 
+      catch (err) {
         console.error('Error saving file:', err);
       }
     }

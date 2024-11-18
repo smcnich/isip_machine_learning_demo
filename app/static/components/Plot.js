@@ -59,6 +59,25 @@ class Plot extends HTMLElement {
     this.render();
     this.plotId = this.getAttribute('plotId');
 
+    window.addEventListener('getData', (event) => {
+
+      // if the plotId is not the same as this plotId, return nothing
+      //
+      const plotId = event.detail.plotId;
+      if (plotId != this.plotId) {
+        return;
+      }
+
+      // get the event sender so the data can be sent back to the correct component
+      //
+      const sender = event.detail.ref;
+
+      // save the data to the sender (Toolbar_SaveFileButton), to it can be saved to a
+      // csv
+      //
+      sender.data = this.data;
+    });
+
     // Add event listener to create an empty plot when the website loads
     //
     window.addEventListener('DOMContentLoaded', () => {
@@ -67,9 +86,9 @@ class Plot extends HTMLElement {
 
     // Add event listener to plot data when a file is loaded
     //
-    window.addEventListener('file-loaded', (event) => {
+    window.addEventListener('fileLoaded', (event) => {
       if(event.detail.plotId == this.plotId) {
-        this.plot(event.detail);
+        this.plot(event.detail.data);
       }
     });
 
@@ -82,9 +101,57 @@ class Plot extends HTMLElement {
       };
       Plotly.relayout(update);
     });
+
   }
   //
   // end of method
+
+  createTraces(data) {
+
+    // make the all the data labels are the same
+    //
+    if ((data.labels.length != data.x.length) ||
+        (data.x.length != data.y.length) || 
+        (data.y.length != data.labels.length)) {
+          
+          return null;
+    }
+
+    // iterate over each value in the data and create a trace for each label
+    //
+    let traces = {};
+    for (let i = 0; i < data.labels.length; i++) {
+      
+      // get the label of the index
+      //
+      let label = data.labels[i]
+
+      // if the label is not a already created
+      //
+      if (!(label in traces)) {
+
+        traces[label] = {
+          x: [],
+          y: [],
+          mode: 'markers',
+          type: 'scattergl',
+          name: label,
+          marker: { size: 2 },
+          hoverinfo: 'none'
+        }
+      }
+
+      // add the x and y values to the trace
+      //
+      traces[label].x.push(data.x[i]);
+      traces[label].y.push(data.y[i]);
+    }
+
+    // convert the object of objects tob an array of objects
+    // then return
+    //
+    return Object.values(traces);
+  }
 
   plot_empty() {
     /*
@@ -99,6 +166,10 @@ class Plot extends HTMLElement {
     desciption:
      creates an empty plotly plot.
     */
+
+    // save the data to as null because the plot is empty
+    //
+    this.data = null;
 
     // Get the plot div element
     //
@@ -156,9 +227,9 @@ class Plot extends HTMLElement {
      data (Object): an object containing the data to plot.
                     ex: 
                         {
-                          labels: ['label1', 'label2'],
-                          x: [[1, 2, 3], [4, 5, 6]],
-                          y: [[1, 2, 3], [4, 5, 6]]
+                          labels: ['label1', 'label1', 'label2', ...],
+                          x: [1, 2, 3, 4, 5, 6, ...],
+                          y: [1, 2, 3, 4, 5, 6, ...]
                         }
     
     return:
@@ -168,26 +239,18 @@ class Plot extends HTMLElement {
      creates a plotly plot with the data provided.
     */
 
+    // save the data to the component so it can be saved to a file
+    // or sent to the backend
+    //
+    this.data = data;
+
     // Get the plot div element
     //
     const plotDiv = this.querySelector('#plot');
 
     // Prepare plot data by creating a trace for each label
     //
-    let plot_data = []
-    for (let i = 0; i < data.labels.length; i++) {
-      const trace = {
-        x: data.x[i],
-        y: data.y[i],
-        mode: 'markers',
-        type: 'scattergl',
-        name: data.labels[i],
-        marker: { size: 2 },
-        hoverinfo: 'none'
-      }
-
-      plot_data.push(trace);
-    };
+    const plotData = this.createTraces(this.data);
 
     // Set configuration data for Plotly
     //
@@ -237,7 +300,7 @@ class Plot extends HTMLElement {
 
     // Create the plot with data
     //
-    Plotly.newPlot(plotDiv, plot_data, layout, config);
+    Plotly.newPlot(plotDiv, plotData, layout, config);
   }
 //
 // end of method
@@ -273,6 +336,8 @@ class Plot extends HTMLElement {
 
       <div id="plot"></div>
     `;
+
+
   }
   //
   // end of method
