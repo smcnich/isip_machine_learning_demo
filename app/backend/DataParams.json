@@ -1,0 +1,420 @@
+{
+  "two_gaussian": {
+    "name": "Two Gaussian",
+    "params": {
+      "num_pts": {
+        "name": "Number of Points",
+        "type": "input",
+        "dimensions": "1,1",
+        "default": [10000]
+      },
+      "mucov1": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mu1": {
+            "name": "Mean (1st)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [-0.5, 0.5]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.025, 0, 0, 0.025]
+          }
+        }
+      },
+      "mucov2": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mu2": {
+            "name": "Mean (2nd)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [0.5, -0.5]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.025, 0, 0, 0.025]
+          }
+        }
+      }
+    }
+  },
+  "four_gaussian": {
+    "name": "Four Gaussian",
+    "params": {
+      "num_pts": {
+        "name": "Number of Points",
+        "type": "input",
+        "dimensions": "1,1",
+        "default": [10000]
+      },
+      "mucov1": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mu1": {
+            "name": "Mean (1st)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [-0.5, 0.5]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.025, 0, 0, 0.025]
+          }
+        }
+      },
+      "mucov2": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mu2": {
+            "name": "Mean (2nd)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [0.5, -0.5]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.025, 0, 0, 0.025]
+          }
+        }
+      },
+      "mucov3": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mu1": {
+            "name": "Mean (1st)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [-0.5, -0.5]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.025, 0, 0, 0.025]
+          }
+        }
+      },
+      "mucov4": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mu2": {
+            "name": "Mean (2nd)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [0.5, 0.5]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.025, 0, 0, 0.025]
+          }
+        }
+      }
+    }
+  },
+  "overlapping_gaussian": {
+    "name": "Overlapping Gaussian",
+    "params": {
+      "num_pts": {
+        "name": "Number of Points",
+        "type": "input",
+        "dimensions": "1,1",
+        "default": [10000]
+      },
+      "mucov1": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mu1": {
+            "name": "Mean (1st)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [-0.14, 0.14]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.025, 0, 0, 0.025]
+          }
+        }
+      },
+      "mucov2": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mu2": {
+            "name": "Mean (2nd)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [0.14, 0.14]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.025, 0, 0, 0.025]
+          }
+        }
+      }
+    }
+  },
+  "two_ellipses": {
+    "name": "Two Ellipses",
+    "params": {
+      "num_pts": {
+        "name": "Number of Points",
+        "type": "input",
+        "dimensions": "1,1",
+        "default": [10000]
+      },
+      "mucov1": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mu1": {
+            "name": "Mean (1st)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [-0.5, 0.5]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.0333, 0, 0, 0.0043]
+          }
+        }
+      },
+      "mucov2": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mu2": {
+            "name": "Mean (2nd)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [0.5, -0.5]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.0333, 0, 0, 0.0043]
+          }
+        }
+      }
+    }
+  },
+  "four_ellipses": {
+    "name": "Four Ellipses",
+    "params": {
+      "num_pts": {
+        "name": "Number of Points",
+        "type": "input",
+        "dimensions": "1,1",
+        "default": [10000]
+      },
+      "mucov1": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mu1": {
+            "name": "Mean (1st)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [-0.5, 0.5]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.0333, 0, 0, 0.0043]
+          }
+        }
+      },
+      "mucov2": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mu2": {
+            "name": "Mean (2nd)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [0.5, -0.5]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.0333, 0, 0, 0.0043]
+          }
+        }
+      },
+      "mucov3": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mu1": {
+            "name": "Mean (1st)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [-0.5, -0.5]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.0333, 0, 0, 0.0043]
+          }
+        }
+      },
+      "mucov4": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mu2": {
+            "name": "Mean (2nd)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [0.5, 0.5]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.0333, 0, 0, 0.0043]
+          }
+        }
+      }
+    }
+  },
+  "rotated_ellipses": {
+    "name": "Rotated Ellipses",
+    "params": {
+      "num_pts": {
+        "name": "Number of Points",
+        "type": "input",
+        "dimensions": "1,1",
+        "default": [10000]
+      },
+      "mucov1": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mu1": {
+            "name": "Mean (1st)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [-0.5, 0.5]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.0333, 0, 0, 0.0043]
+          }
+        }
+      },
+      "mucov2": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mu2": {
+            "name": "Mean (2nd)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [0.5, -0.5]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.0043, 0, 0, 0.0333]
+          }
+        }
+      }
+    }
+  },
+  "toroidal": {
+    "name": "Toroidal",
+    "params": {
+      "num_pts": {
+        "name": "Number of Points",
+        "type": "input",
+        "dimensions": "1,1",
+        "default": [10000]
+      },
+      "num_pts_ring": {
+        "name": "Number of Points (Ring)",
+        "type": "input",
+        "dimensions": "1,1",
+        "default": [2000]
+      },
+      "inner_outer_radius": {
+        "name": "Inner and Outer Radius (Ring)",
+        "type": "input",
+        "dimensions": "1,2",
+        "default": [0.650, 0.85]
+      },
+      "mucov1": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mu1": {
+            "name": "Mean (1st)",
+            "type": "input",
+            "dimensions": "2,1",
+            "default": [0.0, 0.0]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "input",
+            "dimensions": "2,2",
+            "default": [0.0083, 0, 0, 0.0083]
+          }
+        }
+      }
+    }
+  },
+  "yin_yang": {
+    "name": "Yin Yang",
+    "params": {
+      "num_pts_yin": {
+        "name": "Number of Points (Yin)",
+        "type": "input",
+        "dimensions": "1,1",
+        "default": [2000]
+      },
+      "num_pts_yang": {
+        "name": "Number of Points (Yang)",
+        "type": "input",
+        "dimensions": "1,1",
+        "default": [2000]
+      },
+      "radius": {
+        "name": "Radius",
+        "type": "input",
+        "dimensions": "1,1",
+        "default": [2]
+      }
+    }
+  }
+}

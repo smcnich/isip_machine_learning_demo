@@ -65,6 +65,8 @@ class MainToolbar extends HTMLElement {
      the component to close any open dropdowns.
     */
 
+     await this.loadJSONData();
+
     // Render the component to the webpage
     //
     this.render();
@@ -80,6 +82,16 @@ class MainToolbar extends HTMLElement {
   //
   // end of method
 
+  async loadJSONData() {
+    try {
+      const response = await fetch('/api/get_data_params');  // Adjust the URL to your endpoint
+      const jsonText = await response.json();  // Use .json() instead of .text() for JSON parsing
+      this.jsonData = jsonText;  // Store the data directly
+    } catch (error) {
+      this.jsonData = {};  // Fallback in case of error
+      console.error("Error loading JSON data:", error);
+    }
+  }  
 
   disconnectedCallback() {
     /*
@@ -227,6 +239,10 @@ class MainToolbar extends HTMLElement {
       This method renders the component to the webpage by setting the innerHTML of the
       shadow root to what is in the string below.
     */
+
+    const dataButtons = Object.entries(this.jsonData).map(([key, value]) => {
+      return `<data-button label="${value.name}" key="${key}"></data-button>`;
+    }).join("");
 
     // Set the inner HTML of the shadow root with toolbar structure, menu items, and dropdowns
     //
@@ -383,14 +399,7 @@ class MainToolbar extends HTMLElement {
         <div class="menu">
           <button class="menubutton">Data</button>
           <div class="dropdown">
-            <toolbar-dropdown-data label="Two Gaussian" layout="mucovtwo" shape="two-gaussian"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Four Gaussian" layout="mucovfour" shape="four-gaussian"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Overlapping Gaussian" layout="mucovtwo" shape="overlapping-gaussian"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Two Ellipses" layout="mucovtwo" shape="two-ellipses"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Four Ellipses" layout="mucovfour" shape="four-ellipses"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Rotated Ellipses" layout="mucovtwo" shape="rotated-ellipses"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Toroidal" layout="toroidal"></toolbar-dropdown-data>
-            <toolbar-dropdown-data label="Yin Yang" layout="yinyang"></toolbar-dropdown-data>
+            ${dataButtons}
           </div>
         </div>
 

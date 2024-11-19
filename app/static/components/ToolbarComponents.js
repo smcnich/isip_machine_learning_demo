@@ -246,181 +246,6 @@ class Toolbar_DropdownClear extends HTMLElement {
     }
 }
 
-class Toolbar_DropdownData extends HTMLElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: 'open' });
-    }
-  
-    connectedCallback() {
-      this.render();
-      this.addHoverListeners();
-    }
-  
-    render() {
-      const label = this.getAttribute('label') || 'Button'; // Get the label from the attribute
-      const layoutType = this.getAttribute('layout') || 'mucovtwo'; // Dynamically choose the layout
-      const shape = this.getAttribute('shape');
-
-      this.shadowRoot.innerHTML = `
-        <style>
-          .toolbar-item {
-            position: relative; /* Anchor point for the dropdown menu */
-            display: inline-block; /* Keep button and dropdown aligned per instance */
-          }
-
-          .toolbar-button {
-            background-color: white;
-            color: black;
-            font-family: 'Inter', sans-serif;
-            font-weight: 100;
-            font-size: 1em;
-            padding: 5px 30px;
-            border: none;
-            cursor: pointer;
-            min-width: 220px;
-            width: 100%;
-            white-space: nowrap;
-            text-align: left;
-          }
-
-          .toolbar-button::after {
-            content: '';
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            border-width: 5px;
-            border-style: solid;
-            border-color: transparent transparent transparent black;
-          }
-
-          .toolbar-button:hover,
-          .toolbar-button.active {
-            background-color: #c9c9c9;
-          }
-
-          .header {
-            color: black;
-            font-family: 'Inter', sans-serif;
-            font-weight: bold;
-            font-size: 1em;
-            padding: 5px 30px;
-            margin: 0;
-            white-space: nowrap;
-            cursor: default;
-          }
-
-          .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: calc(100% + 0.7px); /* Align to the right of the toolbar-item container */
-            background-color: white;
-            z-index: 1000;
-            min-width: 150px;
-            border: 1px solid #ccc;
-          }
-
-          .dropdown-menu.show {
-            display: block;
-          }
-
-          .dropdown-item {
-            background-color: white;
-            color: black;
-            font-family: 'Inter', sans-serif;
-            font-weight: 100;
-            font-size: 1em;
-            padding: 5px 20px;
-            cursor: pointer;
-            white-space: nowrap;
-            text-align: left;
-          }
-
-          .dropdown-item:hover {
-            background-color: #c9c9c9;
-          }
-        </style>
-
-        <div class="toolbar-item">
-          <button class="toolbar-button">${label}</button>
-          <div class="dropdown-menu" id="dropdown-menu">
-            <h1 class="header">Set Parameters</h1>
-            <div id="dropdown-content"></div>
-          </div>
-        </div>
-
-      `;
-
-      const dropdownContent = this.shadowRoot.getElementById('dropdown-content');
-      this.insertLayout(layoutType, dropdownContent, shape);
-    }
-
-    insertLayout(layoutType, container, shape) {
-
-      const mucovtwo = `
-        <toolbar-popup-button-mucovtwo label="Train" shape=${shape}></toolbar-popup-button-mucovtwo>
-        <toolbar-popup-button-mucovtwo label="Eval" shape=${shape}></toolbar-popup-button-mucovtwo>
-      `;
-
-      const mucovfour = `
-        <toolbar-popup-button-mucovfour label="Train" shape=${shape}></toolbar-popup-button-mucovfour>
-        <toolbar-popup-button-mucovfour label="Eval" shape=${shape}></toolbar-popup-button-mucovfour>
-      `;
-
-      const toroidal = `
-        <toolbar-popup-button-toroidal label="Train"></toolbar-popup-button-toroidal>
-        <toolbar-popup-button-toroidal label="Eval"></toolbar-popup-button-toroidal>
-      `;
-
-      const yinyang = `
-        <toolbar-popup-button-yinyang label="Train"></toolbar-popup-button-yinyang>
-        <toolbar-popup-button-yinyang label="Eval"></toolbar-popup-button-yinyang>
-      `;
-
-      if (layoutType == 'mucovfour') {
-        container.innerHTML = mucovfour;
-      } else if (layoutType == 'toroidal') {
-        container.innerHTML = toroidal;
-      } else if (layoutType == 'yinyang') {
-        container.innerHTML = yinyang;
-      } else {
-        container.innerHTML = mucovtwo;
-      }
-
-    }
-  
-    addHoverListeners() {
-      const button = this.shadowRoot.querySelector('.toolbar-button');
-      const dropdownMenu = this.shadowRoot.getElementById('dropdown-menu');
-  
-      // Show the dropdown on hover
-      button.addEventListener('mouseenter', () => {
-        dropdownMenu.classList.add('show');
-        button.classList.add('active'); // Add active class to highlight button
-      });
-  
-      // Hide the dropdown when not hovering over both the button and dropdown
-      button.addEventListener('mouseleave', () => {
-        if (!dropdownMenu.matches(':hover')) {
-          dropdownMenu.classList.remove('show');
-          button.classList.remove('active'); // Remove active class when hiding
-        }
-      });
-  
-      dropdownMenu.addEventListener('mouseenter', () => {
-        dropdownMenu.classList.add('show'); // Keep dropdown open
-        button.classList.add('active'); // Keep button highlighted
-      });
-  
-      dropdownMenu.addEventListener('mouseleave', () => {
-        dropdownMenu.classList.remove('show'); // Hide when not hovering over dropdown
-        button.classList.remove('active'); // Remove highlight when leaving dropdown
-      });
-    }
-}
-
 class Toolbar_DropdownSettings extends HTMLElement {
     constructor() {
       super();
@@ -761,13 +586,177 @@ class Toolbar_SaveFileButton extends HTMLElement {
     }
 }
 
+class Toolbar_PopupButton extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this.isPopupOpen = false; // Track the popup state
+  }
+
+  connectedCallback() {
+    this.render();
+  }
+
+  render() {
+    const label = this.getAttribute('label') || 'Button'; // Get the label from the attribute
+
+    this.shadowRoot.innerHTML = `
+      <style>
+        .toolbar-popup-button {
+          background-color: white;
+          color: black;
+          font-family: 'Inter', sans-serif;
+          font-weight: 100;
+          font-size: 1em;
+          padding: 5px 30px;
+          border: none;
+          cursor: pointer;
+          min-width: 220px;
+          white-space: nowrap;
+          text-align: left;
+        }
+
+        .toolbar-popup-button:hover {
+          background-color: #c9c9c9;
+        }
+
+        /* Popup styling */
+        .popup {
+          display: none; /* Initially hidden */
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) scale(0); /* Start scaled down */
+          width: 300px;
+          height: 200px; /* Increased height */
+          padding: 20px;
+          background-color: white;
+          border-radius: 15px; /* Rounded corners */
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+          z-index: 1000; /* Ensure it's on top */
+          opacity: 0; /* Start fully transparent */
+          transition: opacity 0.1s ease, transform 0.s ease; /* Transition for opening/closing */
+        }
+
+        .popup.show {
+          display: block; /* Show when needed */
+          opacity: 1; /* Fully opaque when shown */
+          transform: translate(-50%, -50%) scale(1); /* Scale to original size */
+        }
+
+        .popup h2 {
+          margin: 0 0 20px 0;
+        }
+
+        /* Close button styling */
+        .close-btn {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: transparent;
+          border: none;
+          font-size: 16px;
+          cursor: pointer;
+          color: #333;
+        }
+
+        /* Overlay styling */
+        .overlay {
+          display: none; /* Initially hidden */
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+          z-index: 999; /* Ensure it's below the popup */
+        }
+
+        .overlay.show {
+          display: block; /* Show overlay when needed */
+        }
+      </style>
+
+      <button class="toolbar-popup-button">${label}</button>
+      <div class="overlay" id="overlay"></div>
+      <div class="popup" id="popup">
+        <button class="close-btn" id="close-btn">X</button>
+        <h2>Popup Title</h2>
+        <p>This is the popup content!</p>
+      </div>
+    `;
+
+    // Get elements
+    const button = this.shadowRoot.querySelector('.toolbar-popup-button');
+    const popup = this.shadowRoot.getElementById('popup');
+    const overlay = this.shadowRoot.getElementById('overlay');
+    const closeBtn = this.shadowRoot.getElementById('close-btn');
+
+    // Show the popup when clicking the button
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.togglePopup();
+    });
+
+    // Close the popup when clicking the close button
+    closeBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.closePopup();
+    });
+
+    // Add a global click listener to close the popup if clicked outside
+    document.addEventListener('click', (event) => {
+      if (this.isPopupOpen && !this.contains(event.target)) {
+        this.closePopup();
+      }
+    });
+
+    // Stop event propagation on popup to avoid closing when clicking inside it
+    popup.addEventListener('click', (event) => {
+      event.stopPropagation();
+    });
+  }
+
+  togglePopup() {
+    const popup = this.shadowRoot.getElementById('popup');
+    const overlay = this.shadowRoot.getElementById('overlay');
+
+    this.isPopupOpen = !this.isPopupOpen;
+
+    if (this.isPopupOpen) {
+      popup.classList.add('show');
+      overlay.classList.add('show');
+      popup.style.display = 'block';
+      overlay.style.display = 'block';
+    } else {
+      this.closePopup();
+    }
+  }
+
+  closePopup() {
+    const popup = this.shadowRoot.getElementById('popup');
+    const overlay = this.shadowRoot.getElementById('overlay');
+
+    popup.classList.remove('show');
+    overlay.classList.remove('show');
+
+    setTimeout(() => {
+      popup.style.display = 'none';
+      overlay.style.display = 'none';
+    }, 100);
+
+    this.isPopupOpen = false;
+  }
+}
+
+
 // Register the custom element for dropdown buttons
 customElements.define('toolbar-button', Toolbar_Button);
 customElements.define('toolbar-checkbox-button', Toolbar_CheckboxButton);
 customElements.define('toolbar-dropdown-clear', Toolbar_DropdownClear);
-customElements.define('toolbar-dropdown-data', Toolbar_DropdownData);
 customElements.define('toolbar-dropdown-settings', Toolbar_DropdownSettings);
 customElements.define('toolbar-openfile-button', Toolbar_OpenFileButton);
 customElements.define('toolbar-savefile-button', Toolbar_SaveFileButton);
+customElements.define('toolbar-popup-button', Toolbar_PopupButton);
 
 

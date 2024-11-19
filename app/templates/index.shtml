@@ -45,8 +45,7 @@
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="static/components/InfoIcon.js"></script>
   <script src="static/components/ToolbarComponents.js"></script>
-  <script src="static/components/ToolbarPopup.js"></script>
-  <script src="static/components/DataForm.js"></script>
+  <script src="static/components/DataParams.js"></script>
   <script>
    let plotInfo = {labels: []};
   </script>
