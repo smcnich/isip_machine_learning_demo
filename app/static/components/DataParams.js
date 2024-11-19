@@ -1,38 +1,145 @@
 class FormContainer extends HTMLElement {
+  /*
+  class: FormContainer
+
+  description:
+    This class is designed to create a dynamic form container component that fetches data parameters from 
+    an API endpoint and renders inputs or grouped input elements based on the received parameters. It extends
+    the HTMLElement class and uses a shadow DOM for encapsulating its styles and structure. The component 
+    automatically processes nested parameters and ensures a responsive design.
+
+    To create a new instance of the component, the class should be instantiated using the custom element 
+    `<form-container>`. It fetches parameters from the backend, processes them, and dynamically renders the UI.
+
+    Additional methods can be added as needed to extend its functionality.
+  */
   constructor() {
+    /*
+    method: FormContainer::constructor
+
+    args:
+      None
+
+    returns:
+      FormContainer instance
+
+    description:
+      This is the constructor for the FormContainer class. It initializes the component
+      by creating a shadow root for style and structure encapsulation.
+    */
+
+    // Call the parent constructor (HTMLElement)
+    //
     super();
+
+    // Create a shadow root for the component
+    //
     this.attachShadow({mode: 'open'});
   }
+  //
+  // end of method
 
   async connectedCallback() {
+    /*
+    method: FormContainer::connectedCallback
 
+    args:
+      None
+
+    returns:
+      None
+
+    description:
+      This lifecycle method is called when the component is added to the DOM.
+      It fetches parameters from the backend, renders the component based on 
+      those parameters, and applies them as needed.
+    */
+
+    // Fetch parameters from the backend
+    //
     const params = await this.fetch_params();
+
+    // If parameters are successfully fetched
+    //
     if (params) {
-      this.render(params);
-      // Use the params as needed.
+      this.render(params); // Render the component UI using the fetched parameters
     }
   }
+  //
+  // end of method
 
   async fetch_params() {
+    /*
+    method: FormContainer::fetch_params
+
+    args:
+      None
+
+    returns:
+      (Object | undefined) - An object containing the fetched parameters, or undefined in case of an error.
+
+    description:
+      This method fetches parameter data from the `/api/get_data_params` endpoint. It retrieves
+      a specific key based on the 'key' attribute of the element, processes the data, and 
+      returns the corresponding parameters for rendering.
+    */
     try {
+      // Send a GET request to the API endpoint
+      //
       const response = await fetch('/api/get_data_params');
+      
+      // If the response is not successful, throw an error
+      //
       if (!response.ok) {
         throw new Error('HTTP error: Status: ${response.status}');
       }
+
+      // Parse the JSON response
+      //
       const data = await response.json();
+
+      // Extract the parameter key from the element attribute
+      //
       const key = this.getAttribute('key') || 'two_gaussian';
-      const params = data[key]?.params;
       
+      // Return the parameters corresponding to the specified key
+      //
+      const params = data[key]?.params;
       return params;
 
     } catch (error) {
+      // Log errors encountered during the fetch process
+      //
       console.error('Failed to fetch parameters:', error);
     }
   }
+  //
+  // end of method
 
   generate_container(name, dimensions, defaultValues) {
+    /*
+    method: FormContainer::generate_container
+
+    args:
+      name (String) - The name of the parameter to be displayed as a label.
+      dimensions (String) - The dimensions of the input grid (e.g., "2,3").
+      defaultValues (Array) - Default values for the input fields.
+
+    returns:
+      (String) - An HTML string representing a container with dynamically generated inputs.
+
+    description:
+      This method generates a responsive container with labeled input fields
+      based on the specified name, dimensions, and default values. It ensures 
+      that all input values are formatted to four decimal places.
+    */
+
+    // Parse the rows and columns from the dimensions
+    //
     const [rows, cols] = (dimensions || '1,1').split(',').map(Number);
 
+    // Generate HTML for input fields
+    //
     let inputsHTML = '';
     let index = 1;
     for (let i = 0; i < rows; i++) {
@@ -51,6 +158,8 @@ class FormContainer extends HTMLElement {
       }
     }
 
+    // Create a container with label and input grid
+    //
     const container = document.createElement('div');
     container.className = 'num-container';
 
@@ -71,29 +180,51 @@ class FormContainer extends HTMLElement {
     container.appendChild(inputDiv);
 
     return container.outerHTML;
-
   }
+  //
+  // end of method
 
   render(params) {
-    this.shadowRoot.innerHTML = '';
+    /*
+    method: FormContainer::render
 
+    args:
+      params (Object) - An object containing the parameters to be rendered.
+
+    returns:
+      None
+
+    description:
+      This method renders the component by dynamically generating input
+      fields and nested groups based on the provided parameters. It applies 
+      styles for responsive design and organizes the elements into a structured layout.
+    */
+
+    // Clear existing content
+    //
+    this.shadowRoot.innerHTML = '';
     let inputsHTML = '';
     
-    // Helper function to handle the iteration for input and group types
+    // Helper function to process parameters
+    //
     const processParam = (param) => {
       const { type } = param;
 
       // If the parameter is of type 'input'
+      //
       if (type === 'input') {
         return this.generate_container(param.name, param.dimensions, param.default);
       }
 
       // If the parameter is of type 'group' and has nested params
+      //
       if (type === 'group' && param.params) {
         // Create a div for the group container
+        //
         let groupHTML = '<div class="group-container" style="display: flex;">'; // Use flexbox and wrap
 
         // Iterate over nested params inside the group and process each one
+        //
         for (const [nestedKey, nestedParam] of Object.entries(param.params)) {
           groupHTML += processParam(nestedParam);  // Recursively process each nested parameter
         }
@@ -106,18 +237,22 @@ class FormContainer extends HTMLElement {
     };
 
     // Iterate over top-level params
+    //
     for (const [key, param] of Object.entries(params)) {
       inputsHTML += processParam(param);  // Process each parameter, including nested ones
     }
 
     // Attach styles and inputs
+    //
     this.shadowRoot.innerHTML = `
       <style>
+        /* Styling the main container for form inputs */
         .form-container {
           display: flex;
           flex-direction: column;
         }
-      
+
+        /* Styling for individual input containers */
         .num-container {
           border: 2px solid #ccc;
           padding: 0.4vw;
@@ -127,6 +262,7 @@ class FormContainer extends HTMLElement {
           box-sizing: border-box;
         }
 
+        /* Label styling for input fields */
         .num-container label {
           padding-left: 0.5vw;
           font-family: 'Inter', sans-serif;
@@ -136,11 +272,13 @@ class FormContainer extends HTMLElement {
           display: block;
         }
 
+        /* Grid layout for input fields */
         .num-input {
           display: grid;
           gap: 0.5vw;
         }
 
+        /* Input field styling */
         input {
           padding: 0.4vw;
           border: 1px solid #ccc;
@@ -150,6 +288,7 @@ class FormContainer extends HTMLElement {
           width: 100%;
         }
 
+        /* Input field focus state */
         input:focus {
           border-color: #7441BA;
           border-width: 2px;
@@ -161,27 +300,110 @@ class FormContainer extends HTMLElement {
       </div>
     `; 
   }
+  //
+  // end of method
 }
+//
+// end of class
 
 class DataPopup extends HTMLElement {
+  /*
+  class: DataPopup
+
+  description:
+    This class creates a customizable button that, when clicked, displays a popup form with options and parameters. 
+    It provides functionality for handling presets, clearing inputs, and submitting data. The popup includes 
+    an overlay to focus the user’s attention and can be closed by clicking outside or on a close button.
+
+    The DataPopup component is encapsulated using Shadow DOM to isolate styles and logic, ensuring it integrates 
+    seamlessly into different projects. It uses attributes such as 'label' and 'key' to dynamically set its contents.
+  */
   constructor() {
+    /*
+    method: DataPopup::constructor
+
+    args:
+      None
+
+    returns:
+      DataPopup instance
+
+    description:
+      Initializes the DataPopup component. The constructor creates the shadow DOM and sets 
+      an initial state for `isPopupOpen`, which tracks whether the popup is visible or not.
+    */
+   
+    // Call the parent HTMLElement constructor
+    //
     super();
+
+    // Attach a shadow DOM
+    //
     this.attachShadow({mode: 'open'});
+
+    // Set initial popup status
+    //
     this.isPopupOpen = false;
   }
+  //
+  // end of method
 
   connectedCallback() {
+    /*
+    method: DataPopup::connectedCallback
+
+    args:
+      None
+
+    return:
+      None
+
+    description:
+      Invoked when the component is added to the DOM. This method triggers the rendering of the 
+      component's structure and styles, sets up event listeners for interaction, and ensures the 
+      popup behaves as intended.
+    */
+
+    // Render the HTML and styles for the component
+    //
     this.render();
+
+    // Add event listeners for interactivity
+    //
     this.addEventListeners();
     
-  }    
+  } 
+  //
+  // end of method   
   
   render() {
+    /*
+    method: DataPopup::render
+
+    args:
+      None
+
+    return:
+      None
+
+    description:
+      Creates the HTML and styles for the DataPopup component. This method dynamically updates 
+      the button label and popup contents based on the component's attributes ('label' and 'key').
+      It also includes styling for the button, popup, and overlay.
+    */
+
+    // Retrieve the button label from attributes
+    //
     const label = this.getAttribute('label') || 'Button';
+
+    // Retrieve the data key from attributes
+    //
     const key = this.getAttribute('key') || 'two_gaussian';
 
     this.shadowRoot.innerHTML = `
       <style>
+
+        /* Button styles */
         .toolbar-popup-button {
           background-color: white;
           color: black;
@@ -288,8 +510,13 @@ class DataPopup extends HTMLElement {
 
       </style>
 
+      <!-- Button to trigger the popup -->
       <button class="toolbar-popup-button">${label}</button>
+      
+      <!-- Background overlay -->
       <div class="overlay" id="overlay"></div>
+
+      <!-- Popup container -->
       <div class="popup" id="popup">
         <button class="close-btn" id="close-btn">X</button>
         <h2>Set ${label} Parameters</h2>
@@ -300,182 +527,355 @@ class DataPopup extends HTMLElement {
             <button type="reset" class="reset" id="clearButton">Clear</button>
             <button type="submit" class="button">Submit</button>
           </div>
-
         </form>      
       </div>
     `;
 
-    // Get elements
+    // Get elements within the shadow DOM
+    //
     const button = this.shadowRoot.querySelector('.toolbar-popup-button');
     const popup = this.shadowRoot.getElementById('popup');
     const overlay = this.shadowRoot.getElementById('overlay');
     const closeBtn = this.shadowRoot.getElementById('close-btn');
 
-    // Show the popup when clicking the button
+    // Show the popup when the button is clicked
+    //
     button.addEventListener('click', (event) => {
+      // Prevent event propagation to avoid unintended behavior
+      //
       event.stopPropagation();
+
+      // Call togglePopup method to show/hide popup
+      //
       this.togglePopup();
     });
 
     // Close the popup when clicking the close button
+    //
     closeBtn.addEventListener('click', (event) => {
+      // Prevent event propagation to avoid conflicts
+      //
       event.stopPropagation();
+
+      // Call closePopup method to hide popup
+      //
       this.closePopup();
     });
 
     // Add a global click listener to close the popup if clicked outside
+    //
     document.addEventListener('click', (event) => {
+      // Check if popup is open and if the click is outside the component
+      //
       if (this.isPopupOpen && !this.contains(event.target)) {
-        this.closePopup();
+        this.closePopup(); // Close the popup if the conditions are met
       }
     });
 
     // Stop event propagation on popup to avoid closing when clicking inside it
+    //
     popup.addEventListener('click', (event) => {
-      event.stopPropagation();
+      event.stopPropagation(); // Stop event from bubbling up to parent listeners
     });
   }
+  //
+  // end of method
 
+  // Fetch and process default values for a given key asynchronously
+  //
   async getDefaults(key) {
     try {
       // Fetch the JSON data from the /data_json route
+      //
       const response = await fetch('/api/get_data_params');
       
+      // Handle response errors
+      //
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
   
-      const data = await response.json(); // Parse the response as JSON
+      // Parse the response as JSON
+      //
+      const data = await response.json(); 
   
       // Initialize an array to store default values
+      //
       let defaultValues = [];
   
       // Check if the given key exists in the data and process its parameters
+      //
       if (data[key] && data[key].params) {
+        // Helper function to traverse and extract default values
+        //
         function traverseParams(params) {
           for (const key in params) {
             if (params[key].type === 'input' && params[key].default) {
               // If it's an input and has a default, add it to the list
+              //
               defaultValues = defaultValues.concat(params[key].default);
             } else if (params[key].type === 'group' && params[key].params) {
               // If it's a group, recurse into the params
+              //
               traverseParams(params[key].params);
             }
           }
         }
   
         // Start traversing from the params of the given key
+        //
         traverseParams(data[key].params);
       }
   
       // Return the default values as a comma-separated string
+      //
       return defaultValues.join(', ');
   
     } catch (error) {
       console.error('Error fetching data:', error);
-      return '';
+      return ''; // Return empty string on error
     }
   }
+  //
+  // end of method
 
+  // Add event listeners for preset and clear button actions
+  //
   addEventListeners() {
+    // Set up button to clear inputs and apply preset values
+    //
     const clearButton = this.shadowRoot.querySelector('#clearButton');
     const presetButton = this.shadowRoot.querySelector('#presetButton');
     
+    // Clear all input fields when clear button is clicked
+    //
     clearButton.addEventListener('click', () => {
-      this.resetInputs();
+      this.resetInputs(); // Call resetInputs method
     });
+
+    // Fetch and apply preset values when preset button is clicked
+    //
     presetButton.addEventListener('click', async () => {
+      // Get the current key and fetch preset values
+      //
       const key = this.getAttribute('key');
       const presets = await this.getDefaults(key);
+      
+      // Populate inputs with fetched preset values
+      //
       this.fillPresets(presets);
     });
   }
+  //
+  // end of method
 
+  // Reset all input fields in the form
+  //
   resetInputs() {
+    // Select form components
+    //
     const components = this.shadowRoot.querySelectorAll('form-container');
     components.forEach(componenets => {
+      // Get input fields
+      //
       const inputs = componenets.shadowRoot.querySelectorAll('input');
       inputs.forEach(input => {
+        // Clear the value of each input field
+        //
         input.value = '';
       });
     });
   }
+  //
+  // end of method
 
+  // Populate input fields with preset values
+  //
   fillPresets(presetValues) {
     // If presetValues is a string, split and parse it to convert it to an array of numbers
+    //
     if (typeof presetValues === 'string') {
       presetValues = presetValues.split(',').map(value => parseFloat(value.trim()));
     }
   
+    // Get form components
+    //
     const components = this.shadowRoot.querySelectorAll('form-container');
-    let valueIndex = 0; // Track position in presetValues array
+    
+    // Track current position in presetValues array
+    //
+    let valueIndex = 0;
   
     components.forEach(component => {
+      // Select input fields
+      //
       const inputs = component.shadowRoot.querySelectorAll('input');
       
       inputs.forEach(input => {
+        // Populate input with corresponding preset value if available
+        //
         if (valueIndex < presetValues.length) {
+          // Format value to 4 decimal places
+          //
           input.value = parseFloat(presetValues[valueIndex]).toFixed(4); // Set input value from presetValues array
+          
+          // Move to next preset value
+          //
           valueIndex++;
         }
       });
     });
-  }  
+  } 
+  //
+  // end of method
 
+  // Toggle the visibility of the popup
   togglePopup() {
+    // Create popup and overlay element
+    //
     const popup = this.shadowRoot.getElementById('popup');
     const overlay = this.shadowRoot.getElementById('overlay');
 
+    // Toggle popup state
+    //
     this.isPopupOpen = !this.isPopupOpen;
 
+    // Show popup and overlap and ensure they are both visible
     if (this.isPopupOpen) {
       popup.classList.add('show');
       overlay.classList.add('show');
       popup.style.display = 'block';
       overlay.style.display = 'block';
     } else {
+      // Close popup if already open
+      //
       this.closePopup();
     }
   }
+  //
+  // end of method
 
+  // Close the popup and overlay
   closePopup() {
+    // Create popup and overlay element
     const popup = this.shadowRoot.getElementById('popup');
     const overlay = this.shadowRoot.getElementById('overlay');
 
+    // Remove show class from popup and overlay
     popup.classList.remove('show');
     overlay.classList.remove('show');
 
+    // Hide popup and overlay after transition ends
+    //
     setTimeout(() => {
       popup.style.display = 'none';
       overlay.style.display = 'none';
     }, 100);
 
+    // Set popup state to closed
+    //
     this.isPopupOpen = false;
   }
+  //
+  // end of method
 }
+//
+// end of class
 
 class DataButton extends HTMLElement {
+  /*
+  class: DataButton
+
+  description:
+    This class defines a custom web component that represents a button with a dropdown menu. 
+    The button is styled to match a toolbar and displays additional options (or "data-popup" components)
+    in a dropdown menu on hover. It is designed to work as part of a toolbar system where each button
+    is independent and displays dropdown content dynamically based on attributes.
+
+    The class utilizes shadow DOM for encapsulation and includes CSS styling directly within the component.
+  */
   constructor() {
+    /*
+    method: DataButton::constructor
+
+    args:
+      None
+
+    returns:
+      DataButton instance
+
+    description:
+      This constructor initializes the component by calling the parent class (HTMLElement) constructor 
+      and attaches a shadow root in "open" mode, allowing external JavaScript to access the shadow DOM.
+    */
+
+    // Call the parent constructor
+    //
     super();
+
+    // Attach shadow DOM for encapsulation
+    //
     this.attachShadow({ mode: 'open' });
   }
+  //
+  // end of method
 
   connectedCallback() {
+    /*
+    method: DataButton::connectedCallback
+
+    args:
+      None
+
+    returns:
+      None
+
+    description:
+      Called when the component is added to the DOM. This method triggers the rendering of the component 
+      and adds event listeners to handle hover interactions for the dropdown menu.
+    */
+
+    // Render the component
+    //
     this.render();
+
+    // Add event listeners for hover functionality
+    //
     this.addHoverListeners();
   }
+  //
+  // end of method
 
   render() {
+    /*
+    method: DataButton::render
+
+    args:
+      None
+
+    returns:
+      None
+
+    description:
+      This method generates the HTML and CSS content for the DataButton component. It reads attributes
+      (`label` for button text and `key` for parameter keys) and constructs the button and dropdown 
+      menu structure, including custom styling for the toolbar layout.
+    */
+
+    // Get the label and key attributes
+    //
     const label = this.getAttribute('label') || 'Button'; // Get the label from the attribute
     const key = this.getAttribute('key') || 'two_gaussian';
 
     this.shadowRoot.innerHTML = `
       <style>
+        /* Main container for button and dropdown */
         .toolbar-item {
           position: relative; /* Anchor point for the dropdown menu */
           display: inline-block; /* Keep button and dropdown aligned per instance */
         }
 
+        /* Button styling */
         .toolbar-button {
           background-color: white;
           color: black;
@@ -491,6 +891,7 @@ class DataButton extends HTMLElement {
           text-align: left;
         }
 
+        /* Add a dropdown arrow indicator */
         .toolbar-button::after {
           content: '';
           position: absolute;
@@ -502,11 +903,13 @@ class DataButton extends HTMLElement {
           border-color: transparent transparent transparent black;
         }
 
+        /* Button hover/active state styling */
         .toolbar-button:hover,
         .toolbar-button.active {
           background-color: #c9c9c9;
         }
 
+        /* Header styling */
         .header {
           color: black;
           font-family: 'Inter', sans-serif;
@@ -518,6 +921,7 @@ class DataButton extends HTMLElement {
           cursor: default;
         }
 
+        /* Dropdown menu styling */
         .dropdown-menu {
           display: none;
           position: absolute;
@@ -529,10 +933,12 @@ class DataButton extends HTMLElement {
           border: 1px solid #ccc;
         }
 
+        /* Show dropdown when visible */
         .dropdown-menu.show {
           display: block;
         }
 
+        /* Styling for dropdown items */
         .dropdown-item {
           background-color: white;
           color: black;
@@ -562,36 +968,53 @@ class DataButton extends HTMLElement {
     `;
   }
 
+  // Add event listeners when hovering over the dropdown button
+  //
   addHoverListeners() {
+
+    // Create the button and dropdown menu reference
+    //
     const button = this.shadowRoot.querySelector('.toolbar-button');
     const dropdownMenu = this.shadowRoot.getElementById('dropdown-menu');
 
     // Show the dropdown on hover
+    //
     button.addEventListener('mouseenter', () => {
-      dropdownMenu.classList.add('show');
-      button.classList.add('active'); // Add active class to highlight button
+      dropdownMenu.classList.add('show'); // Display button
+      button.classList.add('active'); // Highlight button
     });
 
     // Hide the dropdown when not hovering over both the button and dropdown
+    //
     button.addEventListener('mouseleave', () => {
       if (!dropdownMenu.matches(':hover')) {
-        dropdownMenu.classList.remove('show');
-        button.classList.remove('active'); // Remove active class when hiding
+        dropdownMenu.classList.remove('show'); // Hide dropdown
+        button.classList.remove('active'); // Remove highlight
       }
     });
 
+    // Keep dropdown visible when hovering over it
+    //
     dropdownMenu.addEventListener('mouseenter', () => {
       dropdownMenu.classList.add('show'); // Keep dropdown open
       button.classList.add('active'); // Keep button highlighted
     });
 
+    // Hide dropdown when leaving it
+    //
     dropdownMenu.addEventListener('mouseleave', () => {
       dropdownMenu.classList.remove('show'); // Hide when not hovering over dropdown
       button.classList.remove('active'); // Remove highlight when leaving dropdown
     });
   }
+  //
+  // end of method
 }
+//
+// end of class
 
+// Register the custom element
+//
 customElements.define('form-container', FormContainer);
 customElements.define('data-popup', DataPopup);
 customElements.define('data-button', DataButton);
