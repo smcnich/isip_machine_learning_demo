@@ -37,8 +37,16 @@ class FormContainer extends HTMLElement {
     let index = 1;
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
-        const defaultValue = defaultValues[index - 1];
-        inputsHTML += `<input type="number" placeholder="Value ${index}" value="${defaultValue}">`;
+        const defaultValue = parseFloat(defaultValues[index - 1] || 0).toFixed(4); // Ensure default values have 4 decimals
+        inputsHTML += `
+          <input 
+            type="number" 
+            placeholder="Value ${index}" 
+            value="${defaultValue}" 
+            oninput="this.value = parseFloat(this.value || 0).toFixed(4)" 
+            onblur="this.value = parseFloat(this.value || 0).toFixed(4)"
+          >
+        `;
         index++;
       }
     }
@@ -407,7 +415,7 @@ class DataPopup extends HTMLElement {
       
       inputs.forEach(input => {
         if (valueIndex < presetValues.length) {
-          input.value = presetValues[valueIndex]; // Set input value from presetValues array
+          input.value = parseFloat(presetValues[valueIndex]).toFixed(4); // Set input value from presetValues array
           valueIndex++;
         }
       });

@@ -96,13 +96,13 @@
         "type": "group",
         "params": {
           "mu1": {
-            "name": "Mean (1st)",
+            "name": "Mean (3rd)",
             "type": "input",
             "dimensions": "2,1",
             "default": [-0.5, -0.5]
           },
           "cov1": {
-            "name": "Covariance (1st)",
+            "name": "Covariance (3rd)",
             "type": "input",
             "dimensions": "2,2",
             "default": [0.025, 0, 0, 0.025]
@@ -114,13 +114,13 @@
         "type": "group",
         "params": {
           "mu2": {
-            "name": "Mean (2nd)",
+            "name": "Mean (4th)",
             "type": "input",
             "dimensions": "2,1",
             "default": [0.5, 0.5]
           },
           "cov2": {
-            "name": "Covariance (2nd)",
+            "name": "Covariance (4th)",
             "type": "input",
             "dimensions": "2,2",
             "default": [0.025, 0, 0, 0.025]
@@ -273,13 +273,13 @@
         "type": "group",
         "params": {
           "mu1": {
-            "name": "Mean (1st)",
+            "name": "Mean (3rd)",
             "type": "input",
             "dimensions": "2,1",
             "default": [-0.5, -0.5]
           },
           "cov1": {
-            "name": "Covariance (1st)",
+            "name": "Covariance (3rd)",
             "type": "input",
             "dimensions": "2,2",
             "default": [0.0333, 0, 0, 0.0043]
@@ -291,13 +291,13 @@
         "type": "group",
         "params": {
           "mu2": {
-            "name": "Mean (2nd)",
+            "name": "Mean (4th)",
             "type": "input",
             "dimensions": "2,1",
             "default": [0.5, 0.5]
           },
           "cov2": {
-            "name": "Covariance (2nd)",
+            "name": "Covariance (4th)",
             "type": "input",
             "dimensions": "2,2",
             "default": [0.0333, 0, 0, 0.0043]
