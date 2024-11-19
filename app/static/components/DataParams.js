@@ -207,7 +207,7 @@ class DataPopup extends HTMLElement {
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%) scale(0); /* Start scaled down */
-          width: 25vw; /* Set a fixed width */
+          width: 45vw; /* Set a fixed width */
           max-width: 90%; /* Allow the width to shrink if needed */
           max-height: 80vh; /* Limit the height to 80% of the viewport height */
           padding: 15px;
