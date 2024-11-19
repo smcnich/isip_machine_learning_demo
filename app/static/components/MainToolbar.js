@@ -329,8 +329,8 @@ class MainToolbar extends HTMLElement {
             <toolbar-openfile-button label="Load Train Data" plotId="train"></toolbar-openfile-button>
             <toolbar-openfile-button label="Load Eval Data" plotId="eval"></toolbar-openfile-button>
             <div class="separator"></div>
-            <toolbar-savefile-button label="Save Train As..."></toolbar-savefile-button>
-            <toolbar-savefile-button label="Save Eval As..."></toolbar-savefile-button>
+            <toolbar-savefile-button label="Save Train As..." plotId="train"></toolbar-savefile-button>
+            <toolbar-savefile-button label="Save Eval As..."> plotId="eval"</toolbar-savefile-button>
             <div class="separator"></div>
             <toolbar-openfile-button label="Load Model"></toolbar-openfile-button>
             <toolbar-openfile-button label="Load Parameters"></toolbar-openfile-button>
@@ -346,8 +346,8 @@ class MainToolbar extends HTMLElement {
           <div class="dropdown">
             <toolbar-dropdown-settings label="Settings"></toolbar-dropdown-settings>
             <toolbar-button label="Process Log"></toolbar-button>
-            <toolbar-dropdown-clear label="Clear Train"></toolbar-dropdown-clear>
-            <toolbar-dropdown-clear label="Clear Eval"></toolbar-dropdown-clear>
+            <toolbar-dropdown-clear label="Clear Train" plotId="train"></toolbar-dropdown-clear>
+            <toolbar-dropdown-clear label="Clear Eval" plotId="eval"></toolbar-dropdown-clear>
             <toolbar-button label="Clear All"></toolbar-button>
             <toolbar-button label="Reset"></toolbar-button>
           </div>

@@ -124,6 +124,7 @@ class Toolbar_DropdownClear extends HTMLElement {
   
     connectedCallback() {
       this.render();
+      this.plotId = this.getAttribute('plotId');
       this.addHoverListeners();
     }
   
@@ -208,9 +209,9 @@ class Toolbar_DropdownClear extends HTMLElement {
         <div class="toolbar-item">
           <button class="toolbar-button">${label}</button>
           <div class="dropdown-menu" id="dropdown-menu">
-            <toolbar-button label="Clear Data"></toolbar-button>
-            <toolbar-button label="Clear Results"></toolbar-button>
-            <toolbar-button label="Clear All"></toolbar-button>
+            <toolbar-button label="Clear Data" clear="data"></toolbar-button>
+            <toolbar-button label="Clear Results" clear="results"></toolbar-button>
+            <toolbar-button label="Clear All" clear="all"></toolbar-button>
           </div>
         </div>
       `;
@@ -243,6 +244,20 @@ class Toolbar_DropdownClear extends HTMLElement {
         dropdownMenu.classList.remove('show'); // Hide when not hovering over dropdown
         button.classList.remove('active'); // Remove highlight when leaving dropdown
       });
+
+      for (let clearButton of dropdownMenu.querySelectorAll('toolbar-button')) {
+        clearButton.addEventListener('click', () => {
+  
+          const clear = clearButton.getAttribute('clear');
+  
+          window.dispatchEvent(new CustomEvent('clearPlot', {
+            detail: {
+              type: clear,
+              plotId: this.plotId
+            }
+          }));
+        });
+      }
     }
 }
 

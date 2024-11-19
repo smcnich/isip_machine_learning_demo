@@ -92,6 +92,21 @@ class Plot extends HTMLElement {
       }
     });
 
+    window.addEventListener('clearPlot', (event) => {
+    
+      // empty the plot when the clear buttons are selected
+      //
+      if ((event.detail.plotId == this.plotId) || (event.detail.plotId == null)) {
+        this.plot_empty();
+      }
+
+      // TODO: make logic to clear specific parts of the plot based on
+      //       on what button is sent. use event.detail.type to determine
+      //       what to clear (data, results, all). currently, there is no
+      //       function to clear results, so this must be done first.
+    
+    });
+
     // Event listener for resizing the plot
     //
     window.addEventListener('resize', () => {
