@@ -367,6 +367,7 @@ class FormContainer extends HTMLElement {
   
       // Generate HTML for input fields
       //
+      let index = 1;
       for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
           
@@ -387,8 +388,9 @@ class FormContainer extends HTMLElement {
           
           // give the input a placeholder and default value
           //
-          input.placeholder = `Value [${i}, ${j}]`;
+          input.placeholder = `Value ${index}`;
           input.value = defaultValue;
+          index++;
           
           // make sure the input is limited to 4 decimal places
           //

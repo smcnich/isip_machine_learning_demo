@@ -336,64 +336,6 @@ class DataPopup extends HTMLElement {
   //
   // end of method
 
-  // Fetch and process default values for a given key asynchronously
-  //
-  async getDefaults(key) {
-    try {
-      // Fetch the JSON data from the /data_json route
-      //
-      const response = await fetch('/api/get_data_params');
-      
-      // Handle response errors
-      //
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-  
-      // Parse the response as JSON
-      //
-      const data = await response.json(); 
-  
-      // Initialize an array to store default values
-      //
-      let defaultValues = [];
-  
-      // Check if the given key exists in the data and process its parameters
-      //
-      if (data[key] && data[key].params) {
-        // Helper function to traverse and extract default values
-        //
-        function traverseParams(params) {
-          for (const key in params) {
-            if ((params[key].type === 'int' || params[key.type === 'matrix']) && params[key].default) {
-              // If it's an input and has a default, add it to the list
-              //
-              defaultValues = defaultValues.concat(params[key].default);
-            } else if (params[key].type === 'group' && params[key].params) {
-              // If it's a group, recurse into the params
-              //
-              traverseParams(params[key].params);
-            }
-          }
-        }
-  
-        // Start traversing from the params of the given key
-        //
-        traverseParams(data[key].params);
-      }
-  
-      // Return the default values as a comma-separated string
-      //
-      return defaultValues.join(', ');
-  
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      return ''; // Return empty string on error
-    }
-  }
-  //
-  // end of method
-
   // Add event listeners for preset and clear button actions
   //
   addEventListeners() {
@@ -437,46 +379,6 @@ class DataPopup extends HTMLElement {
       });
     });
   }
-  //
-  // end of method
-
-  // Populate input fields with preset values
-  //
-  fillPresets(presetValues) {
-    // If presetValues is a string, split and parse it to convert it to an array of numbers
-    //
-    if (typeof presetValues === 'string') {
-      presetValues = presetValues.split(',').map(value => parseFloat(value.trim()));
-    }
-  
-    // Get form components
-    //
-    const components = this.shadowRoot.querySelectorAll('form-container');
-    
-    // Track current position in presetValues array
-    //
-    let valueIndex = 0;
-  
-    components.forEach(component => {
-      // Select input fields
-      //
-      const inputs = component.shadowRoot.querySelectorAll('input');
-      
-      inputs.forEach(input => {
-        // Populate input with corresponding preset value if available
-        //
-        if (valueIndex < presetValues.length) {
-          // Format value to 4 decimal places
-          //
-          input.value = parseFloat(presetValues[valueIndex]).toFixed(4); // Set input value from presetValues array
-          
-          // Move to next preset value
-          //
-          valueIndex++;
-        }
-      });
-    });
-  } 
   //
   // end of method
 
