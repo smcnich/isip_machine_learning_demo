@@ -1,311 +1,3 @@
-class FormContainer extends HTMLElement {
-  /*
-  class: FormContainer
-
-  description:
-    This class is designed to create a dynamic form container component that fetches data parameters from 
-    an API endpoint and renders inputs or grouped input elements based on the received parameters. It extends
-    the HTMLElement class and uses a shadow DOM for encapsulating its styles and structure. The component 
-    automatically processes nested parameters and ensures a responsive design.
-
-    To create a new instance of the component, the class should be instantiated using the custom element 
-    `<form-container>`. It fetches parameters from the backend, processes them, and dynamically renders the UI.
-
-    Additional methods can be added as needed to extend its functionality.
-  */
-  constructor() {
-    /*
-    method: FormContainer::constructor
-
-    args:
-      None
-
-    returns:
-      FormContainer instance
-
-    description:
-      This is the constructor for the FormContainer class. It initializes the component
-      by creating a shadow root for style and structure encapsulation.
-    */
-
-    // Call the parent constructor (HTMLElement)
-    //
-    super();
-
-    // Create a shadow root for the component
-    //
-    this.attachShadow({mode: 'open'});
-  }
-  //
-  // end of method
-
-  async connectedCallback() {
-    /*
-    method: FormContainer::connectedCallback
-
-    args:
-      None
-
-    returns:
-      None
-
-    description:
-      This lifecycle method is called when the component is added to the DOM.
-      It fetches parameters from the backend, renders the component based on 
-      those parameters, and applies them as needed.
-    */
-
-    // Fetch parameters from the backend
-    //
-    const params = await this.fetch_params();
-
-    // If parameters are successfully fetched
-    //
-    if (params) {
-      this.render(params); // Render the component UI using the fetched parameters
-    }
-  }
-  //
-  // end of method
-
-  async fetch_params() {
-    /*
-    method: FormContainer::fetch_params
-
-    args:
-      None
-
-    returns:
-      (Object | undefined) - An object containing the fetched parameters, or undefined in case of an error.
-
-    description:
-      This method fetches parameter data from the `/api/get_data_params` endpoint. It retrieves
-      a specific key based on the 'key' attribute of the element, processes the data, and 
-      returns the corresponding parameters for rendering.
-    */
-    try {
-      // Send a GET request to the API endpoint
-      //
-      const response = await fetch('/api/get_data_params');
-      
-      // If the response is not successful, throw an error
-      //
-      if (!response.ok) {
-        throw new Error('HTTP error: Status: ${response.status}');
-      }
-
-      // Parse the JSON response
-      //
-      const data = await response.json();
-
-      // Extract the parameter key from the element attribute
-      //
-      const key = this.getAttribute('key') || 'two_gaussian';
-      
-      // Return the parameters corresponding to the specified key
-      //
-      const params = data[key]?.params;
-      return params;
-
-    } catch (error) {
-      // Log errors encountered during the fetch process
-      //
-      console.error('Failed to fetch parameters:', error);
-    }
-  }
-  //
-  // end of method
-
-  generate_container(name, dimensions, defaultValues) {
-    /*
-    method: FormContainer::generate_container
-
-    args:
-      name (String) - The name of the parameter to be displayed as a label.
-      dimensions (String) - The dimensions of the input grid (e.g., "2,3").
-      defaultValues (Array) - Default values for the input fields.
-
-    returns:
-      (String) - An HTML string representing a container with dynamically generated inputs.
-
-    description:
-      This method generates a responsive container with labeled input fields
-      based on the specified name, dimensions, and default values. It ensures 
-      that all input values are formatted to four decimal places.
-    */
-
-    // Parse the rows and columns from the dimensions
-    //
-    const [rows, cols] = (dimensions || '1,1').split(',').map(Number);
-
-    // Generate HTML for input fields
-    //
-    let inputsHTML = '';
-    let index = 1;
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        const defaultValue = parseFloat(defaultValues[index - 1] || 0).toFixed(4); // Ensure default values have 4 decimals
-        inputsHTML += `
-          <input 
-            type="number" 
-            placeholder="Value ${index}" 
-            value="${defaultValue}" 
-            oninput="this.value = parseFloat(this.value || 0).toFixed(4)" 
-            onblur="this.value = parseFloat(this.value || 0).toFixed(4)"
-          >
-        `;
-        index++;
-      }
-    }
-
-    // Create a container with label and input grid
-    //
-    const container = document.createElement('div');
-    container.className = 'num-container';
-
-    const label = document.createElement('label');
-    label.textContent = name;
-
-    const inputDiv = document.createElement('div');
-    inputDiv.className = 'num-input';
-
-    // Apply grid layout dynamically
-    inputDiv.style.display = 'grid';
-    inputDiv.style.gridTemplateColumns = `repeat(${cols}, 1fr)`; // Dynamically set grid columns
-    inputDiv.style.gap = '0.5vw'; // Space between inputs
-
-    inputDiv.innerHTML = inputsHTML;
-
-    container.appendChild(label);
-    container.appendChild(inputDiv);
-
-    return container.outerHTML;
-  }
-  //
-  // end of method
-
-  render(params) {
-    /*
-    method: FormContainer::render
-
-    args:
-      params (Object) - An object containing the parameters to be rendered.
-
-    returns:
-      None
-
-    description:
-      This method renders the component by dynamically generating input
-      fields and nested groups based on the provided parameters. It applies 
-      styles for responsive design and organizes the elements into a structured layout.
-    */
-
-    // Clear existing content
-    //
-    this.shadowRoot.innerHTML = '';
-    let inputsHTML = '';
-    
-    // Helper function to process parameters
-    //
-    const processParam = (param) => {
-      const { type } = param;
-
-      // If the parameter is of type 'input'
-      //
-      if (type === 'input') {
-        return this.generate_container(param.name, param.dimensions, param.default);
-      }
-
-      // If the parameter is of type 'group' and has nested params
-      //
-      if (type === 'group' && param.params) {
-        // Create a div for the group container
-        //
-        let groupHTML = '<div class="group-container" style="display: flex;">'; // Use flexbox and wrap
-
-        // Iterate over nested params inside the group and process each one
-        //
-        for (const [nestedKey, nestedParam] of Object.entries(param.params)) {
-          groupHTML += processParam(nestedParam);  // Recursively process each nested parameter
-        }
-
-        groupHTML += '</div>';  // Close the group container
-        return groupHTML;  // Return the group HTML
-      }
-
-      return '';  // Return an empty string if no valid type is found
-    };
-
-    // Iterate over top-level params
-    //
-    for (const [key, param] of Object.entries(params)) {
-      inputsHTML += processParam(param);  // Process each parameter, including nested ones
-    }
-
-    // Attach styles and inputs
-    //
-    this.shadowRoot.innerHTML = `
-      <style>
-        /* Styling the main container for form inputs */
-        .form-container {
-          display: flex;
-          flex-direction: column;
-        }
-
-        /* Styling for individual input containers */
-        .num-container {
-          border: 2px solid #ccc;
-          padding: 0.4vw;
-          border-radius: 0.4vw;
-          width: 100%;
-          margin: 0.4vh 0.15vw 0.1vw;
-          box-sizing: border-box;
-        }
-
-        /* Label styling for input fields */
-        .num-container label {
-          padding-left: 0.5vw;
-          font-family: 'Inter', sans-serif;
-          font-size: 0.9em;
-          font-weight: bold;
-          margin-bottom: 0.3vw;
-          display: block;
-        }
-
-        /* Grid layout for input fields */
-        .num-input {
-          display: grid;
-          gap: 0.5vw;
-        }
-
-        /* Input field styling */
-        input {
-          padding: 0.4vw;
-          border: 1px solid #ccc;
-          border-radius: 0.4vw;
-          font-size: 0.75em;
-          box-sizing: border-box;
-          width: 100%;
-        }
-
-        /* Input field focus state */
-        input:focus {
-          border-color: #7441BA;
-          border-width: 2px;
-          outline: none;
-        }
-      </style>
-      <div class="form-container">
-        ${inputsHTML}
-      </div>
-    `; 
-  }
-  //
-  // end of method
-}
-//
-// end of class
-
 class DataPopup extends HTMLElement {
   /*
   class: DataPopup
@@ -364,6 +56,17 @@ class DataPopup extends HTMLElement {
       popup behaves as intended.
     */
 
+    const params = this.getAttribute('params');
+    this.params = JSON.parse(params);
+
+    // Retrieve the button label from attributes
+    //
+    this.label = this.getAttribute('label') || 'Button';
+
+    // Retrieve the data key from attributes
+    //
+    this.key = this.getAttribute('key') || 'two_gaussian';
+
     // Render the HTML and styles for the component
     //
     this.render();
@@ -391,14 +94,6 @@ class DataPopup extends HTMLElement {
       the button label and popup contents based on the component's attributes ('label' and 'key').
       It also includes styling for the button, popup, and overlay.
     */
-
-    // Retrieve the button label from attributes
-    //
-    const label = this.getAttribute('label') || 'Button';
-
-    // Retrieve the data key from attributes
-    //
-    const key = this.getAttribute('key') || 'two_gaussian';
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -510,8 +205,9 @@ class DataPopup extends HTMLElement {
 
       </style>
 
+
       <!-- Button to trigger the popup -->
-      <button class="toolbar-popup-button">${label}</button>
+      <button class="toolbar-popup-button">${this.label}</button>
       
       <!-- Background overlay -->
       <div class="overlay" id="overlay"></div>
@@ -519,15 +215,14 @@ class DataPopup extends HTMLElement {
       <!-- Popup container -->
       <div class="popup" id="popup">
         <button class="close-btn" id="close-btn">X</button>
-        <h2>Set ${label} Parameters</h2>
-        <form-container key="${key}"></form-container>
-        <form id="data-form">
+        <h2>Set ${this.label} Parameters</h2>
+        <div id="form-div">
           <div class="button-container">
             <button type="button" class="button" id="presetButton">Presets</button>
             <button type="reset" class="reset" id="clearButton">Clear</button>
             <button type="submit" class="button">Submit</button>
           </div>
-        </form>      
+        </div>      
       </div>
     `;
 
@@ -535,8 +230,16 @@ class DataPopup extends HTMLElement {
     //
     const button = this.shadowRoot.querySelector('.toolbar-popup-button');
     const popup = this.shadowRoot.getElementById('popup');
-    const overlay = this.shadowRoot.getElementById('overlay');
     const closeBtn = this.shadowRoot.getElementById('close-btn');
+
+    // create a dynamic form container for the distribution key
+    //
+    const form = new FormContainer(this.params);
+
+    // Append the form to the popup before the button container
+    // 
+    const formDiv = this.shadowRoot.getElementById('form-div');
+    formDiv.insertBefore(form, formDiv.firstChild);
 
     // Show the popup when the button is clicked
     //
@@ -866,6 +569,7 @@ class DataButton extends HTMLElement {
     //
     const label = this.getAttribute('label') || 'Button'; // Get the label from the attribute
     const key = this.getAttribute('key') || 'two_gaussian';
+    const params = this.getAttribute('params');
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -960,12 +664,33 @@ class DataButton extends HTMLElement {
         <button class="toolbar-button">${label}</button>
         <div class="dropdown-menu" id="dropdown-menu">
           <h1 class="header">Set Parameters</h1>
-          <data-popup label="Train" key="${key}"></data-popup>
-          <data-popup label="Eval" key="${key}"></data-popup>
         </div>
       </div>
-
     `;
+
+    // get the dropdown menu element
+    //
+    const dropMenu = this.shadowRoot.querySelector('.dropdown-menu');
+
+    // add the train data pop-up botton with the correct attributes
+    // you have to do it this way because if you create the popups
+    // in the HTML string above, the JSON parameters are not passed
+    // correctly
+    //
+    const train = document.createElement('data-popup');
+    train.setAttribute('label', 'Train');
+    train.setAttribute('key', key);
+    train.setAttribute('params', params);
+    dropMenu.appendChild(train);
+
+    // do the same for the eval pop-up botton. not allowed to name
+    // a variable "eval" in some forms of JS, so add the underscore before
+    //
+    const _eval = document.createElement('data-popup');
+    _eval.setAttribute('label', 'Eval');
+    _eval.setAttribute('key', key);
+    _eval.setAttribute('params', params);
+    dropMenu.appendChild(_eval);
   }
 
   // Add event listeners when hovering over the dropdown button
@@ -1015,6 +740,5 @@ class DataButton extends HTMLElement {
 
 // Register the custom element
 //
-customElements.define('form-container', FormContainer);
 customElements.define('data-popup', DataPopup);
 customElements.define('data-button', DataButton);

@@ -245,11 +245,22 @@ class Toolbar_DropdownClear extends HTMLElement {
         button.classList.remove('active'); // Remove highlight when leaving dropdown
       });
 
+      // iterate over all of the buttons in the submenu (clear data, clear results, clear all)
+      //
       for (let clearButton of dropdownMenu.querySelectorAll('toolbar-button')) {
+        
+        // add an event listener to each button
+        //
         clearButton.addEventListener('click', () => {
   
+          // get the clear attribute from the button
+          //
           const clear = clearButton.getAttribute('clear');
   
+          // send a custom event to the window which the plot component
+          // is listening for. the plot component will clear the plot
+          // based on the clear attribute.
+          //
           window.dispatchEvent(new CustomEvent('clearPlot', {
             detail: {
               type: clear,

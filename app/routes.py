@@ -39,7 +39,7 @@ def get_data_params():
     # get the default parameter file. do not do this as a global variable
     # because the 'current_app.config' object only works in a route
     #
-    pfile = os.path.join(current_app.config['BACKEND'], 'DataParams.json')
+    pfile = os.path.join(current_app.config['BACKEND'], 'imld_data_params.json')
 
     with open(pfile, 'r') as file:
         data = json.load(file)

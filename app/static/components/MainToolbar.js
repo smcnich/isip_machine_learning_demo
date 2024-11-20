@@ -65,7 +65,7 @@ class MainToolbar extends HTMLElement {
      the component to close any open dropdowns.
     */
 
-     await this.loadJSONData();
+    await this.loadJSONData();
 
     // Render the component to the webpage
     //
@@ -84,10 +84,15 @@ class MainToolbar extends HTMLElement {
 
   async loadJSONData() {
     try {
-      const response = await fetch('/api/get_data_params');  // Adjust the URL to your endpoint
-      const jsonText = await response.json();  // Use .json() instead of .text() for JSON parsing
-      this.jsonData = jsonText;  // Store the data directly
-    } catch (error) {
+
+      // Fetch the JSON data from the server\
+      //
+      const response = await fetch('/api/get_data_params'); 
+      const jsonText = await response.json(); 
+      this.jsonData = jsonText; 
+    } 
+    
+    catch (error) {
       this.jsonData = {};  // Fallback in case of error
       console.error("Error loading JSON data:", error);
     }
@@ -240,8 +245,14 @@ class MainToolbar extends HTMLElement {
       shadow root to what is in the string below.
     */
 
+    
+
     const dataButtons = Object.entries(this.jsonData).map(([key, value]) => {
-      return `<data-button label="${value.name}" key="${key}"></data-button>`;
+      const button = document.createElement('data-button');
+      button.setAttribute('label', value.name);
+      button.setAttribute('key', key);
+      button.setAttribute('params', JSON.stringify(value));
+      return button.outerHTML;
     }).join("");
 
     // Set the inner HTML of the shadow root with toolbar structure, menu items, and dropdowns

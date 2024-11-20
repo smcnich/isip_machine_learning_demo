@@ -42,13 +42,11 @@
   <script src="static/components/ProcessLog.js"></script>
   <script src="static/components/Plot.js"></script>
   <script src="static/components/AlgoTool.js"></script>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="static/components/InfoIcon.js"></script>
   <script src="static/components/ToolbarComponents.js"></script>
   <script src="static/components/DataParams.js"></script>
-  <script>
-   let plotInfo = {labels: []};
-  </script>
+  <script src="static/components/FormContainer.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
  </head>
  <style>

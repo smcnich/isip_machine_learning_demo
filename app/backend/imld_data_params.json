@@ -1,0 +1,505 @@
+{
+  "two_gaussian": {
+    "name": "Two Gaussian",
+    "params": {
+      "npts1": {
+        "name": "Number of Points (1st)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov1": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mean1": {
+            "name": "Mean (1st)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[-0.5], [0.5]]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.025, 0], [0, 0.025]]
+          }
+        }
+      },
+      "npts2": {
+        "name": "Number of Points (2nd)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov2": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mean2": {
+            "name": "Mean (2nd)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[0.5], [-0.5]]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.025, 0], [0, 0.025]]
+          }
+        }
+      }
+    }
+  },
+
+  "four_gaussian": {
+    "name": "Four Gaussian",
+    "params": {
+      "npts1": {
+        "name": "Number of Points (1st)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov1": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mean1": {
+            "name": "Mean (1st)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[-0.5], [0.5]]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.025, 0], [0, 0.025]]
+          }
+        }
+      },
+      "npts2": {
+        "name": "Number of Points (2nd)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov2": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mean2": {
+            "name": "Mean (2nd)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[-0.5], [0.5]]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.025, 0], [0, 0.025]]
+          }
+        }
+      },
+      "npts3": {
+        "name": "Number of Points (3rd)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov3": {
+        "name": "Mean and Covariance 3",
+        "type": "group",
+        "params": {
+          "mean1": {
+            "name": "Mean (3rd)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[-0.5], [0.5]]
+          },
+          "cov1": {
+            "name": "Covariance (3rd)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.025, 0], [0, 0.025]]
+          }
+        }
+      },
+      "npts4": {
+        "name": "Number of Points (4th)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov4": {
+        "name": "Mean and Covariance 4",
+        "type": "group",
+        "params": {
+          "mean1": {
+            "name": "Mean (4th)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[-0.5], [0.5]]
+          },
+          "cov1": {
+            "name": "Covariance (4th)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.025, 0], [0, 0.025]]
+          }
+        }
+      }
+    }
+  },
+
+  "overlapping_gaussian": {
+    "name": "Overlapping Gaussian",
+    "params": {
+      "npts1": {
+        "name": "Number of Points (1st)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov1": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mean1": {
+            "name": "Mean (1st)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[-0.5], [0.5]]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.025, 0], [0, 0.025]]
+          }
+        }
+      },
+      "npts2": {
+        "name": "Number of Points (2nd)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov2": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mean2": {
+            "name": "Mean (2nd)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[-0.5], [0.5]]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.025, 0], [0, 0.025]]
+          }
+        }
+      }
+    }
+  },
+
+  "two_ellipses": {
+    "name": "Two Ellipses",
+    "params": {
+      "npts1": {
+        "name": "Number of Points (1st)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov1": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mean1": {
+            "name": "Mean (1st)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[0.5], [0.5]]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.0333, 0], [0, 0.0043]]
+          }
+        }
+      },
+      "npts2": {
+        "name": "Number of Points (2nd)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov2": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mean2": {
+            "name": "Mean (2nd)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[0.5], [0.5]]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.0333, 0], [0, 0.0043]]
+          }
+        }
+      }
+    }
+  },
+
+  "four_ellipses": {
+    "name": "Four Ellipses",
+    "params": {
+      "npts1": {
+        "name": "Number of Points (1st)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov1": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mean1": {
+            "name": "Mean (1st)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[0.5], [0.5]]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.0333, 0], [0, 0.0043]]
+          }
+        }
+      },
+      "npts2": {
+        "name": "Number of Points (2nd)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov2": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mean2": {
+            "name": "Mean (2nd)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[0.5], [0.5]]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.0333, 0], [0, 0.0043]]
+          }
+        }
+      },
+      "npts3": {
+        "name": "Number of Points (3rd)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov3": {
+        "name": "Mean and Covariance 3",
+        "type": "group",
+        "params": {
+          "mean1": {
+            "name": "Mean (3rd)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[0.5], [0.5]]
+          },
+          "cov1": {
+            "name": "Covariance (3rd)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.0333, 0], [0, 0.0043]]
+          }
+        }
+      },
+      "npts4": {
+        "name": "Number of Points (4th)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov4": {
+        "name": "Mean and Covariance 4",
+        "type": "group",
+        "params": {
+          "mean1": {
+            "name": "Mean (4th)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[0.5], [0.5]]
+          },
+          "cov1": {
+            "name": "Covariance (4th)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.0333, 0], [0, 0.0043]]
+          }
+        }
+      }
+    }
+  },
+
+  "rotated_ellipses": {
+    "name": "Rotated Ellipses",
+    "params": {
+      "npts1": {
+        "name": "Number of Points (1st)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov1": {
+        "name": "Mean and Covariance 1",
+        "type": "group",
+        "params": {
+          "mean1": {
+            "name": "Mean (1st)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[0.5], [0.5]]
+          },
+          "cov1": {
+            "name": "Covariance (1st)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.0333, 0], [0, 0.0043]]
+          }
+        }
+      },
+      "npts2": {
+        "name": "Number of Points (2nd)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov2": {
+        "name": "Mean and Covariance 2",
+        "type": "group",
+        "params": {
+          "mean2": {
+            "name": "Mean (2nd)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[0.5], [0.5]]
+          },
+          "cov2": {
+            "name": "Covariance (2nd)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.0333, 0], [0, 0.0043]]
+          }
+        }
+      }
+    }
+  },
+
+  "toroidal": {
+    "name": "Toroidal",
+    "params": {
+      "npts_ring": {
+        "name": "Number of Points (Ring)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 2000
+      },
+      "inner_outer_rad": {
+        "name": "Inner and Outer Radius",
+        "type": "group",
+        "params": {
+          "inner_rad": {
+            "name": "Inner Radius (Ring)",
+            "type": "float",
+            "range": [0, "inf"],
+            "default": 0.650
+          },
+          "outer_rad": {
+            "name": "Outer Radius (Ring)",
+            "type": "float",
+            "range": [0, "inf"],
+            "default": [0.850]
+          }
+        }
+      },
+      "npts_mass": {
+        "name": "Number of Points (Mass)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 10000
+      },
+      "meancov1": {
+        "name": "Mean and Covariance (Mass)",
+        "type": "group",
+        "params": {
+          "mean1": {
+            "name": "Mean (Mass)",
+            "type": "matrix",
+            "dimensions": [2,1],
+            "default": [[0.0], [0.0]]
+          },
+          "cov1": {
+            "name": "Covariance (Mass)",
+            "type": "matrix",
+            "dimensions": [2,2],
+            "default": [[0.0083, 0], [0, 0.0083]]
+          }
+        }
+      }
+    }
+  },
+
+  "yin_yang": {
+    "name": "Yin Yang",
+    "params": {
+      "npts_yin": {
+        "name": "Number of Points (Yin)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 2000
+      },
+      "npts_yang": {
+        "name": "Number of Points (Yang)",
+        "type": "int",
+        "range": [0, "inf"],
+        "default": 2000
+      },
+      "radius": {
+        "name": "Radius",
+        "type": "float",
+        "range": [0, "inf"],
+        "default": 2
+      },
+      "ovlp": {
+        "name": "Overlap",
+        "type": "float",
+        "range": [0, "inf"],
+        "default": 0
+      }
+    }
+  }
+}
