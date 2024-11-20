@@ -9,7 +9,7 @@ class FormContainer extends HTMLElement {
       the form. the form can be submitted to get the values of the input fields.
     */
 
-    constructor(params) {
+    constructor(params, styleStr) {
       /*
       method: FormContainer::constructor
 
@@ -50,6 +50,8 @@ class FormContainer extends HTMLElement {
       // set the parameters for the form
       //
       this.params = params;
+
+      this.styleStr = styleStr;
     }
     //
     // end of method
@@ -90,57 +92,11 @@ class FormContainer extends HTMLElement {
        shadow root to what is in the string below.
       */
 
-       // WRITE YOUR HTML AND CSS HERE
+      // WRITE YOUR HTML AND CSS HERE
       this.shadowRoot.innerHTML = `
+
         <style>
-          /* Styling the main container for form inputs */
-          .form-container {
-            display: flex;
-            flex-direction: column;
-          }
-
-          /* Styling for individual input containers */
-          .num-container {
-            border: 2px solid #ccc;
-            padding: 0.4vw;
-            border-radius: 0.4vw;
-            width: 100%;
-            margin: 0.4vh 0.15vw 0.1vw;
-            box-sizing: border-box;
-          }
-
-          /* Label styling for input fields */
-          .num-container label {
-            padding-left: 0.5vw;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9em;
-            font-weight: bold;
-            margin-bottom: 0.3vw;
-            display: block;
-          }
-
-          /* Grid layout for input fields */
-          .num-input {
-            display: grid;
-            gap: 0.5vw;
-          }
-
-          /* Input field styling */
-          input {
-            padding: 0.4vw;
-            border: 1px solid #ccc;
-            border-radius: 0.4vw;
-            font-size: 0.75em;
-            box-sizing: border-box;
-            width: 100%;
-          }
-
-          /* Input field focus state */
-          input:focus {
-            border-color: #7441BA;
-            border-width: 2px;
-            outline: none;
-          }
+          ${this.styleStr}
         </style>
 
         <!-- Add your HTML here -->
@@ -200,10 +156,14 @@ class FormContainer extends HTMLElement {
         return this.generate_numeric_input(key, param, false);
       }
 
+      else if (type == 'select') {
+        return this.generate_select_input(key, param);
+      }
+
       // if the input is of type 'matrix'
       //
       else if (type === 'matrix') {
-        return this.generate_matrix(key, param, false);
+        return this.generate_matrix_input(key, param, false);
       }
 
       // If the parameter is of type 'group' and has nested params
@@ -324,9 +284,44 @@ class FormContainer extends HTMLElement {
     //
     // end of method
 
-    generate_matrix(key, params, int=False) {
+    generate_select_input(key, params) {
       /*
-      method: FormContainer::generate_matrix
+      */
+
+      // Create a container with label and input grid
+      //
+      const container = document.createElement('div');
+      container.className = 'select-container';
+  
+      // create a label for the input
+      //
+      const label = document.createElement('label');
+      label.textContent = params.name;
+      label.for = key;
+  
+      // create the input field
+      //
+      const inputDiv = document.createElement('select');
+      inputDiv.className = 'select-input';
+
+      params.options.forEach(option => {
+        let opt = document.createElement('option');
+        opt.value = option;
+        opt.innerText = option;
+        inputDiv.appendChild(opt);
+      });
+
+      // append the label and input div to the container
+      //
+      container.appendChild(label);
+      container.appendChild(inputDiv);
+      
+      return container;
+    }
+
+    generate_matrix_input(key, params, int=False) {
+      /*
+      method: FormContainer::generate_matrix_input
   
       args:
        key (String): the key of the parameter, should match nedc ml tools data
@@ -496,23 +491,80 @@ class FormContainer extends HTMLElement {
        of the form and return them as a JSON object.
       */
 
-      // get the form data
-      //
-      const formData = new FormData(this.form);
-
-      // convert the form data to a JSON object
-      //
-      const data = {};
-      for (const [key, value] of formData.entries()) {
-        data[key] = value;
-      }
-
-      // return the data
-      //
-      return data;
+      return
     }
     // end of method
 
+    clearform() {
+      return
+    }
+
+    setDefaults(_params=null) {
+      /*
+      method: FormContainer::setDefaults
+  
+      args:
+       _params (Object): the parameter block containing defaults [default = null]
+  
+      returns:
+       None
+  
+      description:
+       this method sets the default values of the form to the values specified
+       in the parameters object.
+      */
+
+      // create a params variable. since the default param is null, test
+      // make sure the params var always holds something, whether it is the
+      // class attribute or if it is passed in
+      //
+      let params;
+      if (_params) { params = _params; }
+      else { params = this.params; }
+
+      // iterate over the parameters and set the default values
+      //
+      for (const [key, param] of Object.entries(params.params)) {
+
+        // if the parameter is a matrix 
+        //
+        if (param.type == 'matrix') {
+          
+          // get the container that holds the inputs of the matrix based
+          // on its aria-label
+          //
+          const inputDiv = this.shadowRoot.querySelector(`[aria-label="${key}"]`);
+          
+          // get all of the inputs inside of the matrix container
+          //
+          const inputs = inputDiv.getElementsByTagName('input');
+
+          // flatten the array completely. since the array is given as 2D
+          // in the parameter file, flatten it into a vector
+          //
+          const flattenedDefaults = param.default.flat(Infinity);
+          
+          // iterate over each input value, applying the default value
+          //
+          for (let i = 0; i < inputs.length; i++) {
+            inputs[i].value = flattenedDefaults[i];
+          }
+        }
+
+        // if the type is a group, recursively call the function
+        //
+        else if (param.type == 'group') {
+          this.setDefaults(param);
+        }
+
+        // else, get the element and key
+        //
+        else {
+          const input = this.shadowRoot.getElementById(key);
+          input.value = param.default;
+        }
+      }
+    }
   }
   //
   // end of class

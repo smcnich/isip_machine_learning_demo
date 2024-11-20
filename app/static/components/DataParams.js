@@ -232,14 +232,66 @@ class DataPopup extends HTMLElement {
     const popup = this.shadowRoot.getElementById('popup');
     const closeBtn = this.shadowRoot.getElementById('close-btn');
 
+    // Create a style element
+    const style = `
+    /* Styling the main container for form inputs */
+    .form-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Styling for individual input containers */
+    .num-container {
+      border: 2px solid #ccc;
+      padding: 0.4vw;
+      border-radius: 0.4vw;
+      width: 100%;
+      margin: 0.4vh 0.15vw 0.1vw;
+      box-sizing: border-box;
+    }
+
+    /* Label styling for input fields */
+    .num-container label {
+      padding-left: 0.5vw;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9em;
+      font-weight: bold;
+      margin-bottom: 0.3vw;
+      display: block;
+    }
+
+    /* Grid layout for input fields */
+    .num-input {
+      display: grid;
+      gap: 0.5vw;
+    }
+
+    /* Input field styling */
+    input {
+      padding: 0.4vw;
+      border: 1px solid #ccc;
+      border-radius: 0.4vw;
+      font-size: 0.75em;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    /* Input field focus state */
+    input:focus {
+      border-color: #7441BA;
+      border-width: 2px;
+      outline: none;
+    }
+  `;
+
     // create a dynamic form container for the distribution key
     //
-    const form = new FormContainer(this.params);
+    this.form = new FormContainer(this.params, style);
 
     // Append the form to the popup before the button container
     // 
     const formDiv = this.shadowRoot.getElementById('form-div');
-    formDiv.insertBefore(form, formDiv.firstChild);
+    formDiv.insertBefore(this.form, formDiv.firstChild);
 
     // Show the popup when the button is clicked
     //
@@ -313,7 +365,7 @@ class DataPopup extends HTMLElement {
         //
         function traverseParams(params) {
           for (const key in params) {
-            if (params[key].type === 'input' && params[key].default) {
+            if ((params[key].type === 'int' || params[key.type === 'matrix']) && params[key].default) {
               // If it's an input and has a default, add it to the list
               //
               defaultValues = defaultValues.concat(params[key].default);
@@ -359,14 +411,10 @@ class DataPopup extends HTMLElement {
     // Fetch and apply preset values when preset button is clicked
     //
     presetButton.addEventListener('click', async () => {
-      // Get the current key and fetch preset values
+
+      // set the defaults through the form object
       //
-      const key = this.getAttribute('key');
-      const presets = await this.getDefaults(key);
-      
-      // Populate inputs with fetched preset values
-      //
-      this.fillPresets(presets);
+      this.form.setDefaults();
     });
   }
   //

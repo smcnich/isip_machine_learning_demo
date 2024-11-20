@@ -398,32 +398,9 @@ class AlgoTool extends HTMLElement {
               margin-left: 5px;
             }
 
-            .input {
-              height: auto;
-              width: 50%;
-              -webkit-box-sizing: border-box;
-              -moz-box-sizing: border-box;
-              box-sizing: border-box;
+            #paramBox {
+              margin-top: 10px;
             }
-
-            select.input {
-              font-family: 'Inter', sans-serif;
-              font-size: 0.9em;
-              font-weight: 100;
-              border: 1px solid #8f8f9d;
-              border-radius: 2px;
-              background-color: var(--secondary-color);
-            }
-
-            input.input {
-              font-family: 'Inter', sans-serif;
-              font-size: 0.9em;
-              font-weight: 100;
-              border: 1px solid #8f8f9d;
-              border-radius: 2px;
-              background-color: var(--secondary-color);
-            }
-
           </style>
 
           <!-- Add your HTML here -->
@@ -436,7 +413,7 @@ class AlgoTool extends HTMLElement {
               <option value="" disabled selected>Select an Algorithm</option>
               ${options}
             <select>
-            <div id="params"></div>
+            <div id="paramBox"></div>
           </div>
         `;
 
@@ -447,7 +424,7 @@ class AlgoTool extends HTMLElement {
         // get the container which the parameters will be stored in so they can be
         // added when the algortihm is changed
         //
-        const paramsContainer = this.shadowRoot.querySelector('#params');
+        const paramsContainer = this.shadowRoot.querySelector('#paramBox');
         
         // create an event listener that listens to when the value of the select element changes
         //
@@ -461,12 +438,47 @@ class AlgoTool extends HTMLElement {
           //
           const selectedValue = event.target.value;
 
-          // get the params for the selected algorithm and generate the param fields
+          // Create a style element
+          const style = `
+            /* Styling the main container for form inputs */
+            .form-container {
+              display: flex;
+              flex-direction: column;
+            }
+
+            /* Styling for individual input containers */
+            .num-container {
+              border: 2px solid #ccc;
+              padding: 0.4vw;
+              border-radius: 0.4vw;
+              width: 100%;
+              margin: 0.4vh 0.15vw 0.1vw;
+              box-sizing: border-box;
+            }
+
+            /* Label styling for input fields */
+            .num-container label {
+              padding-left: 0.5vw;
+              font-family: 'Inter', sans-serif;
+              font-size: 0.9em;
+              font-weight: bold;
+              margin-bottom: 0.3vw;
+              display: block;
+            }
+
+            /* Grid layout for input fields */
+            .num-input {
+              display: grid;
+              gap: 0.5vw;
+            }
+          `;
+
+          // create a dynamic form container for the distribution key
           //
-          let params = this.generate_param_fields(data[selectedValue]['params']);
+          const form = new FormContainer(data[selectedValue], style);
 
           // add the params to the params container
-          paramsContainer.innerHTML += params;
+          paramsContainer.appendChild(form);
         });
         //
         // end of event listener
