@@ -510,8 +510,41 @@ class FormContainer extends HTMLElement {
     }
     // end of method
 
-    clearform() {
-      return
+    clearForm(_params=null) {
+      let params;
+      if (_params) { params = _params; }
+      else { params = this.params; }
+
+      // iterate over the parameters and set the default values
+      //
+      for (const [key, param] of Object.entries(params.params)) {
+        if (param.type == 'group') {
+          this.clearForm(param);
+        } else if (param.type == 'matrix') {
+          // get the container that holds the inputs of the matrix based
+          // on its aria-label
+          //
+          const inputDiv = this.shadowRoot.querySelector(`[aria-label="${key}"]`);
+          
+          // get all of the inputs inside of the matrix container
+          //
+          const inputs = inputDiv.getElementsByTagName('input');
+
+          // flatten the array completely. since the array is given as 2D
+          // in the parameter file, flatten it into a vector
+          //
+          const flattenedDefaults = param.default.flat(Infinity);
+          
+          // iterate over each input value, applying the default value
+          //
+          for (let i = 0; i < inputs.length; i++) {
+            inputs[i].value = '';          
+          }
+        } else {
+          const input = this.shadowRoot.getElementById(key);
+          input.value = ''; 
+        }
+      }
     }
 
     setDefaults(_params=null) {

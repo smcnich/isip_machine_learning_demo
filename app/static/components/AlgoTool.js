@@ -154,8 +154,8 @@ class AlgoTool extends HTMLElement {
               justify-content: center;
               align-items: center;
               height: 95%;
-              margin-top: 1rem;
-              margin-bottom: 1rem;
+              margin-top: 0.2rem;
+              margin-bottom: 0.2rem;
               margin-left: 1.25rem;
               margin-right: 1.25rem;
             }
@@ -168,7 +168,6 @@ class AlgoTool extends HTMLElement {
               font-size: 1em;
               font-weight: 100;
               background-color: var(--main-color);
-              margin-top: 1em;
             }
 
             option {
@@ -181,20 +180,17 @@ class AlgoTool extends HTMLElement {
               display: flex;
               flex-direction: row;
               justify-content: center;
-              margin-bottom: 1em;
-              margin-top: 1em;
+              margin-bottom: 0.2em;
               width: 100%;
               height: 10%;
             }
 
             button { 
-              height: 100%;
-              width: 40%;
+              height: 70%;
+              width: 45%;
               font-family: 'Inter', sans-serif;
               font-weight: 600;
-              padding-top: 0.5em;
-              padding-bottom: 0.5em;
-              font-size: 1.25em;
+              font-size: 1.1em;
               border-style: solid;
               border-width: 1px;
               border-color: black;
@@ -204,7 +200,6 @@ class AlgoTool extends HTMLElement {
             #params {
               width: 100%;
               height: 90%;
-              margin-top: 1.5em;
               display: flex;
               flex-direction: column;
               justify-content: start;
@@ -249,7 +244,7 @@ class AlgoTool extends HTMLElement {
             }
 
             #paramBox {
-              margin-top: 10px;
+              margin-top: 2px;
               width: 100%;
               height: 100%;
             }
@@ -316,8 +311,9 @@ class AlgoTool extends HTMLElement {
           label {
             padding-left: 0.5vw;
             padding-right: 0.5vw;
+            padding-top: 0.30vw;
             font-family: 'Inter', sans-serif;
-            font-size: 0.8em;
+            font-size: 0.85em;
             font-weight: bold;
           }
       
@@ -327,7 +323,7 @@ class AlgoTool extends HTMLElement {
             border: 1px solid #ccc;
             border-radius: 0.4vw;
             font-size: 0.8em;
-            width: 25%;
+            width: 35%;
             background-color: white;
             font-family: 'Inter', sans-serif;
             font-size: 0.8em;

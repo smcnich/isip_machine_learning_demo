@@ -347,7 +347,10 @@ class DataPopup extends HTMLElement {
     // Clear all input fields when clear button is clicked
     //
     clearButton.addEventListener('click', () => {
-      this.resetInputs(); // Call resetInputs method
+      
+      // clear the inputs through the form object
+      //
+      this.form.clearForm();
     });
 
     // Fetch and apply preset values when preset button is clicked
@@ -357,26 +360,6 @@ class DataPopup extends HTMLElement {
       // set the defaults through the form object
       //
       this.form.setDefaults();
-    });
-  }
-  //
-  // end of method
-
-  // Reset all input fields in the form
-  //
-  resetInputs() {
-    // Select form components
-    //
-    const components = this.shadowRoot.querySelectorAll('form-container');
-    components.forEach(componenets => {
-      // Get input fields
-      //
-      const inputs = componenets.shadowRoot.querySelectorAll('input');
-      inputs.forEach(input => {
-        // Clear the value of each input field
-        //
-        input.value = '';
-      });
     });
   }
   //
