@@ -26,12 +26,29 @@ def get_alg_params():
     # get the default parameter file. do not do this as a global variable
     # because the 'current_app.config' object only works in a route
     #
+    #pfile = os.path.join(current_app.config['BACKEND'], 'imld_alg_params.json')
+
+    #with open(pfile, 'r') as f:
+        #data = json.load(f)
+
+    #return jsonify(data)
+
+    # get the default parameter file. do not do this as a global variable
+    # because the 'current_app.config' object only works in a route
+    #
     pfile = os.path.join(current_app.config['BACKEND'], 'imld_alg_params.json')
 
-    with open(pfile, 'r') as f:
-        data = json.load(f)
+    with open(pfile, 'r') as file:
+        data = json.load(file)
 
-    return jsonify(data)
+    # Convert data to an OrderedDict to preserve the order of keys
+    ordered_data = OrderedDict(data)
+
+    # Manually serialize the ordered data and return it as JSON
+    return current_app.response_class(
+        json.dumps(ordered_data),  # Serialize ordered data to JSON
+        mimetype='application/json'
+    )
 
 @main.route('/api/get_data_params/', methods=['GET'])
 def get_data_params():
