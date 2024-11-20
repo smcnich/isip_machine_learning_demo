@@ -450,7 +450,7 @@ class AlgoTool extends HTMLElement {
           }
       
           /* Styling for individual input containers */
-          .param-container {
+          .num-container {
             display: flex;
             flex-direction: row;
             justify-content: space-between;

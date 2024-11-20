@@ -227,7 +227,7 @@ class FormContainer extends HTMLElement {
       // Create a container with label and input grid
       //
       const container = document.createElement('div');
-      container.className = 'param-container';
+      container.className = 'num-container';
   
       // create a label for the input
       //
@@ -300,7 +300,7 @@ class FormContainer extends HTMLElement {
       // Create a container with label and input grid
       //
       const container = document.createElement('div');
-      container.className = 'param-container';
+      container.className = 'num-container';
   
       // create a label for the input
       //
