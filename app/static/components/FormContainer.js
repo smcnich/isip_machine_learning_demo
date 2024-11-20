@@ -96,6 +96,15 @@ class FormContainer extends HTMLElement {
       this.shadowRoot.innerHTML = `
 
         <style>
+          :host {
+            width: 100%;
+            height: 100%;
+          }
+        
+          #form-div {
+            width: 100%;
+          }
+
           ${this.styleStr}
         </style>
 
@@ -218,7 +227,7 @@ class FormContainer extends HTMLElement {
       // Create a container with label and input grid
       //
       const container = document.createElement('div');
-      container.className = 'num-container';
+      container.className = 'param-container';
   
       // create a label for the input
       //
@@ -291,7 +300,7 @@ class FormContainer extends HTMLElement {
       // Create a container with label and input grid
       //
       const container = document.createElement('div');
-      container.className = 'select-container';
+      container.className = 'param-container';
   
       // create a label for the input
       //

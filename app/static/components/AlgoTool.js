@@ -285,7 +285,7 @@ class AlgoTool extends HTMLElement {
         // iterate over each alg in the dictionary and create an option element
         //
         for (let key in data) {
-          options += `<option value="${key}">${data[key]['name']} (${key})</option>`;
+          options += `<option value="${key}">${data[key]['name']}</option>`;
         };
 
         // WRITE YOUR HTML AND CSS HERE
@@ -400,6 +400,8 @@ class AlgoTool extends HTMLElement {
 
             #paramBox {
               margin-top: 10px;
+              width: 100%;
+              height: 100%;
             }
           </style>
 
@@ -440,38 +442,64 @@ class AlgoTool extends HTMLElement {
 
           // Create a style element
           const style = `
-            /* Styling the main container for form inputs */
-            .form-container {
-              display: flex;
-              flex-direction: column;
-            }
+          /* Styling the main container for form inputs */
+          .form-container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+          }
+      
+          /* Styling for individual input containers */
+          .param-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            border: 2px solid #ccc;
+            padding: 0.4vw;
+            border-radius: 0.4vw;
+            margin: 0.4vh 0.15vw 0.1vw;
+            box-sizing: border-box;
+            width: 100%;
+          }
+      
+          /* Label styling for input fields */
+          label {
+            padding-left: 0.5vw;
+            padding-right: 0.5vw;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8em;
+            font-weight: bold;
+          }
+      
+          /* Input field styling */
+          input, select {
+            padding: 0.2vw;
+            border: 1px solid #ccc;
+            border-radius: 0.4vw;
+            font-size: 0.8em;
+            width: 25%;
+            background-color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8em;
 
-            /* Styling for individual input containers */
-            .num-container {
-              border: 2px solid #ccc;
-              padding: 0.4vw;
-              border-radius: 0.4vw;
-              width: 100%;
-              margin: 0.4vh 0.15vw 0.1vw;
-              box-sizing: border-box;
-            }
+            -ms-box-sizing:content-box;
+            -moz-box-sizing:content-box;
+            box-sizing:content-box;
+            -webkit-box-sizing:content-box; 
+          }
 
-            /* Label styling for input fields */
-            .num-container label {
-              padding-left: 0.5vw;
-              font-family: 'Inter', sans-serif;
-              font-size: 0.9em;
-              font-weight: bold;
-              margin-bottom: 0.3vw;
-              display: block;
-            }
-
-            /* Grid layout for input fields */
-            .num-input {
-              display: grid;
-              gap: 0.5vw;
-            }
-          `;
+          option {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8em;
+          }
+      
+          /* Input field focus state */
+          input:focus, select:focus {
+            border-color: #7441BA;
+            border-width: 2px;
+            outline: none;
+          }
+        `;
 
           // create a dynamic form container for the distribution key
           //
