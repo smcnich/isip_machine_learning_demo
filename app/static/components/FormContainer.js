@@ -259,6 +259,10 @@ class FormContainer extends HTMLElement {
       if (int) { 
         inputDiv.step = 1; 
         placeHolder = 'Integer Value';
+      } else {
+        // For floats, ensure values are displayed with 4 decimal places
+        inputDiv.step = '0.0001'; // Set the step to match the desired precision
+        inputDiv.value = parseFloat(inputDiv.value || 0).toFixed(4); // Default or format existing value
       }
       
       // if a range is given, set the min and max values
@@ -558,21 +562,25 @@ class FormContainer extends HTMLElement {
           // iterate over each input value, applying the default value
           //
           for (let i = 0; i < inputs.length; i++) {
-            inputs[i].value = flattenedDefaults[i];
-          }
+            inputs[i].value = parseFloat(flattenedDefaults[i]).toFixed(4);          }
+        }
+
+        // else, get the element and key
+        //
+        else if (param.type == 'int') {
+          const input = this.shadowRoot.getElementById(key);
+          input.value = param.default;
+        }
+
+        else if (param.type == 'float') {
+          const input = this.shadowRoot.getElementById(key);
+          input.value = parseFloat(param.default).toFixed(4);
         }
 
         // if the type is a group, recursively call the function
         //
         else if (param.type == 'group') {
           this.setDefaults(param);
-        }
-
-        // else, get the element and key
-        //
-        else {
-          const input = this.shadowRoot.getElementById(key);
-          input.value = param.default;
         }
       }
     }
