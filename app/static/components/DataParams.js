@@ -220,7 +220,7 @@ class DataPopup extends HTMLElement {
           <div class="button-container">
             <button type="button" class="button" id="presetButton">Presets</button>
             <button type="reset" class="reset" id="clearButton">Clear</button>
-            <button type="submit" class="button">Submit</button>
+            <button type="submit" class="button" id="submitButton">Submit</button>
           </div>
         </div>      
       </div>
@@ -343,6 +343,7 @@ class DataPopup extends HTMLElement {
     //
     const clearButton = this.shadowRoot.querySelector('#clearButton');
     const presetButton = this.shadowRoot.querySelector('#presetButton');
+    const submitButton = this.shadowRoot.querySelector('#submitButton');
     
     // Clear all input fields when clear button is clicked
     //
@@ -361,6 +362,45 @@ class DataPopup extends HTMLElement {
       //
       this.form.setDefaults();
     });
+
+    // Fetch and apply preset values when preset button is clicked
+    //
+    submitButton.addEventListener('click', async () => {
+
+      // set the defaults through the form object
+      //
+      const paramsDict = this.form.submitForm();
+      const dataPackage = [this.key, paramsDict];
+
+      try {
+        // Send paramsDict to the backend
+        const response = await fetch('/api/data_gen', { // Replace with your API endpoint
+            method: 'POST', // Use the appropriate method (POST/PUT)
+            headers: {
+                'Content-Type': 'application/json', // Ensure the server expects JSON
+            },
+            body: JSON.stringify(dataPackage), // Convert the paramsDict to a JSON string
+        });
+
+        // Check if the request was successful by looking at the response status code
+        if (response.ok) {
+            const result = await response.json();
+        } else {
+            // Check the status code directly
+            console.error(`Request failed with status: ${response.status} ${response.statusText}`);
+            // Optionally handle different status codes for different scenarios
+            if (response.status === 400) {
+                console.error('Bad Request: The data sent to the backend is invalid.');
+            } else if (response.status === 500) {
+                console.error('Server Error: There was an issue processing your request on the server.');
+            }
+        }
+      } catch (error) {
+          console.error('Error sending data to backend:', error);
+      }
+
+    });
+
   }
   //
   // end of method
