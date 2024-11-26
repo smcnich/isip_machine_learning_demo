@@ -349,10 +349,86 @@ class AlgoTool extends HTMLElement {
 
           // create a dynamic form container for the distribution key
           //
-          const form = new FormContainer(data[selectedValue], style);
+          this.form = new FormContainer(data[selectedValue], style);
 
           // add the params to the params container
-          paramsContainer.appendChild(form);
+          paramsContainer.appendChild(this.form);
+
+          // get the algo select element to be used to monitor when the value changes
+          //
+          const submitButtons = this.shadowRoot.querySelectorAll('button');
+
+          submitButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+
+              if (!this.form) {
+                return;
+              }
+
+              // get the proper button id and route to send the data to
+              //
+              let plot = button.getAttribute('id');
+              let route = '/api/' + plot + '/';
+ 
+              // create an event to get the data from the Plot.js component
+              // the event listener is in the Plot.js component and when invoked,
+              // the listener will add a property called "this.data" that contains
+              // the data from the plot
+              //
+              window.dispatchEvent(new CustomEvent('getData', {
+                detail: {
+                  ref: this,
+                  plotId: plot
+                }
+              }));
+
+              if (this.data == null) {
+                return null;
+              }
+
+
+              const request = {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  'algo': selectedValue.toString(),
+                  'params': this.form.submitForm(),
+                  'plotData': this.data
+                })
+              };
+
+              // make a train request to the server
+              //
+              fetch(route, request)
+              
+              // if the fetch fails, throw an error
+              //
+              .then((response) => {
+                if (response.ok) {
+                  return response.json();
+                }
+                throw new Error('Network response was not ok.');
+              })
+              
+              // if the fetch is successful, plot the decision surface
+              //
+              .then((data) => {
+
+                document.querySelectorAll('plot-card').forEach((plotCard) => {
+
+                  if(plotCard.getAttribute('plotId') == plot) {
+                    plotCard.decision_surface(data);
+                  }
+
+                })
+
+              });
+                
+            
+            });
+          });
         });
         //
         // end of event listener
@@ -360,6 +436,7 @@ class AlgoTool extends HTMLElement {
       });
       //
       // end of fetch
+
     }
     //
     // end of method

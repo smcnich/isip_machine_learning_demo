@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy
 
 import nedc_ml_tools as mlt
 import nedc_ml_tools_data as mltd
@@ -41,7 +42,7 @@ def imld_callback(name:str, *, status:float=None, data:dict=None, msg:str=None) 
 #
 # end of function
     
-def create_model(alg_name:str, *, params=None) -> mlt.Alg:
+def create_model(alg_name:str, params=None) -> mlt.Alg:
     '''
     function: create_model
 
@@ -78,6 +79,37 @@ def create_model(alg_name:str, *, params=None) -> mlt.Alg:
     return model
 #
 # end of function
+
+def create_data(x:list, y:list, labels:list) -> mltd.MLToolsData:
+    '''
+    function: create_data
+
+    args:
+     x (np.ndarray) : the data to use in the ML Tools data object
+     y (np.ndarray) : the labels to use in the ML Tools data object
+     labels (np.ndarray): the labels to use in the ML Tools data object
+
+    return:
+     mltd.MLToolsData: the ML Tools data object created
+    '''
+
+    # create a numpy array from the data
+    # make sure to stack the x and y data into a single array
+    # ex: x = [1,2,3]
+    #     y = [4,5,6]
+    #     X = [[1,4],
+    #          [2,5],
+    #          [3,6]]
+    #
+    X = np.column_stack((x, y))
+
+    # set the data and labels in the ML Tools data object
+    #
+    data = mltd.MLToolsData.from_data(X, labels)
+
+    # exit gracefully
+    #
+    return data
 
 def generate_data(dist_name:str, params:dict):
     '''
@@ -145,11 +177,9 @@ def train(model:mlt.Alg, data:mltd.MLToolsData):
       the labels generated while calculating the goodness of fit score.    
     '''
 
-    # train the model and get the model stats and f1 score
-    #
     stats, score = model.train(data)
 
-    # exit gracefully
+    # train the model and get the model stats and f1 score
     #
     return model, stats, score
 #
@@ -250,7 +280,45 @@ def load_alg_params(pfile:str) -> dict:
 # TODO: [Optional for Sprint 3] create a function that generates the decision surface
 #       for a model. Base it on the prep_decision_surface, predict_decision_surface, and
 #       plot_decision_surface functions in imld_model.py
-def generate_decision_surface():
-    return
+def generate_decision_surface(data:mltd.MLToolsData, model:mlt.Alg):
+
+    X = data.data
+
+    # get the min and max values of the data. pad the mins and maxes by 1
+    #
+    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+
+    print(x_min, x_max, y_min, y_max)
+
+    # create a meshgrid of the data. use this meshgrid to predict the labels
+    # at each point in the grid. this will allow us to plot the decision surface
+    # xx and yy will be the x and y values of the grid in the form of 2D arrays.
+    # xx acts as the rows of the grid, and yy acts as the columns of the grid
+    #
+    xx, yy = np.meshgrid(np.linspace(x_min, x_max), 
+                         np.linspace(y_min, y_max))
+    
+    # combine the xx and yy arrays to create a 3D array of the grid. this will effectively
+    # create a list of all the points in the grid. the shape of the array will be (n, 2)
+    #
+    XX = np.c_[xx.ravel(), yy.ravel()]
+
+    # create an MLToolsData object from the grid. since MLTools.predict needs MLToolsData
+    # as an input, we need to create a MLToolsData object from the grid. we don't need labels
+    # for the grid because that is unnecessary for prediction, so we can pass an empty 
+    # array for the labels
+    #
+    meshgrid = mltd.MLToolsData.from_data(XX, np.array([]))
+
+    # get the predictions of the model on each point of the meshgrid 
+    # get the labels for each point in the meshgrid. the labels will be
+    # flattened for each sample in the meshgrid
+    #
+    labels, _ = model.predict(meshgrid)
+
+    # return the labels of the meshgrid
+    #
+    return xx[0, :], yy[0, :], np.asarray(labels).reshape(xx.shape)
 #
 # end of function

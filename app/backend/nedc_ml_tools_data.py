@@ -92,7 +92,8 @@ class MLToolsData:
         self.num_of_classes = 0
         self.mapping_label = {}
 
-        self.load()
+        if (dir_path != ""):
+            self.load()
 
     def __repr__(self) -> str:
         return (f"MLToolData({self.dir_path}, label index = {self.lndx}, "
@@ -160,7 +161,7 @@ class MLToolsData:
     # end of method
 
     @classmethod
-    def from_imld(cls, imld_data):
+    def from_data(cls, X, y):
         """
         function: from_imld
 
@@ -178,28 +179,22 @@ class MLToolsData:
         self.dir_path = ""
         self.lndx = 0
         self.nfeats = -1
-        self.num_of_classes = len(imld_data)
+        self.num_of_classes = len(set(y))
 
-        labels = []
-        data = []
-        mapping_label = {}
-
-        # converting the data into our new format
+        # save the data and labels
         #
-        for i, lists in enumerate(imld_data):
-            mapping_label[i] = i
-            labels.extend([i] * len(lists))
-            for item in lists:
-                data.append(item)
+        self.labels = np.asarray(y)
+        self.data = np.asarray(X)
 
-        labels = np.asarray(labels)
-        data = np.asarray(data)
+        # create the mapping label
+        #
+        self.mapping_label = {i: label for i, label in enumerate(set(y))}
 
-        self.labels = labels
-        self.data = data
-        self.mapping_label = mapping_label
-
+        # return the MLToolsData object
+        #
         return self
+    #
+    # end of method
 
     @staticmethod
     def is_excel(fname):

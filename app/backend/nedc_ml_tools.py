@@ -1696,7 +1696,6 @@ class PCA:
             center= self.params_d[PCA_PRM_KEY_PARAM][PCA_PRM_KEY_CENTER],
             scale= self.params_d[PCA_PRM_KEY_PARAM][PCA_PRM_KEY_SCALE])
         cov = self.model_d[PCA_MDL_KEY_MODEL][PCA_MDL_KEY_COV]
-        print(cov)
 
         # number of components
         #

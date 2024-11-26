@@ -299,6 +299,26 @@ class FormContainer extends HTMLElement {
 
     generate_select_input(key, params) {
       /*
+      method: FormContainer::generate_select_input
+
+      args:
+       key (String): the key of the parameter, should match nedc ml tools data
+       params (Object): the parameters for the specific select input. should have
+                        the following format:
+
+                         params = {
+                           name: 'Parameter Name',
+                           type: 'select',
+                           options: ['option1', 'option2', ...],
+                           default: 'option1'
+                         }
+
+      returns:
+       HTMLDivElement: a container with labeled input fields for a select input
+
+      description:
+       this method generates a responsive container with labeled input field for a
+       select input based on the specified name, options, and default value.
       */
 
       // Create a container with label and input grid
@@ -316,6 +336,7 @@ class FormContainer extends HTMLElement {
       //
       const inputDiv = document.createElement('select');
       inputDiv.className = 'select-input';
+      inputDiv.id = key;
 
       params.options.forEach(option => {
         let opt = document.createElement('option');
@@ -491,7 +512,7 @@ class FormContainer extends HTMLElement {
     //
     // end of method
 
-    submitForm() {
+    submitForm(_params, _formValues) {
       /*
       method: FormContainer::submitForm
 
@@ -506,21 +527,41 @@ class FormContainer extends HTMLElement {
        of the form and return them as a JSON object.
       */
 
-      return
-    }
-    // end of method
-
-    clearForm(_params=null) {
+      // create a params variable. since the default param is null, test
+      // make sure the params var always holds something, whether it is the
+      // class attribute or if it is passed in
+      //
       let params;
       if (_params) { params = _params; }
       else { params = this.params; }
 
-      // iterate over the parameters and set the default values
+      // create a formValues variable. if the formValues is null, create an
+      // empty variable as this is the top level of the form. else, it is inside
+      // of a group parameter, so keep the formValues as is
+      //
+      let formValues;
+      if (!_formValues) { 
+        formValues = {}; 
+      }
+      else {
+        formValues = _formValues;
+      }
+
+      // iterate over the parameters and get the input values
       //
       for (const [key, param] of Object.entries(params.params)) {
+        
+        // if the form is a group, recursively call the function
+        // to get the input values of the group
+        //
         if (param.type == 'group') {
-          this.clearForm(param);
-        } else if (param.type == 'matrix') {
+          this.submitForm(param, formValues);
+        } 
+        
+        // if the form is a matrix, get the input values in a 2D array
+        //
+        else if (param.type == 'matrix') {
+        
           // get the container that holds the inputs of the matrix based
           // on its aria-label
           //
@@ -529,18 +570,82 @@ class FormContainer extends HTMLElement {
           // get all of the inputs inside of the matrix container
           //
           const inputs = inputDiv.getElementsByTagName('input');
-
-          // flatten the array completely. since the array is given as 2D
-          // in the parameter file, flatten it into a vector
+          
+          // iterate over each input in the array using simple
+          // matrix scaling technique. this is because the inputs
+          // are stored in a 1D array, so apply the matrix dimensions
+          // to the input box array to store the values in a 2D array
           //
-          const flattenedDefaults = param.default.flat(Infinity);
+          const rows = param.dimensions[0];
+          const cols = param.dimensions[1];
+          formValues[key] = [];
+          for (let i = 0; i < rows; i++) {
+            formValues[key].push([]);
+            for (let j = 0; j < cols; j++) {
+              formValues[key][i].push(inputs[i*cols + j].value);
+            }
+          }
+        } 
+        
+        // else, get the simple input value
+        //
+        else {
+          const input = this.shadowRoot.getElementById(key);
+          formValues[key] = input.value;
+        }
+      }
+
+      // return the form values as an object with each key
+      // being the parameter key
+      //
+      return formValues;
+    }
+    // end of method
+
+    clearForm(_params=null) {
+
+      // create a params variable. since the default param is null, test
+      // make sure the params var always holds something, whether it is the
+      // class attribute or if it is passed in
+      //
+      let params;
+      if (_params) { params = _params; }
+      else { params = this.params; }
+
+      // iterate over the parameters and set the default values
+      //
+      for (const [key, param] of Object.entries(params.params)) {
+        
+        // if the form is a group, recursively call the function
+        // to clear the values of the group
+        //
+        if (param.type == 'group') {
+          this.clearForm(param);
+        } 
+        
+        // if the form is a matrix, clear the values of the matrix
+        //
+        else if (param.type == 'matrix') {
+        
+          // get the container that holds the inputs of the matrix based
+          // on its aria-label
+          //
+          const inputDiv = this.shadowRoot.querySelector(`[aria-label="${key}"]`);
+          
+          // get all of the inputs inside of the matrix container
+          //
+          const inputs = inputDiv.getElementsByTagName('input');
           
           // iterate over each input value, applying the default value
           //
           for (let i = 0; i < inputs.length; i++) {
             inputs[i].value = '';          
           }
-        } else {
+        } 
+        
+        // else, clear the input value
+        //
+        else {
           const input = this.shadowRoot.getElementById(key);
           input.value = ''; 
         }

@@ -26,16 +26,6 @@ def get_alg_params():
     # get the default parameter file. do not do this as a global variable
     # because the 'current_app.config' object only works in a route
     #
-    #pfile = os.path.join(current_app.config['BACKEND'], 'imld_alg_params.json')
-
-    #with open(pfile, 'r') as f:
-        #data = json.load(f)
-
-    #return jsonify(data)
-
-    # get the default parameter file. do not do this as a global variable
-    # because the 'current_app.config' object only works in a route
-    #
     pfile = os.path.join(current_app.config['BACKEND'], 'imld_alg_params.json')
 
     with open(pfile, 'r') as file:
@@ -69,6 +59,52 @@ def get_data_params():
         json.dumps(ordered_data),  # Serialize ordered data to JSON
         mimetype='application/json'
     )
+
+@main.route('/api/train/', methods=['POST'])
+def train():
+    
+    # get the data from the request
+    #
+    data = request.get_json()
+
+    # get the data and algorithm parameters
+    #
+    params = data['params']
+    algo = data['algo']
+    x = data['plotData']['x']
+    y = data['plotData']['y']
+    labels = data['plotData']['labels']
+
+    # create the model given the parameters
+    #
+    model = imld.create_model(algo, {"name": algo, "params": params})
+
+    # create the data object
+    #
+    data = imld.create_data(x, y, labels)
+
+    # train the model
+    #
+    model, _, _ = imld.train(model, data)
+
+    # get the x y and z values from the decision surface
+    # x and y will be 1D and z will be 2D
+    #
+    x, y, z = imld.generate_decision_surface(data, model)
+
+    # format the response
+    #
+    response = {
+        'xx': x.tolist(), 
+        'yy': y.tolist(), 
+        'z': z.tolist()
+    }
+    
+    # return the jsonified response
+    #
+    return jsonify(response)
+#
+# end of function
 
 @main.route('/api/data_gen/', methods=['POST'])
 def data_gen():

@@ -59,6 +59,11 @@ class Plot extends HTMLElement {
     this.render();
     this.plotId = this.getAttribute('plotId');
 
+    // create class atrributes for plotting
+    //
+    this.plotData = [];
+    this.data = null;
+
     window.addEventListener('getData', (event) => {
 
       // if the plotId is not the same as this plotId, return nothing
@@ -72,7 +77,7 @@ class Plot extends HTMLElement {
       //
       const sender = event.detail.ref;
 
-      // save the data to the sender (Toolbar_SaveFileButton), to it can be saved to a
+      // save the data to the sender, to it can be saved to a
       // csv
       //
       sender.data = this.data;
@@ -81,6 +86,51 @@ class Plot extends HTMLElement {
     // Add event listener to create an empty plot when the website loads
     //
     window.addEventListener('DOMContentLoaded', () => {
+
+      // Set configuration data for Plotly
+      //
+      this.config = {
+        displayLogo: false,
+        modeBarButtonsToRemove: ['zoom2d', 'select2d', 'lasso2d', 'toggleSpikelines', 
+                                'hoverClosestCartesian', 'hoverCompareCartesian',
+                                'autoScale2d'],
+        responsive: true,
+        showLink: false,
+        cursor: 'pointer'
+      };
+
+      // Set layout data for Plotly
+      //
+      this.layout = {
+        autosize: true,
+        dragmode: false,
+        xaxis: {
+          range: [-1, 1],
+          zeroline: false,
+          showline: true,
+        },
+        yaxis: {
+          range: [-1, 1],
+          zeroline: false,
+          showline: true,
+        },
+        legend: {
+          x: 0.5,
+          y: -0.2,
+          xanchor: 'center',
+          yanchor: 'bottom',
+          orientation: 'h'
+        },
+        margin: { 
+          t: 10,
+          b: 10,
+          l: 40,
+          r: 10
+        },
+        width: this.parentElement.clientWidth - 50,
+        height: this.parentElement.clientHeight - 50
+      };
+
       this.plot_empty();
     })
 
@@ -114,7 +164,7 @@ class Plot extends HTMLElement {
         width: this.parentElement.clientWidth - 50,
         height: this.parentElement.clientHeight - 50
       };
-      Plotly.relayout(update);
+      Plotly.relayout(this.querySelector('#plot'), update);
     });
 
   }
@@ -131,6 +181,11 @@ class Plot extends HTMLElement {
           
           return null;
     }
+
+    // set the default colors for the plot based on Plotly.js default
+    // colors
+    //
+    const defaultColors = Plotly.d3.scale.category10();
 
     // iterate over each value in the data and create a trace for each label
     //
@@ -151,7 +206,10 @@ class Plot extends HTMLElement {
           mode: 'markers',
           type: 'scattergl',
           name: label,
-          marker: { size: 2 },
+          marker: { 
+            size: 2, 
+            color: defaultColors(i)
+          },
           hoverinfo: 'none'
         }
       }
@@ -185,53 +243,23 @@ class Plot extends HTMLElement {
     // save the data to as null because the plot is empty
     //
     this.data = null;
+    this.plotData = [];
+
+    const layout = this.layout;
+    layout.margin = { 
+      t: 10,
+      b: 62,
+      l: 40,
+      r: 10
+    }
 
     // Get the plot div element
     //
     const plotDiv = this.querySelector('#plot');
 
-    // Set configuration data for Plotly
-    //
-    const config = {
-      displayLogo: false,
-      modeBarButtonsToRemove: ['zoom2d', 'select2d', 'lasso2d', 'toggleSpikelines', 
-                               'hoverClosestCartesian', 'hoverCompareCartesian',
-                               'autoScale2d'],
-      responsive: true,
-      showLink: false,
-      cursor: 'pointer'
-    };
-
-    // Set layout data for Plotly
-    //
-    const layout = {
-      autosize: true,
-      dragmode: false,
-      xaxis: {
-        range: [-1, 1],
-        dtick: 0.25,
-        zeroline: false,
-        showline: true,
-      },
-      yaxis: {
-        range: [-1, 1],
-        dtick: 0.25,
-        zeroline: false,
-        showline: true,
-      },
-      margin: { 
-        t: 10,
-        b: 64, // this value perfectly makes the bottom margin equal to when the legend is there
-        l: 40,
-        r: 10
-      },
-      width: this.parentElement.clientWidth - 50,
-      height: this.parentElement.clientHeight - 50
-    };
-
     // Create the empty plot
     //
-    Plotly.newPlot(plotDiv, [], layout, config);
+    Plotly.newPlot(plotDiv, this.plotData, this.layout, this.config);
   }
 
   plot(data) {
@@ -265,60 +293,64 @@ class Plot extends HTMLElement {
 
     // Prepare plot data by creating a trace for each label
     //
-    const plotData = this.createTraces(this.data);
-
-    // Set configuration data for Plotly
-    //
-    const config = {
-      displayLogo: false,
-      modeBarButtonsToRemove: ['zoom2d', 'select2d', 'lasso2d', 'toggleSpikelines', 
-                               'hoverClosestCartesian', 'hoverCompareCartesian',
-                               'autoScale2d'],
-      responsive: true,
-      showLink: false,
-      cursor: 'pointer'
-    };
-
-    // Set layout data for Plotly
-    //
-    const layout = {
-      autosize: true,
-      dragmode: false,
-      xaxis: {
-        range: [-1, 1],
-        dtick: 0.25,
-        zeroline: false,
-        showline: true,
-      },
-      yaxis: {
-        range: [-1, 1],
-        dtick: 0.25,
-        zeroline: false,
-        showline: true,
-      },
-      legend: {
-        x: 0.5,
-        y: -0.2,
-        xanchor: 'center',
-        yanchor: 'bottom',
-        orientation: 'h'
-      },
-      margin: { 
-        t: 10,
-        b: 10,
-        l: 40,
-        r: 10
-      },
-      width: this.parentElement.clientWidth - 50,
-      height: this.parentElement.clientHeight - 50
-    };
+    this.plotData = this.createTraces(this.data);
 
     // Create the plot with data
     //
-    Plotly.newPlot(plotDiv, plotData, layout, config);
+    Plotly.newPlot(plotDiv, this.plotData, this.layout, this.config);
   }
 //
 // end of method
+
+decision_surface(data) {
+  /*
+  method: Plot::decision_surface
+
+  args:
+   None
+
+  return:
+   None
+
+  description:
+   This method creates a decision surface plot using a contour plot given Z data.
+  */
+
+  // Get the plot div element
+  //
+  const plotDiv = this.querySelector('#plot');
+
+  // Retrieve colors from scatter plots
+  // const scatterColors = this.plotData.map(trace => trace.marker.color);
+
+  console.log(`x length: ${data.xx.length}`);
+  console.log(`y length: ${data.yy.length}`);
+  console.log(`z dimensions: ${data.z.length}x${data.z[0].length}`);
+
+  console.log(data.xx)
+
+  // Data for the contour plot
+  const contourData = {
+    x: data.xx,
+    y: data.yy,
+    z: data.z,
+    type: 'heatmap',
+    showscale: false,
+    hoverinfo: 'none',
+    colorscale: [
+      [0, 'blue'],      // Class -1
+      [1, 'red']        // Class +1
+    ],
+  };
+
+  // add the contour data to the plot data
+  //
+  this.plotData = this.plotData.concat(contourData);
+
+  // update the plot to add the decision surface
+  //
+  Plotly.react(plotDiv, this.plotData, this.layout, this.config);
+}
 
   render() {
     /*
@@ -351,7 +383,6 @@ class Plot extends HTMLElement {
 
       <div id="plot"></div>
     `;
-
 
   }
   //
