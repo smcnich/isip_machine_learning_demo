@@ -1,5 +1,5 @@
 import numpy as np
-from copy import deepcopy
+from math import floor, ceil
 
 import nedc_ml_tools as mlt
 import nedc_ml_tools_data as mltd
@@ -282,22 +282,22 @@ def load_alg_params(pfile:str) -> dict:
 #       plot_decision_surface functions in imld_model.py
 def generate_decision_surface(data:mltd.MLToolsData, model:mlt.Alg):
 
+    # get the raw data from the ML Tools data object
+    #
     X = data.data
 
     # get the min and max values of the data. pad the mins and maxes by 1
     #
-    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
-    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
-
-    print(x_min, x_max, y_min, y_max)
+    x_min, x_max = floor(X[:, 0].min() - 1), ceil(X[:, 0].max() + 1)
+    y_min, y_max = floor(X[:, 1].min() - 1), ceil(X[:, 1].max() + 1)
 
     # create a meshgrid of the data. use this meshgrid to predict the labels
     # at each point in the grid. this will allow us to plot the decision surface
     # xx and yy will be the x and y values of the grid in the form of 2D arrays.
     # xx acts as the rows of the grid, and yy acts as the columns of the grid
     #
-    xx, yy = np.meshgrid(np.linspace(x_min, x_max), 
-                         np.linspace(y_min, y_max))
+    xx, yy = np.meshgrid(np.linspace(x_min, x_max, 500), 
+                         np.linspace(y_min, y_max, 500))
     
     # combine the xx and yy arrays to create a 3D array of the grid. this will effectively
     # create a list of all the points in the grid. the shape of the array will be (n, 2)
@@ -317,8 +317,39 @@ def generate_decision_surface(data:mltd.MLToolsData, model:mlt.Alg):
     #
     labels, _ = model.predict(meshgrid)
 
-    # return the labels of the meshgrid
+    # get the x and y values. x and y values should be 1D arrays
+    # acting as the axis values of the grid. take a row from the xx
+    # and a column from the yy arrays to get the x and y values. then 
+    # flatten them to ensure 1D
     #
-    return xx[0, :], yy[0, :], np.asarray(labels).reshape(xx.shape)
+    x = xx[0].ravel()
+    y = yy[:, 0].ravel()
+
+    # reshape the labels to be the same shape as the xx and yy arrays
+    #
+    z = np.asarray(labels).reshape(xx.shape)
+
+    # if there are strings in the z array, convert them to numbers
+    # as the contour plot in Plotly.js will not work with strings
+    #
+    if np.any(np.char.isnumeric(z.astype(str)) == False):
+        
+        # flip the dictionary as MLToolsData uses the value as the original
+        # label
+        #
+        mapping_labels = {v: k for k, v in data.mapping_label.items()}
+
+        # vectorize the lambda function to convert the labels to numbers
+        # based on the reversed mapping labels
+        #
+        z = np.vectorize(lambda val: mapping_labels[val])(z)
+        
+    print(z)
+
+    # return the x, y, and z values of the decision surface. 
+    # x and y should be a 1D array, so get a row from the xx array and
+    # a column from the yy array.
+    #
+    return x, y, z
 #
 # end of function

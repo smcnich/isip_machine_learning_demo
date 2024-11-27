@@ -302,55 +302,103 @@ class Plot extends HTMLElement {
 //
 // end of method
 
-decision_surface(data) {
-  /*
-  method: Plot::decision_surface
+  decision_surface(data) {
+    /*
+    method: Plot::decision_surface
 
-  args:
-   None
+    args:
+    None
 
-  return:
-   None
+    return:
+    None
 
-  description:
-   This method creates a decision surface plot using a contour plot given Z data.
-  */
+    description:
+    This method creates a decision surface plot using a contour plot given Z data.
+    */
 
-  // Get the plot div element
-  //
-  const plotDiv = this.querySelector('#plot');
+    // clear the decision surface
+    //
+    this.clear_decision_surface();
 
-  // Retrieve colors from scatter plots
-  // const scatterColors = this.plotData.map(trace => trace.marker.color);
+    console.log('start plot')
 
-  console.log(`x length: ${data.xx.length}`);
-  console.log(`y length: ${data.yy.length}`);
-  console.log(`z dimensions: ${data.z.length}x${data.z[0].length}`);
+    // Get the plot div element
+    //
+    const plotDiv = this.querySelector('#plot');
 
-  console.log(data.xx)
+    // let labelsSet = new Set(data.z.flat());
+    // labelsSet = Array.from(labelsSet);
 
-  // Data for the contour plot
-  const contourData = {
-    x: data.xx,
-    y: data.yy,
-    z: data.z,
-    type: 'heatmap',
-    showscale: false,
-    hoverinfo: 'none',
-    colorscale: [
-      [0, 'blue'],      // Class -1
-      [1, 'red']        // Class +1
-    ],
-  };
+    // Retrieve colors from scatter plots
+    //
+    let colorScale = []
+    for (let i = 0; i < this.plotData.length; i++) {
 
-  // add the contour data to the plot data
-  //
-  this.plotData = this.plotData.concat(contourData);
+      // Get the color of the marker and convert it to RGBA to make it transparent
+      // then add to the custom color scale
+      //
+      let color = hexToRGBA(this.plotData[i].marker.color, 0.1);
+      colorScale.push([i, color]);
+    }
 
-  // update the plot to add the decision surface
-  //
-  Plotly.react(plotDiv, this.plotData, this.layout, this.config);
-}
+    console.log(colorScale)
+
+    // Data for the contour plot
+    const contourData = {
+      z: data.z,
+      x: data.xx,
+      y: data.yy,
+      type: 'contour',
+      contours: {
+        coloring: 'heatmap',
+      },
+      line: {
+        smoothing: 1
+      },
+      name: 'Decision Surface',
+      showscale: false,
+      hoverinfo: 'none',
+      colorscale: colorScale,
+      showlegend: true
+    };
+
+    // add the contour data to the plot data
+    //
+    this.plotData = this.plotData.concat(contourData);
+
+    // update the plot to add the decision surface
+    //
+    Plotly.react(plotDiv, this.plotData, this.layout, this.config);
+
+    console.log('end plot')
+  }
+
+  clear_decision_surface() {
+    /*
+    method: Plot::clear_decision_surface
+
+    args:
+    None
+
+    return:
+    None
+
+    description:
+    This method removes the decision surface from the plot.
+    */
+
+    // Get the plot div element
+    //
+    const plotDiv = this.querySelector('#plot');
+
+    // remove the contour data from the plot data
+    //
+    this.plotData = this.plotData.filter(trace => trace.type !== 'contour');
+
+    // update the plot to remove the decision surface
+    //
+    Plotly.react(plotDiv, this.plotData, this.layout, this.config);  
+  }
 
   render() {
     /*
@@ -391,6 +439,30 @@ decision_surface(data) {
 }
 //
 // end of class
+
+function hexToRGBA(hex, alpha) {
+  // Ensure the input hex starts with #
+  if (!hex.startsWith("#")) {
+      throw new Error("Invalid hex color format. It must start with #.");
+  }
+
+  // Clamp alpha between 0 and 1
+  alpha = Math.min(1, Math.max(0, alpha));
+
+  // Expand shorthand hex (e.g., #RGB to #RRGGBB)
+  if (hex.length === 4) {
+      hex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+  }
+
+  // Convert hex to RGB
+  const num = parseInt(hex.slice(1), 16);
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+
+  // Return RGBA string
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 // Register the custom element
 //
