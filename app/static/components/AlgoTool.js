@@ -41,6 +41,10 @@ class AlgoTool extends HTMLElement {
       //
       this.name = this.constructor.name;
 
+      // create a variable to hold the process log component
+      //
+      this.processLog = document.querySelector('process-log');
+
       this.form = null;
       this.selectedValue = null;
     }
@@ -313,6 +317,8 @@ class AlgoTool extends HTMLElement {
               return;
             }
 
+            this.processLog.writeLog('Training model...');
+
             // get the proper button id and route to send the data to
             //
             let plot = button.getAttribute('id');
@@ -371,7 +377,11 @@ class AlgoTool extends HTMLElement {
 
               })
 
+              this.processLog.writeLog('Model trained successfully!');
+
             });
+
+            
 
           });
         });

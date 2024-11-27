@@ -136,25 +136,6 @@ class ProcessLog extends HTMLElement {
             <div class="scroll-bg">
                 <div class="scroll-div">
                     <div class="scroll-object">
-                        Classes: added class 'Class0' <br>
-                        Classes: added class 'Class1' <br>
-                        =============================================== <br>
-                        Algorithm: PCA <br>
-                        =============================================== <br>
-                        ----------------------------------------------- <br>
-                        Training (PCA): <br>
-                        Training Error Rate = 0.00% <br>
-                        Confusion Matrix: <br>
-                          Ref/Hyp:     Class0          Class1      <br>
-                          Class0: 10000 (100.00%)     0 (  0.00%)  <br>
-                          Class1:     1 (  0.01%)  9999 ( 99.99%)  <br>
-                        ----------------------------------------------- <br>
-                        Evaluating (PCA): <br>
-                        Evaluation Error Rate = 0.00% <br>
-                        Confusion Matrix: <br>
-                          Ref/Hyp:     Class0          Class1     <br>
-                          Class0: 10000 (100.00%)     0 (  0.00%) <br>
-                          Class1:     0 (  0.00%) 10000 (100.00%)
                     </div>
                 </div>
             </div>
@@ -163,6 +144,33 @@ class ProcessLog extends HTMLElement {
     }
     //
     // end of method
+
+    writeLog(log) {
+        /*
+        method: ProcessLog::writeLog
+        
+        args:
+         log: string - the log message to be written to the log container
+  
+        return:
+         None
+  
+        description:
+         This method writes a log message to the log container.
+        */
+  
+        // Get the log object
+        //
+        let logObject = this.shadowRoot.querySelector('.scroll-object');
+  
+        // Append the log message to the log container
+        //
+        logObject.innerHTML += log + '<br>';
+  
+        // Scroll to the bottom of the log container
+        //
+        logObject.scrollTop = logObject.scrollHeight;
+    }
   
   }
   //
