@@ -317,12 +317,25 @@ class AlgoTool extends HTMLElement {
               return;
             }
 
-            this.processLog.writeLog('Training model...');
-
             // get the proper button id and route to send the data to
             //
             let plot = button.getAttribute('id');
             let route = '/api/' + plot + '/';
+
+            this.processLog.writeLog('Training model...');
+
+            // get the plot card to be used to plot the decision surface
+            //
+            let plotCard;
+            document.querySelectorAll('plot-card').forEach((card) => {
+              if(card.getAttribute('plotId') == plot) {
+                plotCard = card;
+              }
+            });
+
+            // clear the decision surface before plotting the new one
+            //
+            plotCard.clear_decision_surface();
 
             // create an event to get the data from the Plot.js component
             // the event listener is in the Plot.js component and when invoked,
@@ -369,13 +382,7 @@ class AlgoTool extends HTMLElement {
             //
             .then((data) => {
 
-              document.querySelectorAll('plot-card').forEach((plotCard) => {
-
-                if(plotCard.getAttribute('plotId') == plot) {
-                  plotCard.decision_surface(data);
-                }
-
-              })
+              plotCard.decision_surface(data);
 
               this.processLog.writeLog('Model trained successfully!');
 

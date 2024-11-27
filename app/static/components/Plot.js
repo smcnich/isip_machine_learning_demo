@@ -299,8 +299,8 @@ class Plot extends HTMLElement {
     //
     Plotly.newPlot(plotDiv, this.plotData, this.layout, this.config);
   }
-//
-// end of method
+  //
+  // end of method
 
   decision_surface(data) {
     /*
