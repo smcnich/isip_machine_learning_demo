@@ -123,7 +123,7 @@ def data_gen():
     try:
         # Call the function to generate two Gaussian distributions
         #
-        labels, x, y = mltd.generate_toroidal(paramsDict)
+        labels, x, y = mltd.generate_data(key, paramsDict)
 
         # Prepare the response data
         #
