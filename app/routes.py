@@ -109,14 +109,29 @@ def train():
 @main.route('/api/data_gen/', methods=['POST'])
 def data_gen():
     
+    # Get the data sent in the POST request as JSON
+    data = request.get_json()
+
+    if data:
+        # Process the received data (e.g., save to database, validate, etc.)
+        key = data[0]
+        paramsDict = data[1]
+
+        print(paramsDict)
+
+        # Send a response back to the frontend
+        return jsonify({"status": "success", "message": "Parameters received", "data": data}), 200
+    else:
+        return jsonify({"status": "error", "message": "No data received"}), 400
+
     # TODO: get the data from the request and use it to generate the data
 
     # generate the data in the correct format
     #
-    data = imld.generate_data()
+    #data = imld.generate_data()
 
     # exit gracefully
     #
-    return jsonify(data)
+    #return jsonify(data)
 #
 # end of function
