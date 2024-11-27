@@ -320,14 +320,9 @@ class Plot extends HTMLElement {
     //
     this.clear_decision_surface();
 
-    console.log('start plot')
-
     // Get the plot div element
     //
     const plotDiv = this.querySelector('#plot');
-
-    // let labelsSet = new Set(data.z.flat());
-    // labelsSet = Array.from(labelsSet);
 
     // Retrieve colors from scatter plots
     //
@@ -341,9 +336,8 @@ class Plot extends HTMLElement {
       colorScale.push([i, color]);
     }
 
-    console.log(colorScale)
-
     // Data for the contour plot
+    //
     const contourData = {
       z: data.z,
       x: data.xx,
@@ -369,8 +363,6 @@ class Plot extends HTMLElement {
     // update the plot to add the decision surface
     //
     Plotly.react(plotDiv, this.plotData, this.layout, this.config);
-
-    console.log('end plot')
   }
 
   clear_decision_surface() {

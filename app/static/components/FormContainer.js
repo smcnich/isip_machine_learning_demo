@@ -586,6 +586,14 @@ class FormContainer extends HTMLElement {
             }
           }
         } 
+
+        // if the form is a select input, get the value of the select
+        // in plain text
+        //
+        else if (param.type == 'select') {
+          const input = this.shadowRoot.getElementById(key);
+          formValues[key] = input.value;
+        }
         
         // else, get the simple input value
         //

@@ -343,8 +343,6 @@ def generate_decision_surface(data:mltd.MLToolsData, model:mlt.Alg):
         # based on the reversed mapping labels
         #
         z = np.vectorize(lambda val: mapping_labels[val])(z)
-        
-    print(z)
 
     # return the x, y, and z values of the decision surface. 
     # x and y should be a 1D array, so get a row from the xx array and

@@ -184,6 +184,7 @@ class AlgoTool extends HTMLElement {
               flex-direction: row;
               justify-content: center;
               margin-bottom: 0.2em;
+              margin-top: 1em;
               width: 100%;
               height: 10%;
             }
@@ -198,6 +199,29 @@ class AlgoTool extends HTMLElement {
               border-width: 1px;
               border-color: black;
               border-radius: 5px;
+              box-shadow: 1px 2px 2px 1px rgba(0,0,0,0.24);
+              opacity: 0.8;
+              transition: box-shadow 0.2s;
+              transition: opacity 0.2s;
+            }
+
+            button:hover {
+              box-shadow: 2px 3px 3px 2px rgba(0,0,0,0.24);
+              opacity: 1;
+            }
+
+            button:active {
+              box-shadow: none;
+            }
+
+            .disabled {
+              opacity: 0.6;
+              cursor: not-allowed;
+              box-shadow: none;
+            }
+
+            .disabled:hover {
+              box-shadow: none;
             }
 
             #params {
@@ -247,7 +271,7 @@ class AlgoTool extends HTMLElement {
             }
 
             #paramBox {
-              margin-top: 2px;
+              margin-top: 1em;
               width: 100%;
               height: 100%;
             }
@@ -256,8 +280,8 @@ class AlgoTool extends HTMLElement {
           <!-- Add your HTML here -->
           <div class="main">
             <div id="button-container">
-              <button id="train">Train</button>
-              <button id="eval">Evaluate</button>
+              <button id="train" class=disabled>Train</button>
+              <button id="eval" class=disabled>Evaluate</button>
             </div>
             <select class="algo-select">
               <option value="" disabled selected>Select an Algorithm</option>
@@ -283,7 +307,9 @@ class AlgoTool extends HTMLElement {
         submitButtons.forEach((button) => {
           button.addEventListener('click', () => {
 
-            if ((!this.form) || (!this.selectedValue)) {
+            // if the form or selected value is null, return
+            //
+            if ((!this.form) || (!this.selectedValue) || (button.className == 'disabled')) {
               return;
             }
 
@@ -320,8 +346,6 @@ class AlgoTool extends HTMLElement {
               })
             };
 
-            console.log('start')
-
             // make a train request to the server
             //
             fetch(route, request)
@@ -339,8 +363,6 @@ class AlgoTool extends HTMLElement {
             //
             .then((data) => {
 
-              console.log('end')
-
               document.querySelectorAll('plot-card').forEach((plotCard) => {
 
                 if(plotCard.getAttribute('plotId') == plot) {
@@ -357,6 +379,14 @@ class AlgoTool extends HTMLElement {
         // create an event listener that listens to when the value of the select element changes
         //
         selectElement.addEventListener('change', (event) => {
+
+          // get the algo select element to be used to monitor when the value changes
+          //
+          const submitButtons = this.shadowRoot.querySelectorAll('button');
+
+          submitButtons.forEach((button) => {
+            button.className = '';
+          });
 
           // clear the params container so that the new params can be added
           //
