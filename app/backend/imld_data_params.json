@@ -94,7 +94,7 @@
             "name": "Mean (2nd)",
             "type": "matrix",
             "dimensions": [2,1],
-            "default": [[-0.5], [0.5]]
+            "default": [[0.5], [-0.5]]
           },
           "cov2": {
             "name": "Covariance (2nd)",
@@ -118,7 +118,7 @@
             "name": "Mean (3rd)",
             "type": "matrix",
             "dimensions": [2,1],
-            "default": [[-0.5], [0.5]]
+            "default": [[-0.5], [-0.5]]
           },
           "cov3": {
             "name": "Covariance (3rd)",
@@ -142,7 +142,7 @@
             "name": "Mean (4th)",
             "type": "matrix",
             "dimensions": [2,1],
-            "default": [[-0.5], [0.5]]
+            "default": [[0.5], [0.5]]
           },
           "cov4": {
             "name": "Covariance (4th)",
@@ -172,7 +172,7 @@
             "name": "Mean (1st)",
             "type": "matrix",
             "dimensions": [2,1],
-            "default": [[-0.5], [0.5]]
+            "default": [[-0.14], [0.14]]
           },
           "cov1": {
             "name": "Covariance (1st)",
@@ -196,7 +196,7 @@
             "name": "Mean (2nd)",
             "type": "matrix",
             "dimensions": [2,1],
-            "default": [[-0.5], [0.5]]
+            "default": [[0.14], [0.14]]
           },
           "cov2": {
             "name": "Covariance (2nd)",
@@ -226,7 +226,7 @@
             "name": "Mean (1st)",
             "type": "matrix",
             "dimensions": [2,1],
-            "default": [[0.5], [0.5]]
+            "default": [[-0.5], [0.5]]
           },
           "cov1": {
             "name": "Covariance (1st)",
@@ -250,7 +250,7 @@
             "name": "Mean (2nd)",
             "type": "matrix",
             "dimensions": [2,1],
-            "default": [[0.5], [0.5]]
+            "default": [[0.5], [-0.5]]
           },
           "cov2": {
             "name": "Covariance (2nd)",
@@ -280,7 +280,7 @@
             "name": "Mean (1st)",
             "type": "matrix",
             "dimensions": [2,1],
-            "default": [[0.5], [0.5]]
+            "default": [[-0.5], [0.5]]
           },
           "cov1": {
             "name": "Covariance (1st)",
@@ -304,7 +304,7 @@
             "name": "Mean (2nd)",
             "type": "matrix",
             "dimensions": [2,1],
-            "default": [[0.5], [0.5]]
+            "default": [[0.5], [-0.5]]
           },
           "cov2": {
             "name": "Covariance (2nd)",
@@ -328,7 +328,7 @@
             "name": "Mean (3rd)",
             "type": "matrix",
             "dimensions": [2,1],
-            "default": [[0.5], [0.5]]
+            "default": [[-0.5], [-0.5]]
           },
           "cov3": {
             "name": "Covariance (3rd)",
@@ -382,7 +382,7 @@
             "name": "Mean (1st)",
             "type": "matrix",
             "dimensions": [2,1],
-            "default": [[0.5], [0.5]]
+            "default": [[-0.5], [0.5]]
           },
           "cov1": {
             "name": "Covariance (1st)",
@@ -406,13 +406,13 @@
             "name": "Mean (2nd)",
             "type": "matrix",
             "dimensions": [2,1],
-            "default": [[0.5], [0.5]]
+            "default": [[0.5], [-0.5]]
           },
           "cov2": {
             "name": "Covariance (2nd)",
             "type": "matrix",
             "dimensions": [2,2],
-            "default": [[0.0333, 0], [0, 0.0043]]
+            "default": [[0.0043, 0], [0, 0.0333]]
           }
         }
       }
@@ -442,7 +442,7 @@
             "name": "Outer Radius (Ring)",
             "type": "float",
             "range": [0, "inf"],
-            "default": [0.850]
+            "default": 0.850
           }
         }
       },
@@ -456,13 +456,13 @@
             "range": [0, "inf"],
             "default": 10000
           },
-          "mean1": {
+          "mean": {
             "name": "Mean (Mass)",
             "type": "matrix",
             "dimensions": [2,1],
-            "default": [[0.0], [0.0]]
+            "default": [[0], [0]]
           },
-          "cov1": {
+          "cov": {
             "name": "Covariance (Mass)",
             "type": "matrix",
             "dimensions": [2,2],

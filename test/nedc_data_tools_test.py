@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath('../IMLD/app/backend'))
 
 # get the dependencies from the app directory
 #
-import nedc_data_tools as ndt
+import nedc_ml_tools_data as ndt
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -82,30 +82,30 @@ def test_two_gaussian():
     save_data(X, y, 'test/test_data/two_gaussian.csv')
 
 def test_four_gaussian():
-    X, y = ndt.generate_four_gaussian(params = {
+    labels, x, y = ndt.generate_four_gaussian(params = {
                                     'npts1' : 10000,
-                                    'mean1' : [-0.5, 0.5],
+                                    'mean1' : [[-0.5], [0.5]],
                                     'cov1'  : [[0.0250, 0], [0, 0.0250]],    
                                     'npts2' : 10000,
-                                    'mean2' : [0.5, -0.5],
+                                    'mean2' : [[0.5], [-0.5]],
                                     'cov2'  : [[0.0250, 0], [0, 0.0250]],
                                     'npts3' : 10000,
-                                    'mean3' : [-0.5, -0.5],
+                                    'mean3' : [[-0.5], [-0.5]],
                                     'cov3'  : [[0.0250, 0], [0, 0.0250]],    
                                     'npts4' : 10000,
-                                    'mean4' : [0.5, 0.5],
+                                    'mean4' : [[0.5], [0.5]],
                                     'cov4'  : [[0.0250, 0], [0, 0.0250]]                                              
                                     })
     # assign colors: first 'npts1' points are blue, next 'npts2' points are red, next 'npts3' points are green, remaining are yellow
     colors = ['blue' if i < 10000 else 'red' if i < 20000 else 'green' if i < 30000 else 'yellow' for i in range(len(y))]
 
-    plt.scatter(X[:,0], X[:,1],c=colors)
+    plt.scatter(x, y, c=colors)
 
     plt.title('four gaussian')
 
     plt.show()
 
-    save_data(X, y, 'test/test_data/four_gaussian.csv')   
+    save_data(labels, x, y, 'test/test_data/four_gaussian.csv')   
 
 def test_ovlp_gaussian():
     X, y = ndt.generate_ovlp_gaussian(params = {
@@ -236,7 +236,7 @@ def test_yin_yang():
 # uncomment desired test:
 
 #test_two_gaussian()
-#test_four_gaussian()
+test_four_gaussian()
 #test_ovlp_gaussian()
 #test_two_ellipses()
 #test_four_ellipses()
