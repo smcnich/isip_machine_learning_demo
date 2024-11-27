@@ -467,7 +467,28 @@ class MLToolsData:
 
 #
 # end of dataclass
-    
+
+def generate_data(dist_name:str, params:dict):
+    '''
+    function: generate_data
+
+    arguments:
+     dist_name: name of the distribution to generate data from
+     params: the parameters for the distribution
+
+    return:
+     a MLToolsData object populated with the data from the distribution
+        
+    description:
+     generate a MLToolsData object from a sp
+    '''
+
+    # generate the data for the distribution
+    #
+    labels, x, y = DISTS[dist_name](params)
+
+    return labels, x, y
+
 def generate_two_gaussian(params:dict) -> tuple:
     '''
     function generate_two_gaussian
