@@ -372,32 +372,45 @@ class DataPopup extends HTMLElement {
       const paramsDict = this.form.submitForm();
       const dataPackage = [this.key, paramsDict];
 
-      try {
-        // Send paramsDict to the backend
-        const response = await fetch('/api/data_gen', { // Replace with your API endpoint
-            method: 'POST', // Use the appropriate method (POST/PUT)
-            headers: {
-                'Content-Type': 'application/json', // Ensure the server expects JSON
-            },
-            body: JSON.stringify(dataPackage), // Convert the paramsDict to a JSON string
-        });
-
-        // Check if the request was successful by looking at the response status code
-        if (response.ok) {
-            const result = await response.json();
-        } else {
-            // Check the status code directly
-            console.error(`Request failed with status: ${response.status} ${response.statusText}`);
-            // Optionally handle different status codes for different scenarios
-            if (response.status === 400) {
-                console.error('Bad Request: The data sent to the backend is invalid.');
-            } else if (response.status === 500) {
-                console.error('Server Error: There was an issue processing your request on the server.');
-            }
+      // Send the dataPackage to the backend via a POST request
+      //
+      fetch('/api/data_gen', { 
+        method: 'POST', // Use the POST method to send the data
+        headers: {
+            'Content-Type': 'application/json', // Ensure the server expects JSON
+        },
+        body: JSON.stringify(dataPackage), // Convert the paramsDict to a JSON string
+      })
+      .then(response => {
+        // Check if the response is OK
+        //
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
-      } catch (error) {
-          console.error('Error sending data to backend:', error);
-      }
+
+        // Parse the response as a JSON
+        //
+        return response.json();
+      })
+      .then(result => {
+        // Handle the successful response from the backend
+        //
+        window.dispatchEvent(new CustomEvent('fileLoaded', {
+          detail: {
+            plotId: this.label.toLowerCase(), // Use the label for plotId
+            data: {
+              labels: result.labels, // Get the 'labels' from the response
+              x: result.x, // Get the 'x' values from the response
+              y: result.y // Get the 'y' values from the response
+            }
+          }
+        }));
+      })
+      .catch(error => {
+        // Handle any network or other errors during the fetch operation
+        //
+        console.error('Error sending data to backend:', error);
+      });
 
     });
 

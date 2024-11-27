@@ -1,6 +1,8 @@
 import os
 import json
+import sys
 from flask import Blueprint, render_template, request, jsonify, current_app
+sys.path.append('/backend/')
 
 import nedc_ml_tools_data as mltd
 import nedc_imld_tools as imld
@@ -108,30 +110,36 @@ def train():
 
 @main.route('/api/data_gen/', methods=['POST'])
 def data_gen():
-    
     # Get the data sent in the POST request as JSON
+    #
     data = request.get_json()
 
     if data:
-        # Process the received data (e.g., save to database, validate, etc.)
+        # Extract the key and parameters from the received data
+        #
         key = data[0]
         paramsDict = data[1]
 
-        print(paramsDict)
+    try:
+        # Call the function to generate two Gaussian distributions
+        #
+        labels, x, y = mltd.generate_two_gaussian(paramsDict)
 
-        # Send a response back to the frontend
-        return jsonify({"status": "success", "message": "Parameters received", "data": data}), 200
-    else:
-        return jsonify({"status": "error", "message": "No data received"}), 400
+        # Prepare the response data
+        #
+        response_data = {
+            "labels": labels,
+            "x": x.tolist(),
+            "y": y.tolist()
+        }
 
-    # TODO: get the data from the request and use it to generate the data
-
-    # generate the data in the correct format
-    #
-    #data = imld.generate_data()
-
-    # exit gracefully
-    #
-    #return jsonify(data)
+        # Return the response in JSON format
+        #
+        return jsonify(response_data)
+    
+    except Exception as e:
+        # Handle any exceptions and return an error message
+        #
+        return jsonify({"error": str(e)}), 500
 #
 # end of function

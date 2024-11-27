@@ -582,7 +582,7 @@ class FormContainer extends HTMLElement {
           for (let i = 0; i < rows; i++) {
             formValues[key].push([]);
             for (let j = 0; j < cols; j++) {
-              formValues[key][i].push(inputs[i*cols + j].value);
+              formValues[key][i].push(Number(inputs[i*cols + j].value));
             }
           }
         } 
@@ -591,7 +591,7 @@ class FormContainer extends HTMLElement {
         //
         else {
           const input = this.shadowRoot.getElementById(key);
-          formValues[key] = input.value;
+          formValues[key] = Number(input.value);
         }
       }
 

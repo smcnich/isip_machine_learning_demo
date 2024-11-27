@@ -494,8 +494,8 @@ def generate_two_gaussian(params:dict) -> tuple:
 
     # get parameters
     #
-    npts1, mean1, cov1 = params['npts1'], params['mean1'], params['cov1']
-    npts2, mean2, cov2 = params['npts2'], params['mean2'], params['cov2']
+    npts1, mean1, cov1 = params['npts1'], np.ravel(params['mean1']), params['cov1']
+    npts2, mean2, cov2 = params['npts2'], np.ravel(params['mean2']), params['cov2']
     
     # gaussian distribution for class 0
     #
@@ -510,11 +510,14 @@ def generate_two_gaussian(params:dict) -> tuple:
     # concatenate data w labels
     #
     X = np.vstack((class_0_data, class_1_data))
-    y = class_0_labels + class_1_labels
+    labels = class_0_labels + class_1_labels
     
+    x = X[:,0]
+    y = X[:,1]
+
     # exit gracefully
     #
-    return X, y
+    return labels, x, y
 #
 # end of method
 
