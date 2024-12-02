@@ -130,10 +130,11 @@ def generate_data(dist_name:str, params:dict):
 
     # create a ML Tools data object using the class method
     #
-    data = mltd.MLToolsData.generate_data(dist_name, params)
+    X, y = mltd.MLToolsData.generate_data(dist_name, params)
 
     # get the labels from the data
     #
+    '''
     labels = set(data.labels)
     
     # get the indexes of each class
@@ -149,10 +150,15 @@ def generate_data(dist_name:str, params:dict):
     for idx in class_idxs:
         X.append(data.data[idx])
         y.append(data.labels[idx])
+    '''
+        
+    labels = y.tolist()
+    x = X[:,0].tolist()
+    y = X[:,1].tolist()
 
     # exit gracefully
     #
-    return list(labels), X, y
+    return labels, x, y
 #
 # end of function
 

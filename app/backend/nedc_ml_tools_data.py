@@ -156,7 +156,7 @@ class MLToolsData:
 
         # return the populated MLToolsData object
         #
-        return self
+        return self.data, self.labels
     #
     # end of method
 
@@ -468,27 +468,6 @@ class MLToolsData:
 #
 # end of dataclass
 
-def generate_data(dist_name:str, params:dict):
-    '''
-    function: generate_data
-
-    arguments:
-     dist_name: name of the distribution to generate data from
-     params: the parameters for the distribution
-
-    return:
-     a MLToolsData object populated with the data from the distribution
-        
-    description:
-     generate a MLToolsData object from a sp
-    '''
-
-    # generate the data for the distribution
-    #
-    labels, x, y = DISTS[dist_name](params)
-
-    return labels, x, y
-
 def generate_two_gaussian(params:dict) -> tuple:
     '''
     function generate_two_gaussian
@@ -531,14 +510,11 @@ def generate_two_gaussian(params:dict) -> tuple:
     # concatenate data w labels
     #
     X = np.vstack((class_0_data, class_1_data))
-    labels = class_0_labels + class_1_labels
-    
-    x = X[:,0]
-    y = X[:,1]
+    y = class_0_labels + class_1_labels
 
     # exit gracefully
     #
-    return labels, x, y
+    return X, y
 #
 # end of method
 
@@ -593,14 +569,11 @@ def generate_four_gaussian(params:dict) -> tuple:
     
     # concatenate data w labels
     X = np.vstack((class_0_data, class_1_data, class_2_data, class_3_data))
-    labels = class_0_labels + class_1_labels + class_2_labels + class_3_labels
+    y = class_0_labels + class_1_labels + class_2_labels + class_3_labels
     
-    x = X[:,0]
-    y = X[:,1]
-
     # exit gracefully
     #
-    return labels, x, y
+    return X, y
 #
 # end of method
 
@@ -644,14 +617,11 @@ def generate_ovlp_gaussian(params:dict) -> tuple:
     # concatenate data w labels
     #
     X = np.vstack((class_0_data, class_1_data))
-    labels = class_0_labels + class_1_labels
-    
-    x = X[:,0]
-    y = X[:,1]
+    y = class_0_labels + class_1_labels
 
     # exit gracefully
     #
-    return labels, x, y
+    return X, y
 #
 # end of method
 
@@ -697,14 +667,11 @@ def generate_two_ellipses(params:dict) -> tuple:
     # concatenate data w labels
     #
     X = np.vstack((class_0_data, class_1_data))
-    labels = class_0_labels + class_1_labels
-    
-    x = X[:,0]
-    y = X[:,1]
+    y = class_0_labels + class_1_labels
 
     # exit gracefully
     #
-    return labels, x, y
+    return X, y
 #
 # end of method
 
@@ -759,14 +726,11 @@ def generate_four_ellipses(params:dict) -> tuple:
     
     # concatenate data w labels
     X = np.vstack((class_0_data, class_1_data, class_2_data, class_3_data))
-    labels = class_0_labels + class_1_labels + class_2_labels + class_3_labels
-    
-    x = X[:,0]
-    y = X[:,1]
+    y = class_0_labels + class_1_labels + class_2_labels + class_3_labels
 
     # exit gracefully
     #
-    return labels, x, y
+    return X, y
 
 #
 # end of method
@@ -813,14 +777,11 @@ def generate_rotated_ellipses(params:dict) -> tuple:
     # concatenate data w labels
     #
     X = np.vstack((class_0_data, class_1_data))
-    labels = class_0_labels + class_1_labels
-    
-    x = X[:,0]
-    y = X[:,1]
+    y = class_0_labels + class_1_labels
 
     # exit gracefully
     #
-    return labels, x, y
+    return X, y
 #
 # end of method
 
@@ -873,14 +834,11 @@ def generate_toroidal(params:dict) -> tuple:
     # concatenate data w labels
     #
     X = np.vstack((class_0_data, class_1_data))
-    labels = class_0_labels + class_1_labels
+    y = class_0_labels + class_1_labels
     
-    x = X[:,0]
-    y = X[:,1]
-
     # exit gracefully
     #
-    return labels, x, y
+    return X, y
 #
 # end of method
 
@@ -955,14 +913,11 @@ def generate_yin_yang(params: dict) -> tuple:
     # Combine the yin and yang classes and create the labels
     #
     X = np.concatenate((yin, yang), axis=0)
-    labels = ['Class0'] * n_yin + ['Class1'] * n_yang
-    
-    x = X[:,0]
-    y = X[:,1]
+    y = ['Class0'] * n_yin + ['Class1'] * n_yang
 
     # exit gracefully
     #
-    return labels, x, y
+    return X, y
 #
 # end of function
 
