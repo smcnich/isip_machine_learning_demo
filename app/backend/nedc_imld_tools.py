@@ -196,10 +196,14 @@ def predict(model:mlt.Alg, data:mltd.MLToolsData):
      data (mltd.MLToolsData): the data to predict
 
     return:
-     model (mlt.Alg)        : the trained model
-     labels (list)          : a list of the predicted labels.
-     posteriors (np.ndarray): a float numpy vector with the posterior 
-                              probability for each class assignment.
+     metrics (dict): a dictionary of the performance metrics of the model, including:
+                        - confusion matrix
+                        - sensitivity
+                        - specificity
+                        - precision
+                        - accuracy
+                        - error rate
+                        - F1 score
 
     description:
      use a ML Tools trained model to predict unseen data. return vectors
@@ -209,11 +213,15 @@ def predict(model:mlt.Alg, data:mltd.MLToolsData):
 
     # predict the labels of the data
     #
-    labels, posteriors = model.predict(data)
+    hyp_labels, _ = model.predict(data)
+
+    # get the performance metrics of the model
+    #
+    metrics = score(model, data, hyp_labels)
 
     # exit gracefully
     #
-    return model, labels, posteriors
+    return metrics
 #
 # end of function
 
@@ -221,7 +229,7 @@ def predict(model:mlt.Alg, data:mltd.MLToolsData):
 TODO: create the wrapper to score the predicted labels compared to the
       actual labels of a dataset. see nedc_ml_tools.py line 1730.
 '''
-def score(num_classes:int, data:mltd.MLToolsData, hyp_labels:list):
+def score(model:mlt.Alg, data:mltd.MLToolsData, hyp_labels:list):
     '''
     function: score
 
@@ -230,21 +238,49 @@ def score(num_classes:int, data:mltd.MLToolsData, hyp_labels:list):
      data (mltd.MLToolsData): the input data including reference labels
      hyp_labels (list): the hypothesis labels
 
-    return:
-     conf matrix (np.ndarray): the confusion matrix
-     sens (float): the sensitivity
-     spec (float): the specificity
-     prec (float): the precision
-     acc (float): the accuracy
-     err (float): the error rate
-     f1 (float): the F1 score
+    return: (dict) a dictionary containing the following metrics:{
+        conf_matrix (list): the confusion matrix
+        sens (float): the sensitivity
+        spec (float): the specificity
+        prec (float): the precision
+        acc (float): the accuracy
+        err (float): the error rate
+        f1 (float): the F1 score
+    }
 
     description:
      calculate various metrics to that show how well a model performed on unseen data.
      pass it unseen data with the proper labels, the hypothesis labels, and the number 
      of classes. return the performance metrics of the model
     '''
-    return
+
+    # get the number of classes from the data
+    #
+    num_classes = data.num_of_classes
+
+    # convert the hypothesis labels to a numpy array of ints
+    #
+    hyp_labels = np.array(hyp_labels, dtype=int)
+
+    # map the labels to the proper format
+    #
+    hyp_labels = data.map_label(hyp_labels)
+
+    # score the model
+    #
+    conf_matrix, sens, spec, prec, acc, err, f1 = model.score(num_classes, data, hyp_labels)
+
+    # return all the metrics as a dict
+    #
+    return {
+        'Confusion Matrix': conf_matrix.tolist(),
+        'Sensitivty': sens,
+        'Specificity': spec,
+        'Precision': prec,
+        'Accuracy': acc,
+        'Error Rate': err,
+        'F1 Score': f1
+    }
 #
 # end of function
 

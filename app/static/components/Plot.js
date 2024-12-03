@@ -313,7 +313,7 @@ class Plot extends HTMLElement {
     None
 
     description:
-    This method creates a decision surface plot using a contour plot given Z data.
+     This method creates a decision surface plot using a contour plot given Z data.
     */
 
     // clear the decision surface
@@ -332,7 +332,7 @@ class Plot extends HTMLElement {
       // Get the color of the marker and convert it to RGBA to make it transparent
       // then add to the custom color scale
       //
-      let color = hexToRGBA(this.plotData[i].marker.color, 0.1);
+      let color = hexToRGBA(this.plotData[i].marker.color, 0.2);
       colorScale.push([i, color]);
     }
 
@@ -340,8 +340,8 @@ class Plot extends HTMLElement {
     //
     const contourData = {
       z: data.z,
-      x: data.xx,
-      y: data.yy,
+      x: data.x,
+      y: data.y,
       type: 'contour',
       contours: {
         coloring: 'heatmap',
@@ -364,6 +364,45 @@ class Plot extends HTMLElement {
     //
     Plotly.react(plotDiv, this.plotData, this.layout, this.config);
   }
+
+  get_decision_surface() {
+    /*
+    method: Plot::get_decision_surface
+
+    args:
+     None
+
+    return:
+     z (Array): the z values of the decision surface
+     x (Array): the x values of the decision surface
+     y (Array): the y values of the decision surface
+
+    description:
+     This method returns the z, x, and y values of the decision surface.
+     This is useful for saving the decision surface to a file or replotting
+     the surface on another plot
+    */
+
+    // Get the contour trace from the plot data
+    //
+    const contourTrace = this.plotData.find(trace => trace.type === 'contour');
+
+    // If the contour trace is not found, return null
+    //
+    if (!contourTrace) {
+      return null;
+    }
+
+    // Return the z, x, and y values of the contour trace
+    //
+    return {
+      z: contourTrace.z,
+      x: contourTrace.x,
+      y: contourTrace.y
+    };
+  }
+  //
+  // end of method
 
   clear_decision_surface() {
     /*

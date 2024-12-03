@@ -190,6 +190,14 @@ class MLToolsData:
         #
         self.mapping_label = {i: label for i, label in enumerate(set(y))}
 
+        # convert the labels to numbers
+        #
+        self.labels = self.map_label()
+
+        # save the mapped labels back into ints
+        #
+        self.labels = np.array(self.labels, dtype = int)
+
         # return the MLToolsData object
         #
         return self
@@ -223,12 +231,15 @@ class MLToolsData:
         #
         return True
 
-    def map_label(self):# -> type[list[_T]] | ndarray | NDArray:
+    def map_label(self, labels:np.array=None):# -> type[list[_T]] | ndarray | NDArray:
 
-        labels = np.array(self.labels)
-        unique_labels = np.unique(labels)
+        if labels is None:
+            labels = np.array(self.labels)
+            unique_labels = np.unique(labels)
 
-        labels = self.labels
+        else:
+            labels = np.array(labels)
+            unique_labels = np.unique(labels)
 
         for i in range(len(unique_labels)):
             for j in range(len(labels)):
@@ -521,12 +532,12 @@ def generate_two_gaussian(params:dict) -> tuple:
     # gaussian distribution for class 0
     #
     class_0_data = np.random.multivariate_normal(mean1, cov1, npts1)
-    class_0_labels = [0] * npts1  # Label for class 0
+    class_0_labels = ['Class0'] * npts1  # Label for class 0
     
     # gaussian distribution for class 1
     #
     class_1_data = np.random.multivariate_normal(mean2, cov2, npts2)
-    class_1_labels = [1] * npts2  # Label for class 1
+    class_1_labels = ['Class1'] * npts2  # Label for class 1
     
     # concatenate data w labels
     #
@@ -580,16 +591,16 @@ def generate_four_gaussian(params:dict) -> tuple:
     
     # gaussian distributions for each class
     class_0_data = np.random.multivariate_normal(mean1, cov1, npts1)
-    class_0_labels = [0] * npts1  # Label for class 0
+    class_0_labels = ['Class0'] * npts1  # Label for class 0
     
     class_1_data = np.random.multivariate_normal(mean2, cov2, npts2)
-    class_1_labels = [1] * npts2  # Label for class 1
+    class_1_labels = ['Class1'] * npts2  # Label for class 1
     
     class_2_data = np.random.multivariate_normal(mean3, cov3, npts3)
-    class_2_labels = [2] * npts3  # Label for class 2
+    class_2_labels = ['Class2'] * npts3  # Label for class 2
     
     class_3_data = np.random.multivariate_normal(mean4, cov4, npts4)
-    class_3_labels = [3] * npts4  # Label for class 3
+    class_3_labels = ['Class3'] * npts4  # Label for class 3
     
     # concatenate data w labels
     X = np.vstack((class_0_data, class_1_data, class_2_data, class_3_data))
@@ -636,10 +647,10 @@ def generate_ovlp_gaussian(params:dict) -> tuple:
     # gaussian distributions for each class
     #
     class_0_data = np.random.multivariate_normal(mean1, cov1, npts1)
-    class_0_labels = [0] * npts1  # Label for class 0
+    class_0_labels = ['Class0'] * npts1  # Label for class 0
     
     class_1_data = np.random.multivariate_normal(mean2, cov2, npts2)
-    class_1_labels = [1] * npts2  # Label for class 1
+    class_1_labels = ['Class1'] * npts2  # Label for class 1
     
     # concatenate data w labels
     #
@@ -687,12 +698,12 @@ def generate_two_ellipses(params:dict) -> tuple:
     # generate data for class 0
     #
     class_0_data = np.random.multivariate_normal(mean1, cov1, npts1)
-    class_0_labels = [0] * npts1  # Label for class 0
+    class_0_labels = ['Class0'] * npts1  # Label for class 0
     
     # generate data for class 1
     #
     class_1_data = np.random.multivariate_normal(mean2, cov2, npts2)
-    class_1_labels = [1] * npts2  # Label for class 1
+    class_1_labels = ['Class1'] * npts2  # Label for class 1
     
     # concatenate data w labels
     #
@@ -746,16 +757,16 @@ def generate_four_ellipses(params:dict) -> tuple:
     
     # gaussian distributions for each class
     class_0_data = np.random.multivariate_normal(mean1, cov1, npts1)
-    class_0_labels = [0] * npts1  # Label for class 0
+    class_0_labels = ['Class0'] * npts1  # Label for class 0
     
     class_1_data = np.random.multivariate_normal(mean2, cov2, npts2)
-    class_1_labels = [1] * npts2  # Label for class 1
+    class_1_labels = ['Class1'] * npts2  # Label for class 1
     
     class_2_data = np.random.multivariate_normal(mean3, cov3, npts3)
-    class_2_labels = [2] * npts3  # Label for class 2
+    class_2_labels = ['Class2'] * npts3  # Label for class 2
     
     class_3_data = np.random.multivariate_normal(mean4, cov4, npts4)
-    class_3_labels = [3] * npts4  # Label for class 3
+    class_3_labels = ['Class3'] * npts4  # Label for class 3
     
     # concatenate data w labels
     X = np.vstack((class_0_data, class_1_data, class_2_data, class_3_data))
@@ -803,12 +814,12 @@ def generate_rotated_ellipses(params:dict) -> tuple:
     # generate data for class 0
     #
     class_0_data = np.random.multivariate_normal(mean1, cov1, npts1)
-    class_0_labels = [0] * npts1  # Label for class 0
+    class_0_labels = ['Class0'] * npts1  # Label for class 0
     
     # generate data for class 1
     #
     class_1_data = np.random.multivariate_normal(mean2, cov2, npts2)
-    class_1_labels = [1] * npts2  # Label for class 1
+    class_1_labels = ['Class1'] * npts2  # Label for class 1
     
     # concatenate data w labels
     #
@@ -860,7 +871,7 @@ def generate_toroidal(params:dict) -> tuple:
     # create data points for mass (class 1)
     #
     class_1_data = np.random.multivariate_normal(mean, cov, npts_mass)
-    class_1_labels = [1] * npts_mass
+    class_1_labels = ['Class1'] * npts_mass
 
     # create data points for ring (class 0)
     #
@@ -868,7 +879,7 @@ def generate_toroidal(params:dict) -> tuple:
     angle = np.linspace(0,2 * np.pi, npts_ring)
     class_0_data = np.array([mean[0] + ring_radius * np.cos(angle),
                          mean[1] + ring_radius * np.sin(angle)]).T
-    class_0_labels = [0] * npts_ring
+    class_0_labels = ['Class0'] * npts_ring
 
     # concatenate data w labels
     #

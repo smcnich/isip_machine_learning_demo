@@ -13,9 +13,9 @@ from collections import OrderedDict
 #
 main = Blueprint('main', __name__)
 
-# create a global variable to hold the model
+# create a global variable to hold the models
 #
-model = None
+model_cache = {}
 
 # Define a route within the Blueprint
 @main.route('/')
@@ -71,52 +71,97 @@ def train():
 
     # get the data and algorithm parameters
     #
+    userID = data['userID']
     params = data['params']
     algo = data['algo']
     x = data['plotData']['x']
     y = data['plotData']['y']
     labels = data['plotData']['labels']
 
-    # create the model given the parameters
+    try:
+
+        # create the model given the parameters
+        #
+        model = imld.create_model(algo, {"name": algo, "params": params})
+
+        # create the data object
+        #
+        data = imld.create_data(x, y, labels)
+
+        # train the model
+        #
+        model, _, _ = imld.train(model, data)
+
+        # get the x y and z values from the decision surface
+        # x and y will be 1D and z will be 2D
+        #
+        x, y, z = imld.generate_decision_surface(data, model)
+
+        # format the response
+        #
+        response = {
+            'x': x.tolist(), 
+            'y': y.tolist(), 
+            'z': z.tolist()
+        }
+
+        # save the model in the cache
+        #
+        model_cache[userID] = model
+        
+        # return the jsonified response
+        #
+        return jsonify(response)
+    
+    # Handle any exceptions and return an error message
+    #          
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+#
+# end of function
+    
+@main.route('/api/eval/', methods=['POST'])
+def eval():
+
+    # get the data from the request
     #
-    model = imld.create_model(algo, {"name": algo, "params": params})
+    data = request.get_json()
+
+    # get the data and algorithm parameters
+    #
+    userID = data['userID']
+    x = data['plotData']['x']
+    y = data['plotData']['y']
+    labels = data['plotData']['labels']
+
+    # get the model from the cache
+    #
+    model = model_cache[userID]
 
     # create the data object
     #
     data = imld.create_data(x, y, labels)
 
-    # train the model
+    # evaluate the model
     #
-    model, _, _ = imld.train(model, data)
+    metrics = imld.predict(model, data)
 
-    # get the x y and z values from the decision surface
-    # x and y will be 1D and z will be 2D
-    #
-    x, y, z = imld.generate_decision_surface(data, model)
-
-    # format the response
-    #
-    response = {
-        'xx': x.tolist(), 
-        'yy': y.tolist(), 
-        'z': z.tolist()
-    }
-    
     # return the jsonified response
     #
-    return jsonify(response)
+    return jsonify(metrics)
 #
 # end of function
-
+    
 @main.route('/api/data_gen/', methods=['POST'])
 def data_gen():
+
     # Get the data sent in the POST request as JSON
     #
     data = request.get_json()
 
+    # Extract the key and parameters from the received data
+    #
     if data:
-        # Extract the key and parameters from the received data
-        #
         key = data[0]
         paramsDict = data[1]
 
@@ -136,10 +181,10 @@ def data_gen():
         # Return the response in JSON format
         #
         return jsonify(response_data)
-    
+
+    # Handle any exceptions and return an error message
+    #    
     except Exception as e:
-        # Handle any exceptions and return an error message
-        #
         return jsonify({"error": str(e)}), 500
 #
 # end of function

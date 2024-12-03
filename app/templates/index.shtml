@@ -59,6 +59,10 @@
  <!------------------------ define the html page body ------------------------>
  <body>
 
+  <script>
+   const userID = Date.now().toString();
+  </script>
+
   <!---------------------- define the html page header ----------------------->
   <header>
    <h1>The ISIP Machine Learning Demo</h1>

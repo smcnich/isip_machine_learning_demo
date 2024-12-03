@@ -226,6 +226,7 @@ class AlgoTool extends HTMLElement {
 
             .disabled:hover {
               box-shadow: none;
+              opacity: 0.6;
             }
 
             #params {
@@ -320,78 +321,16 @@ class AlgoTool extends HTMLElement {
             // get the proper button id and route to send the data to
             //
             let plot = button.getAttribute('id');
-            let route = '/api/' + plot + '/';
-
-            this.processLog.writeLog('Training model...');
-
-            // get the plot card to be used to plot the decision surface
-            //
-            let plotCard;
-            document.querySelectorAll('plot-card').forEach((card) => {
-              if(card.getAttribute('plotId') == plot) {
-                plotCard = card;
-              }
-            });
-
-            // clear the decision surface before plotting the new one
-            //
-            plotCard.clear_decision_surface();
-
-            // create an event to get the data from the Plot.js component
-            // the event listener is in the Plot.js component and when invoked,
-            // the listener will add a property called "this.data" that contains
-            // the data from the plot
-            //
-            window.dispatchEvent(new CustomEvent('getData', {
-              detail: {
-                ref: this,
-                plotId: plot
-              }
-            }));
-
-            if (this.data == null) {
-              return null;
+ 
+            if (plot == 'train') {
+              this.train();
+            }
+            else if (plot == 'eval') {
+              this.evaluate();
             }
 
-            const request = {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                'algo': this.selectedValue.toString(),
-                'params': this.form.submitForm(),
-                'plotData': this.data
-              })
-            };
-
-            // make a train request to the server
-            //
-            fetch(route, request)
-            
-            // if the fetch fails, throw an error
-            //
-            .then((response) => {
-              if (response.ok) {
-                return response.json();
-              }
-              throw new Error('Network response was not ok.');
-            })
-            
-            // if the fetch is successful, plot the decision surface
-            //
-            .then((data) => {
-
-              plotCard.decision_surface(data);
-
-              this.processLog.writeLog('Model trained successfully!');
-
-            });
-
-            
-
-          });
         });
+      });
         
         // create an event listener that listens to when the value of the select element changes
         //
@@ -489,6 +428,178 @@ class AlgoTool extends HTMLElement {
       //
       // end of fetch
 
+    }
+    //
+    // end of method
+
+    evaluate() {
+    
+        // since the eval button was clicked, we know that the plot is the eval plot
+        //
+        let plot = 'eval';
+        let route = '/api/' + plot + '/';
+
+        // write to the process log that the eval data is being evaluated
+        //
+        this.processLog.writeLog('Evaluating data...');
+
+        // get the train and the eval plot card
+        //
+        let evalCard, trainCard;
+        document.querySelectorAll('plot-card').forEach((card) => {
+          if(card.getAttribute('plotId') == "train") {
+            trainCard = card;
+          }
+          else if (card.getAttribute('plotId') == 'eval') {
+            evalCard = card;
+          }
+        });
+
+        // get the decision surface data from the train plot
+        //
+        const dsData = trainCard.get_decision_surface();
+
+        // if the data is null, print to the process log that the model could not be evaluated
+        //
+        if (dsData == null) {
+          this.processLog.writeLog('Could not evaluate model. Please train the model first.');
+          return null;
+        }
+
+        // plot the decision surface on the eval plot
+        //
+        evalCard.decision_surface(dsData);
+
+        // get the data from the eval plot
+        //
+        const plotData = evalCard.data;
+
+        const request = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            'userID': userID,
+            'plotData': plotData
+          })
+        };
+  
+        // make a train request to the server
+        //
+        fetch(route, request)
+        
+        // if the fetch fails, throw an error and log it to the 
+        // process log
+        //
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          }
+  
+          else {
+            this.processLog.writeLog('Model could not be trained due to a server error. Please try again.');
+            throw new Error('Network response was not ok.');
+          }
+        })
+        
+        // if the fetch is successful, plot the decision surface
+        //
+        .then((data) => {
+  
+          // iterate over each metric in the log and write it to the process log
+          //
+          Object.keys(data).forEach((key) => {
+            if (key != "Confusion Matrix") {
+              this.processLog.writeLog(`${key}: ${data[key].toFixed(2)}`);
+            }
+          });
+        });
+        //
+        // end of fetch
+
+        
+    }
+
+    train() {
+      
+      // since the train button was clicked, we know that the plot is the train plot
+      //
+      let plot = 'train';
+      let route = '/api/' + plot + '/';
+
+      // write to the process log that the model is being trained
+      //
+      this.processLog.writeLog('Training model...');
+
+      // get the plot card to be used to plot the decision surface
+      //
+      let plotCard;
+      document.querySelectorAll('plot-card').forEach((card) => {
+        if(card.getAttribute('plotId') == plot) {
+          plotCard = card;
+        }
+      });
+
+      // clear the decision surface before plotting the new one
+      //
+      plotCard.clear_decision_surface();
+
+      // get the data from the plot
+      //
+      let plotData = plotCard.data;
+
+      // if the data in the plot is nothing, 
+      // print to the process log that the model could not be trained
+      //
+      if (plotData == null) {
+        this.processLog.writeLog('Could not train model. Please plot training data first.');
+        return null;
+      }
+
+      const request = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          'userID': userID,
+          'algo': this.selectedValue.toString(),
+          'params': this.form.submitForm(),
+          'plotData': plotData
+        })
+      };
+
+      // make a train request to the server
+      //
+      fetch(route, request)
+      
+      // if the fetch fails, throw an error and log it to the 
+      // process log
+      //
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+
+        else {
+          this.processLog.writeLog('Model could not be trained due to a server error. Please try again.');
+          throw new Error('Network response was not ok.');
+        }
+      })
+      
+      // if the fetch is successful, plot the decision surface
+      //
+      .then((data) => {
+
+        // plot the decision surface
+        //
+        plotCard.decision_surface(data);
+
+        // write to the process log that the model was trained successfully
+        //
+        this.processLog.writeLog('Model trained successfully!');
+      });
     }
     //
     // end of method

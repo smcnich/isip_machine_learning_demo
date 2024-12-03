@@ -1368,7 +1368,7 @@ class Alg:
     #
     # end of method
 
-    def score(self, num_classes, data, hyp_labels, *,
+    def score(self, num_classes, data:mltd.MLToolsData, hyp_labels, *,
               isPrint = False,
               fp = sys.stdout):
         """
