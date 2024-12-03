@@ -166,16 +166,17 @@ def data_gen():
         paramsDict = data[1]
 
     try:
-        # Call the function to generate two Gaussian distributions
+
+        # generate values for labels, x, y
         #
-        labels, x, y = mltd.generate_data(key, paramsDict)
+        labels, x, y = imld.generate_data(key, paramsDict)
 
         # Prepare the response data
         #
         response_data = {
             "labels": labels,
-            "x": x.tolist(),
-            "y": y.tolist()
+            "x": x,
+            "y": y
         }
 
         # Return the response in JSON format
