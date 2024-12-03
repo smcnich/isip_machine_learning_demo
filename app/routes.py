@@ -116,6 +116,7 @@ def train():
     # Handle any exceptions and return an error message
     #          
     except Exception as e:
+        print(e)
         return jsonify({"error": str(e)}), 500
 #
 # end of function
@@ -134,21 +135,27 @@ def eval():
     y = data['plotData']['y']
     labels = data['plotData']['labels']
 
-    # get the model from the cache
-    #
-    model = model_cache[userID]
+    try:
 
-    # create the data object
-    #
-    data = imld.create_data(x, y, labels)
+        # get the model from the cache
+        #
+        model = model_cache[userID]
 
-    # evaluate the model
-    #
-    metrics = imld.predict(model, data)
+        # create the data object
+        #
+        data = imld.create_data(x, y, labels)
 
-    # return the jsonified response
-    #
-    return jsonify(metrics)
+        # evaluate the model
+        #
+        metrics = imld.predict(model, data)
+
+        # return the jsonified response
+        #
+        return jsonify(metrics)
+    
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)}), 500
 #
 # end of function
     

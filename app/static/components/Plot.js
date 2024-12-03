@@ -57,6 +57,9 @@ class Plot extends HTMLElement {
     // Render the component to the webpage
     //
     this.render();
+
+    // get the plotId from the attribute to determine what data the specific instance plots
+    //
     this.plotId = this.getAttribute('plotId');
 
     // create class atrributes for plotting
@@ -260,6 +263,17 @@ class Plot extends HTMLElement {
     // Create the empty plot
     //
     Plotly.newPlot(plotDiv, this.plotData, this.layout, this.config);
+
+    // dispatch an event to the algoTool to update the plot status
+    // of the current plot. this will effect which buttons are enabled
+    // in the algoTool
+    //
+    window.dispatchEvent(new CustomEvent('plotChange', {
+      detail: {
+        plotId: this.plotId,
+        status: false
+      }
+    }));
   }
 
   plot(data) {
@@ -298,6 +312,16 @@ class Plot extends HTMLElement {
     // Create the plot with data
     //
     Plotly.newPlot(plotDiv, this.plotData, this.layout, this.config);
+
+    // dispatch an event to the algoTool to update the plot status
+    // of the current plot
+    //
+    window.dispatchEvent(new CustomEvent('plotChange', {
+      detail: {
+        plotId: this.plotId,
+        status: true
+      }
+    }));
   }
   //
   // end of method
