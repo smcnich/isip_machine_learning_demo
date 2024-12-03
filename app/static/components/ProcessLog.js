@@ -88,6 +88,7 @@ class ProcessLog extends HTMLElement {
         
         <style>
           /* Styling for the scrollable background area */
+
           .scroll-bg {
               display: block;
               width: 100%;
@@ -111,6 +112,23 @@ class ProcessLog extends HTMLElement {
               font-family: 'Inter', sans-serif;
               font-size: 1em;
               padding-right: 0.7em;
+          }
+
+          .scroll-object b {
+              font-size: 1em;
+          }
+
+					.scroll-object h1 {
+              margin-top: 0.7em;
+              margin-bottom: 0.7em;
+          }
+					.scroll-object h2 {
+              margin-top: 0.5em;
+              margin-bottom: 0.5em;
+          }
+					.scroll-object h3 {
+              margin-top: 0.3em;
+              margin-bottom: 0.3em
           }
   
           /* WebKit Browsers (Chrome, Safari) Custom Scrollbar */
@@ -145,9 +163,9 @@ class ProcessLog extends HTMLElement {
     //
     // end of method
 
-    writeLog(log) {
+    writePlain(log) {
         /*
-        method: ProcessLog::writeLog
+        method: ProcessLog::writePlain
         
         args:
          log: string - the log message to be written to the log container
@@ -156,7 +174,7 @@ class ProcessLog extends HTMLElement {
          None
   
         description:
-         This method writes a log message to the log container.
+         This method writes a log message to the log container in plain text
         */
   
         // Get the log object
@@ -171,6 +189,75 @@ class ProcessLog extends HTMLElement {
         //
         logObject.scrollTop = logObject.scrollHeight;
     }
+    //
+    // end of method
+
+    writeHeader(txt, type='h1') {
+        /*
+        method: ProcessLog::writeHeader
+        
+        args:
+         txt (String): the text to be written to the log container as a header
+         type (String): the type of header to write (h1, h2, h3, ...) [default = 'h1']
+  
+        return:
+         None
+  
+        description:
+         This method writes a header message to the log container
+        */
+  
+        // Get the log object
+        //
+        let logObject = this.shadowRoot.querySelector('.scroll-object');
+  
+        // Append the header message to the log container
+        //
+        logObject.innerHTML += `<${type}>${txt}</${type}>`;
+
+        // Scroll to the bottom of the log container
+        //
+        logObject.scrollTop = logObject.scrollHeight;   
+    }
+
+    writeMetrics(metrics) {
+        /*
+        method: ProcessLog::writeMetrics
+        
+        args:
+         metrics (Object): the metrics message to be written to the log container, 
+                           with the key as the metric name and the value as the metric value
+  
+        return:
+         None
+  
+        description:
+         This method writes a metrics message to the log container.
+        */
+
+        // Get the log object
+        //
+        let logObject = this.shadowRoot.querySelector('.scroll-object');
+
+        // write a metrics header
+        this.writeHeader('Metrics:', 'h3');
+
+        // iterate over each metric in the log and write it to the process log
+        //
+        Object.keys(metrics).forEach((key) => {
+            if (key != "Confusion Matrix") {
+                logObject.innerHTML += `<b>${key}:</b> ${metrics[key].toFixed(2)}<br>`;
+            }
+        });
+
+        this.writePlain('');
+
+        // Scroll to the bottom of the log container
+        //
+        logObject.scrollTop = logObject.scrollHeight;
+    }
+    //
+    // end of method
   
   }
   //

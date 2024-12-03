@@ -183,11 +183,17 @@ def train(model:mlt.Alg, data:mltd.MLToolsData):
       the labels generated while calculating the goodness of fit score.    
     '''
 
-    stats, score = model.train(data)
-
-    # train the model and get the model stats and f1 score
+    # train the model
     #
-    return model, stats, score
+    model.train(data)
+
+    # get the performance metrics of the model on the test data
+    #
+    metrics = score(model, data, data.labels)
+
+    # return the trained model and the performance metrics
+    #
+    return model, metrics
 #
 # end of function
 
@@ -280,7 +286,7 @@ def score(model:mlt.Alg, data:mltd.MLToolsData, hyp_labels:list):
     #
     return {
         'Confusion Matrix': conf_matrix.tolist(),
-        'Sensitivty': sens,
+        'Sensitivity': sens,
         'Specificity': spec,
         'Precision': prec,
         'Accuracy': acc,

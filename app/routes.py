@@ -90,7 +90,7 @@ def train():
 
         # train the model
         #
-        model, _, _ = imld.train(model, data)
+        model, metrics = imld.train(model, data)
 
         # get the x y and z values from the decision surface
         # x and y will be 1D and z will be 2D
@@ -100,9 +100,12 @@ def train():
         # format the response
         #
         response = {
-            'x': x.tolist(), 
-            'y': y.tolist(), 
-            'z': z.tolist()
+            'decision_surface': {
+                'x': x.tolist(), 
+                'y': y.tolist(), 
+                'z': z.tolist()
+            },
+            'metrics': metrics
         }
 
         # save the model in the cache

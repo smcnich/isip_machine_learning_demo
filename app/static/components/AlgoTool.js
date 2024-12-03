@@ -391,6 +391,7 @@ class AlgoTool extends HTMLElement {
         // get the selected value of the select element
         //
         this.selectedValue = event.target.value;
+        this.selectedName = event.target.options[event.target.selectedIndex].text;
 
         // Create a style element
         const style = `
@@ -559,7 +560,7 @@ class AlgoTool extends HTMLElement {
 
     // write to the process log that the eval data is being evaluated
     //
-    this.processLog.writeLog('Evaluating data...');
+    this.processLog.writePlain('Evaluating data...');
 
     // get the train and the eval plot card
     //
@@ -580,7 +581,7 @@ class AlgoTool extends HTMLElement {
     // if the data is null, print to the process log that the model could not be evaluated
     //
     if (dsData == null) {
-      this.processLog.writeLog('Could not evaluate model. Please train the model first.');
+      this.processLog.writePlain('Could not evaluate model. Please train the model first.');
       return null;
     }
 
@@ -618,7 +619,7 @@ class AlgoTool extends HTMLElement {
       }
 
       else {
-        this.processLog.writeLog('Model could not be trained due to a server error. Please try again.');
+        this.processLog.writePlain('Model could not be trained due to a server error. Please try again.');
         throw new Error('Network response was not ok.');
       }
     })
@@ -626,14 +627,7 @@ class AlgoTool extends HTMLElement {
     // if the fetch is successful, plot the decision surface
     //
     .then((data) => {
-
-      // iterate over each metric in the log and write it to the process log
-      //
-      Object.keys(data).forEach((key) => {
-        if (key != "Confusion Matrix") {
-          this.processLog.writeLog(`${key}: ${data[key].toFixed(2)}`);
-        }
-      });
+      this.processLog.writeMetrics(data);
     });
     //
     // end of fetch
@@ -663,9 +657,15 @@ class AlgoTool extends HTMLElement {
     let plot = 'train';
     let route = '/api/' + plot + '/';
 
+    // get the form data
+    //
+    const formData = this.form.submitForm();
+
+    this.processLog.writeHeader(this.selectedName.toString(), 'h2');
+
     // write to the process log that the model is being trained
     //
-    this.processLog.writeLog('Training model...');
+    this.processLog.writePlain('Training model...');
 
     // get the plot card to be used to plot the decision surface
     //
@@ -688,7 +688,7 @@ class AlgoTool extends HTMLElement {
     // print to the process log that the model could not be trained
     //
     if (plotData == null) {
-      this.processLog.writeLog('Could not train model. Please plot training data first.');
+      this.processLog.writePlain('Could not train model. Please plot training data first.');
       return null;
     }
 
@@ -702,7 +702,7 @@ class AlgoTool extends HTMLElement {
       body: JSON.stringify({
         'userID': userID,
         'algo': this.selectedValue.toString(),
-        'params': this.form.submitForm(),
+        'params': formData,
         'plotData': plotData
       })
     };
@@ -720,7 +720,7 @@ class AlgoTool extends HTMLElement {
       }
 
       else {
-        this.processLog.writeLog('Model could not be trained due to a server error. Please try again.');
+        this.processLog.writePlain('Model could not be trained due to a server error. Please try again.');
         throw new Error('Network response was not ok.');
       }
     })
@@ -731,11 +731,15 @@ class AlgoTool extends HTMLElement {
 
       // plot the decision surface
       //
-      plotCard.decision_surface(data);
+      plotCard.decision_surface(data.decision_surface);
+
+      // write the metrics to the process log
+      //
+      this.processLog.writeMetrics(data.metrics);
 
       // write to the process log that the model was trained successfully
       //
-      this.processLog.writeLog('Model trained successfully!');
+      this.processLog.writePlain('Model trained successfully!');
     });
   }
   //
