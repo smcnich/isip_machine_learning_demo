@@ -189,7 +189,7 @@ def train(model:mlt.Alg, data:mltd.MLToolsData):
 
     # get the performance metrics of the model on the test data
     #
-    metrics = score(model, data, data.labels)
+    metrics = predict(model, data)
 
     # return the trained model and the performance metrics
     #
