@@ -401,6 +401,13 @@ class AlgoTool extends HTMLElement {
           flex-direction: row;
           width: 100%;
         }
+
+        .class-container {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          width: 100%;
+        }
     
         /* Styling for individual input containers */
         .num-container {
@@ -453,19 +460,39 @@ class AlgoTool extends HTMLElement {
           border-width: 2px;
           outline: none;
         }
-      `;
+        `;
 
-      // create a dynamic form container for the distribution key
-      //
-      this.form = new FormContainer(data[this.selectedValue], style);
+        // create a dynamic form container for the distribution key
+        //
+        this.form = new FormContainer(data[this.selectedValue], style);
 
-      // add the params to the params container
-      //
-      paramsContainer.appendChild(this.form);
+        // if the form is an instance of InvalidLabelsError, then the user
+        // has not created training data yet. print to the process log that
+        // the user needs to create training data before selecting an algorithm
+        // 
+        if (this.form instanceof InvalidLabelsError) {
+          this.processLog.writePlain(`Please create training data before selecting ${this.selectedValue} algorithm`);
 
-      // modify the status of the buttons after the changes
-      //
-      this.check_button();
+          // reset the form
+          //
+          this.form = null;
+
+          // reset the the value on the select element to default
+          //
+          event.target.selectedIndex = 0;
+          
+          // end this function
+          //
+          return;
+        }
+
+        // add the params to the params container
+        //
+        paramsContainer.appendChild(this.form);
+
+        // modify the status of the buttons after the changes
+        //
+        this.check_button();
       });
       //
       // end of event listener
