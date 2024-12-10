@@ -34,25 +34,25 @@
     
   <!-- Load bootstrap -->
   <!--                -->
-  <link type = "text/css" rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+  <link type = "text/css" rel="stylesheet" href="static/index.css">
 
   <!-- Load the web component -->
-  <script src="{{ url_for('static', filename='components/ShareBtn.js') }}"></script>
-  <script src="{{ url_for('static', filename='components/MainToolbar.js') }}"></script>
-  <script src="{{ url_for('static', filename='components/ProcessLog.js') }}"></script>
-  <script src="{{ url_for('static', filename='components/Plot.js') }}"></script>
-  <script src="{{ url_for('static', filename='components/AlgoTool.js') }}"></script>
-  <script src="{{ url_for('static', filename='components/InfoIcon.js') }}"></script>
-  <script src="{{ url_for('static', filename='components/ToolbarComponents.js') }}"></script>
-  <script src="{{ url_for('static', filename='components/DataParams.js') }}"></script>
-  <script src="{{ url_for('static', filename='components/FormContainer.js') }}"></script>
+  <script src="static/components/ShareBtn.js"></script>
+  <script src="static/components/MainToolbar.js"></script>
+  <script src="static/components/ProcessLog.js"></script>
+  <script src="static/components/Plot.js"></script>
+  <script src="static/components/AlgoTool.js"></script>
+  <script src="static/components/InfoIcon.js"></script>
+  <script src="static/components/ToolbarComponents.js"></script>
+  <script src="static/components/DataParams.js"></script>
+  <script src="static/components/FormContainer.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
  </head>
  <style>
   @font-face {
    font-family: 'Inter';
-   src: url("{{ url_for('static', filename='fonts/Inter_24pt-Regular.ttf') }}") format('ttf');
+   src: url("static/fonts/Inter_24pt-Regular.ttf") format('ttf');
   }
  </style>
 
@@ -61,8 +61,8 @@
 
   <script>
    const userID = Date.now().toString();
-   const apiURL = "{{ base_url }}";
-   console.log(apiURL);
+   const baseURL = window.location.origin;
+   console.log(baseURL);
   </script>
 
   <!---------------------- define the html page header ----------------------->
