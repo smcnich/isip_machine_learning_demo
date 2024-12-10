@@ -1,7 +1,7 @@
 import os
 import json
 import sys
-from flask import Blueprint, render_template, request, jsonify, current_app
+from flask import Blueprint, render_template, request, jsonify, current_app, url_for
 sys.path.append('/backend/')
 
 import nedc_ml_tools_data as mltd
@@ -18,9 +18,12 @@ main = Blueprint('main', __name__)
 model_cache = {}
 
 # Define a route within the Blueprint
+# also save the base_url variable to be used in the index.html file
+#
 @main.route('/')
 def index():
-    return render_template('index.shtml')
+    base_url = url_for('main.index', _external=True)
+    return render_template('index.shtml', base_url=base_url)
 
 @main.route('/api/get_alg_params/', methods=['GET'])
 def get_alg_params():

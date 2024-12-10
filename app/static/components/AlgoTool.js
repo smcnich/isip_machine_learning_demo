@@ -100,7 +100,7 @@ class AlgoTool extends HTMLElement {
 
       // fetch the parameters from the Flask server. make sure to wait for the response
       //
-      const response = await fetch('/api/get_alg_params');
+      const response = await fetch(`${apiURL}/api/get_alg_params`);
       
       // if the fetch fails, throw an error
       //
@@ -583,7 +583,7 @@ class AlgoTool extends HTMLElement {
     // since the eval button was clicked, we know that the plot is the eval plot
     //
     let plot = 'eval';
-    let route = '/api/' + plot + '/';
+    let route = `${apiURL}/api/${plot}`;
 
     // write to the process log that the eval data is being evaluated
     //
@@ -682,7 +682,7 @@ class AlgoTool extends HTMLElement {
     // since the train button was clicked, we know that the plot is the train plot
     //
     let plot = 'train';
-    let route = '/api/' + plot + '/';
+    let route = `${apiURL}/api/${plot}`;
 
     // get the form data
     //

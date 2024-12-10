@@ -87,7 +87,7 @@ class MainToolbar extends HTMLElement {
 
       // Fetch the JSON data from the server\
       //
-      const response = await fetch('/api/get_data_params'); 
+      const response = await fetch(`${apiURL}/api/get_data_params`); 
       const jsonText = await response.json(); 
       this.jsonData = jsonText; 
     } 

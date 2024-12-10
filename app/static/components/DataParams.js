@@ -374,7 +374,7 @@ class DataPopup extends HTMLElement {
 
       // Send the dataPackage to the backend via a POST request
       //
-      fetch('/api/data_gen', { 
+      fetch(`${apiURL}/api/data_gen`, { 
         method: 'POST', // Use the POST method to send the data
         headers: {
             'Content-Type': 'application/json', // Ensure the server expects JSON
