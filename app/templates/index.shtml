@@ -61,7 +61,23 @@
 
   <script>
    const userID = Date.now().toString();
+
+   // get the base URL (localhost:5000 or https://isip.piconepress.com)
+   //
    const baseURL = window.location.origin;
+
+   // get the path of the app from the URL 
+   // (imld/index.html for production or / for development)
+   // 
+   const path = window.location.pathname.split('/');
+
+   // Check if the app is in a subdirectory
+   // will be in subdirectory if production
+   // no subdirectory if development
+   //
+   if (path.length > 1 && path[1]) {
+       baseURL += `/${path[1]}/`;
+   }
    console.log(baseURL);
   </script>
 
