@@ -100,7 +100,7 @@ class AlgoTool extends HTMLElement {
 
       // fetch the parameters from the Flask server. make sure to wait for the response
       //
-      const response = await fetch(`${baseURL}/api/get_alg_params`);
+      const response = await fetch(`${baseURL}api/get_alg_params/`);
       
       // if the fetch fails, throw an error
       //
@@ -634,7 +634,7 @@ class AlgoTool extends HTMLElement {
 
     // make a train request to the server
     //
-    fetch(`${baseURL}/api/${plot}`, request)
+    fetch(`${baseURL}api/${plot}/`, request)
     
     // if the fetch fails, throw an error and log it to the 
     // process log
@@ -734,7 +734,7 @@ class AlgoTool extends HTMLElement {
 
     // make a train request to the server
     //
-    fetch(`${baseURL}/api/${plot}`, request)
+    fetch(`${baseURL}api/${plot}/`, request)
     
     // if the fetch fails, throw an error and log it to the 
     // process log

@@ -64,7 +64,7 @@
 
    // get the base URL (localhost:5000 or https://isip.piconepress.com)
    //
-   const baseURL = window.location.origin;
+   let baseURL = window.location.origin;
 
    // get the path of the app from the URL 
    // (imld/index.html for production or / for development)

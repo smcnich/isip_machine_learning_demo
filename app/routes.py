@@ -18,12 +18,10 @@ main = Blueprint('main', __name__)
 model_cache = {}
 
 # Define a route within the Blueprint
-# also save the base_url variable to be used in the index.html file
 #
 @main.route('/')
 def index():
-    base_url = url_for('main.index', _external=True)
-    return render_template('index.shtml', base_url=base_url)
+    return render_template('index.shtml')
 
 @main.route('/api/get_alg_params/', methods=['GET'])
 def get_alg_params():
@@ -200,5 +198,6 @@ def data_gen():
     #    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 #
 # end of function
