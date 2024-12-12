@@ -143,6 +143,10 @@ class Plot extends HTMLElement {
       if(event.detail.plotId == this.plotId) {
         this.plot(event.detail.data);
       }
+
+      const end = Date.now()
+      const start = event.detail.data.start
+      console.log(`Load Time: ${end - start} ms`)
     });
 
     window.addEventListener('clearPlot', (event) => {

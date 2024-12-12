@@ -584,6 +584,8 @@ class AlgoTool extends HTMLElement {
     //
     let plot = 'eval';
 
+    const start = Date.now()
+
     // write to the process log that the eval data is being evaluated
     //
     this.processLog.writePlain('Evaluating data...');
@@ -654,6 +656,8 @@ class AlgoTool extends HTMLElement {
     //
     .then((data) => {
       this.processLog.writeMetrics(data);
+      const end = Date.now()
+      console.log(`Eval Time: ${end - start} ms`)
     });
     //
     // end of fetch
@@ -681,6 +685,8 @@ class AlgoTool extends HTMLElement {
     // since the train button was clicked, we know that the plot is the train plot
     //
     let plot = 'train';
+
+    const start = Date.now()
 
     // get the form data
     //
@@ -761,6 +767,8 @@ class AlgoTool extends HTMLElement {
       // write the metrics to the process log
       //
       this.processLog.writeMetrics(data.metrics);
+      const end = Date.now()
+      console.log(`Train Time: ${end - start} ms`)
 
       // write to the process log that the model was trained successfully
       //

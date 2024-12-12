@@ -478,6 +478,8 @@ class Toolbar_OpenFileButton extends HTMLElement {
       //
       const reader = new FileReader();
     
+      const start = Date.now()
+
       // when the reader is called (i.e. when the file is read)
       //
       reader.onload = (e) => {
@@ -521,7 +523,8 @@ class Toolbar_OpenFileButton extends HTMLElement {
             data: {
               labels: labels,
               x: x,
-              y: y
+              y: y,
+              start: start
             }
           }
         }));
