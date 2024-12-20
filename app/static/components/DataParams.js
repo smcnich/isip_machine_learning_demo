@@ -370,7 +370,7 @@ class DataPopup extends HTMLElement {
       // set the defaults through the form object
       //
       const paramsDict = this.form.submitForm();
-      const dataPackage = [this.key, paramsDict];
+      const key = this.key;
 
       // Send the dataPackage to the backend via a POST request
       //
@@ -379,7 +379,10 @@ class DataPopup extends HTMLElement {
         headers: {
             'Content-Type': 'application/json', // Ensure the server expects JSON
         },
-        body: JSON.stringify(dataPackage), // Convert the paramsDict to a JSON string
+        body: JSON.stringify({
+          'key': key,
+          'paramsDict': paramsDict
+        }) // Convert the paramsDict to a JSON string
       })
       .then(response => {
         // Check if the response is OK

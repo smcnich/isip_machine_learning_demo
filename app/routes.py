@@ -173,8 +173,8 @@ def data_gen():
     # Extract the key and parameters from the received data
     #
     if data:
-        key = data[0]
-        paramsDict = data[1]
+        key = data['key']
+        paramsDict = data['paramsDict']
 
     try:
 
