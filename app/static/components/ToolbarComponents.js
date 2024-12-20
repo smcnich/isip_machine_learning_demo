@@ -605,6 +605,7 @@ class Toolbar_SaveFileButton extends HTMLElement {
   
     connectedCallback() {
       this.render();
+      this.addClickListener();
     }
   
     render() {
@@ -634,14 +635,121 @@ class Toolbar_SaveFileButton extends HTMLElement {
         <button class="toolbar-openfile-button">${label}</button>
       `;
   
-      // Add click event listener to the button to trigger the save file dialog
-      const button = this.shadowRoot.querySelector('.toolbar-openfile-button');
-      button.addEventListener('click', () => {
-        this.plotId = this.getAttribute('plotId');
-        this.openSaveFileDialog(); // Call openSaveFileDialog on button click
-      });
     }
   
+    // Method to add a click listener to the toolbar button
+    //
+    addClickListener() {
+      // Get the button element from the shadow DOM
+      //
+      const button = this.shadowRoot.querySelector('.toolbar-openfile-button');
+      
+      // Get the label attribute value for conditional logic
+      //
+      const label = this.getAttribute('label');
+
+      // Add an event listener to handle the button click event
+      //
+      button.addEventListener('click', () => {
+        // Check the label to determine the action
+        //
+        switch (label) {
+          case 'Save Train As...':
+          case 'Save Eval As...':
+            this.plotId = this.getAttribute('plotId');
+            this.openSaveFileDialog(); // Call openSaveFileDialog on button click
+            break;
+          case 'Save Parameters As...':
+            this.openSaveParamsDialog();
+            break;
+          default:
+            break;
+        }
+      });
+    }
+
+    async openSaveParamsDialog() {
+
+      try {
+        
+        // create an event to get the data from the Plot.js component
+        //
+        window.dispatchEvent(new CustomEvent('getAlgoParams', {
+          detail: {
+            ref: this
+          }
+        }));
+
+        let algoName = this.data.name;
+        let params = this.data.params;
+        
+        // Create the JSON object structure
+        //
+        const result = {
+          [algoName]: {
+            name: algoName, // Replace with dynamic name if needed
+            params: {}
+          }
+        };
+        
+        // Loop through the params and add them to the result in the desired format
+        //
+        for (const key in params) {
+          if (params.hasOwnProperty(key)) {
+            result[algoName].params[key] = {
+              default: params[key]
+            };
+          }
+        }
+        
+        // Convert the result object to a JSON string
+        //
+        let jsonData = JSON.stringify(result, null, 2); // Pretty print JSON
+        
+        // create an object that will hold the link to the JSON file
+        //
+        let textFile;
+        
+        // create a Blob object from the JSON data
+        //
+        let blob = new Blob([jsonData], {type: 'application/json'});
+        
+        // If we are replacing a previously generated file we need to
+        // manually revoke the object URL to avoid memory leaks.
+        if (textFile !== null) {
+          window.URL.revokeObjectURL(textFile);
+        }
+        
+        // create a download URL for the blob (JSON file)
+        textFile = window.URL.createObjectURL(blob);
+        
+        // create a link element and add a download attribute
+        // connect the href to the download URL
+        // append the link to the document body
+        // this link is never displayed on the page.
+        // it acts as a dummy link that starts a download
+        var link = document.createElement('a');
+        link.setAttribute('download', `imld_params.json`); // Change to .json extension
+        link.href = textFile;
+        document.body.appendChild(link);
+        
+        // wait for the link to be added to the document
+        // then simulate a click event on the link
+        // the dummy link created above will start the download
+        // when a click event is dispatched
+        window.requestAnimationFrame(function () {
+          var event = new MouseEvent('click');
+          link.dispatchEvent(event);
+          document.body.removeChild(link);
+        });
+        
+      }
+      catch (err) {
+        console.error('Error saving file:', err);
+      }
+
+    }
+
     async openSaveFileDialog() {
       try {
 

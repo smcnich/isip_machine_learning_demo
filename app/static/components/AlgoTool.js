@@ -77,6 +77,26 @@ class AlgoTool extends HTMLElement {
     // render the component to the webpage
     //
     this.render();
+
+    // Add a global listener for getAlgoParams
+    //
+    window.addEventListener('getAlgoParams', (event) => {
+      // get the event sender so the data can be sent back to the correct component
+      //
+      const sender = event.detail.ref;
+
+      sender.data = {};
+
+      // Get the selected algorithm name from the AlgoTool component
+      const selectElement = this.shadowRoot.querySelector('.algo-select');
+      const algoName = selectElement.selectedOptions[0].textContent;
+
+      // save the data to the sender, to it can be saved 
+      //
+      sender.data.params = this.form.submitForm();
+      sender.data.name = algoName;
+    });
+
   }
   //
   // end of method

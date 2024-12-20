@@ -419,6 +419,13 @@ class FormContainer extends HTMLElement {
         let opt = document.createElement('option');
         opt.value = option;
         opt.innerText = option;
+
+        // set the input value as the default value
+        //
+        if (option == params.default) {
+          opt.selected = true;
+        }
+
         inputDiv.appendChild(opt);
       });
 
@@ -892,7 +899,8 @@ class FormContainer extends HTMLElement {
           // iterate over each input value, applying the default value
           //
           for (let i = 0; i < inputs.length; i++) {
-            inputs[i].value = parseFloat(flattenedDefaults[i]).toFixed(4);          }
+            inputs[i].value = parseFloat(flattenedDefaults[i]).toFixed(4);          
+          }
         }
 
         // else, get the element and key
@@ -905,6 +913,20 @@ class FormContainer extends HTMLElement {
         else if (param.type == 'float') {
           const input = this.shadowRoot.getElementById(key);
           input.value = parseFloat(param.default).toFixed(4);
+        }
+
+        else if (param.type == 'select') {
+          const selectElement = this.shadowRoot.getElementById(key);
+
+          if (selectElement) {
+            const options = selectElement.getElementsById('option');
+            for (let option of options) {
+              if (option.value == param.default) {
+                option.selected = true;
+                break;
+              }
+            }
+          }
         }
 
         // if the type is a group, recursively call the function

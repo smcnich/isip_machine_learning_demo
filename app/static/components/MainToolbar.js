@@ -416,6 +416,9 @@ class MainToolbar extends HTMLElement {
         <!-- "Help" menu with static help button for guidance -->
         <div class="menu">
           <button class="menubutton">Help</button>
+          <div class="dropdown">
+            <toolbar-button label="User Guide"></toolbar-button>
+          </div>
         </div>
       </div>
     `;
