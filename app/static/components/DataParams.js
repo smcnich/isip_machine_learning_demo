@@ -405,6 +405,8 @@ class DataPopup extends HTMLElement {
             }
           }
         }));
+
+        this.closePopup();
       })
       .catch(error => {
         // Handle any network or other errors during the fetch operation
