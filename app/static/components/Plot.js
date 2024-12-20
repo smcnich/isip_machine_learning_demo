@@ -154,13 +154,17 @@ class Plot extends HTMLElement {
       // empty the plot when the clear buttons are selected
       //
       if ((event.detail.plotId == this.plotId) || (event.detail.plotId == null)) {
-        this.plot_empty();
+        
+        // clear entire plot if select data or all
+        //
+        if ((event.detail.type == 'all') || event.detail.type == 'data'){
+          this.plot_empty();
+        }
+        // clear just decision surface if select results
+        if (event.detail.type == 'results'){
+          this.clear_decision_surface();
+        }
       }
-
-      // TODO: make logic to clear specific parts of the plot based on
-      //       on what button is sent. use event.detail.type to determine
-      //       what to clear (data, results, all). currently, there is no
-      //       function to clear results, so this must be done first.
     
     });
 

@@ -655,7 +655,7 @@ class AlgoTool extends HTMLElement {
     // if the fetch is successful, plot the decision surface
     //
     .then((data) => {
-      this.processLog.writeMetrics(data);
+      this.processLog.writeMetrics('Eval', data);
       const end = Date.now()
       console.log(`Eval Time: ${end - start} ms`)
     });
@@ -766,13 +766,10 @@ class AlgoTool extends HTMLElement {
 
       // write the metrics to the process log
       //
-      this.processLog.writeMetrics(data.metrics);
+      this.processLog.writeMetrics('Train', data.metrics);
       const end = Date.now()
       console.log(`Train Time: ${end - start} ms`)
 
-      // write to the process log that the model was trained successfully
-      //
-      this.processLog.writePlain('Model trained successfully!');
     });
   }
   //

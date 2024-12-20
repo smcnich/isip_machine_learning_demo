@@ -2,10 +2,12 @@ class Toolbar_Button extends HTMLElement {
     constructor() {
       super();
       this.attachShadow({ mode: 'open' });
+      this.processLog = document.querySelector('process-log');
     }
   
     connectedCallback() {
       this.render();
+      this.addClickListener();
     }
   
     render() {
@@ -36,6 +38,64 @@ class Toolbar_Button extends HTMLElement {
         <button class="toolbar-button">${label}</button>
       `;
     }
+
+    // Method to add a click listener to the toolbar button
+    //
+    addClickListener() {
+      // Get the button element from the shadow DOM
+      //
+      const button = this.shadowRoot.querySelector('.toolbar-button');
+      
+      // Get the label attribute value for conditional logic
+      //
+      const label = this.getAttribute('label');
+
+      // Add an event listener to handle the button click event
+      //
+      button.addEventListener('click', () => {
+        // Check the label to determine the action
+        //
+        switch (label) {
+          // Clear all case
+          //
+          case 'Clear All':
+            this.clearAll();
+            this.processLog.clearAll();
+            break;
+          // Clear process log case
+          //
+          case 'Clear Process Log':
+            this.processLog.clearAll();
+          // For any other label, do nothing (default case)
+          //
+          default:
+            break;
+        }
+      });
+    }
+
+    // Method to clear data from multiple plots
+    //
+    clearAll() {
+      // Dispatch a custom event to clear the 'eval' plot
+      //
+      window.dispatchEvent(new CustomEvent('clearPlot', {
+        detail: {
+          type: 'all', // Indicate that it's a "clear all" action
+          plotId: 'eval' // Specify the plot to clear ('eval' plot)
+        }
+      }));
+
+      // Dispatch a custom event to clear the 'train' plot
+      //
+      window.dispatchEvent(new CustomEvent('clearPlot', {
+        detail: {
+          type: 'all', // Indicate that it's a "clear all" action
+          plotId: 'train' // Specify the plot to clear ('train' plot)
+        }
+      }));
+    }
+
 }
 
 class Toolbar_CheckboxButton extends HTMLElement {

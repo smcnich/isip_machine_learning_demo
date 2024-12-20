@@ -480,19 +480,19 @@
         "name": "Number of Points (Yin)",
         "type": "int",
         "range": [0, "inf"],
-        "default": 2000
+        "default": 5000
       },
       "npts_yang": {
         "name": "Number of Points (Yang)",
         "type": "int",
         "range": [0, "inf"],
-        "default": 2000
+        "default": 5000
       },
       "radius": {
         "name": "Radius",
         "type": "float",
         "range": [0, "inf"],
-        "default": 2
+        "default": 1.5
       },
       "ovlp": {
         "name": "Overlap",
