@@ -212,7 +212,8 @@ class ProcessLog extends HTMLElement {
   
         // Scroll to the bottom of the log container
         //
-        logObject.scrollTop = logObject.scrollHeight;
+        let logDiv = this.shadowRoot.querySelector('.scroll-div'); // This is the scroll container
+        logDiv.scrollTop = logDiv.scrollHeight;        
     }
     //
     // end of method
@@ -242,7 +243,8 @@ class ProcessLog extends HTMLElement {
 
         // Scroll to the bottom of the log container
         //
-        logObject.scrollTop = logObject.scrollHeight;   
+        let logDiv = this.shadowRoot.querySelector('.scroll-div'); // This is the scroll container
+        logDiv.scrollTop = logDiv.scrollHeight;        
     }
 
     writeMetrics(label, metrics) {
@@ -283,7 +285,8 @@ class ProcessLog extends HTMLElement {
 
         // Scroll to the bottom of the log container
         //
-        logObject.scrollTop = logObject.scrollHeight;
+        let logDiv = this.shadowRoot.querySelector('.scroll-div'); // This is the scroll container
+        logDiv.scrollTop = logDiv.scrollHeight;        
     }
     //
     // end of method
