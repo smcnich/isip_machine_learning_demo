@@ -800,19 +800,9 @@ class Toolbar_SaveFileButton extends HTMLElement {
         const result = {
           [algoName]: {
             name: algoName, // Replace with dynamic name if needed
-            params: {}
+            params: params
           }
         };
-        
-        // Loop through the params and add them to the result in the desired format
-        //
-        for (const key in params) {
-          if (params.hasOwnProperty(key)) {
-            result[algoName].params[key] = {
-              default: params[key]
-            };
-          }
-        }
         
         // Convert the result object to a JSON string
         //

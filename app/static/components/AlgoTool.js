@@ -93,7 +93,8 @@ class AlgoTool extends HTMLElement {
 
       // save the data to the sender, to it can be saved 
       //
-      sender.data.params = this.form.submitForm();
+      sender.data.params = this.form.submitForm(null, null, 1);
+      console.log(sender.data.params)
       sender.data.name = algoName;
     });
 
@@ -351,7 +352,7 @@ class AlgoTool extends HTMLElement {
           <select class="algo-select">
             <option value="" disabled selected>Select an Algorithm</option>
             ${options}
-          <select>
+          </select>
           <div id="paramBox"></div>
         </div>
       `;

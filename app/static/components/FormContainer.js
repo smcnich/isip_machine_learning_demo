@@ -682,7 +682,7 @@ class FormContainer extends HTMLElement {
     //
     // end of method
 
-    submitForm(_params, _formValues) {
+    submitForm(_params, _formValues, _withType) {
       /*
       method: FormContainer::submitForm
 
@@ -717,6 +717,18 @@ class FormContainer extends HTMLElement {
         formValues = _formValues;
       }
 
+      // create a variable to track whether or not to submit the form with the 
+      // input type. This is used for the load/save parameters features because
+      // setDefaults funciton requires a type to determine how to autofill
+      //
+      let withType;
+      if (!_withType) {
+        withType = 0;
+      }
+      else {
+        withType = _withType;
+      }
+
       // iterate over the parameters and get the input values
       //
       for (const [key, param] of Object.entries(params.params)) {
@@ -725,7 +737,7 @@ class FormContainer extends HTMLElement {
         // to get the input values of the group
         //
         if (param.type == 'group') {
-          this.submitForm(param, formValues);
+          this.submitForm(param, formValues, withType);
         }
 
         // if the parameter is classed based
@@ -783,14 +795,44 @@ class FormContainer extends HTMLElement {
         //
         else if (param.type == 'select') {
           const input = this.shadowRoot.getElementById(key);
-          formValues[key] = input.value;
+          
+          // check for withType used for load/save parameters
+          //
+          if (withType == 1) {
+            // create a dictionary of the type and input value
+            //
+            formValues[key] = {
+              type: param.type,
+              default: input.value
+            }
+          }
+          else {
+            // submit just the input value
+            //
+            formValues[key] = input.value;
+          }
         }
         
         // else, get the simple input value
         //
         else {
           const input = this.shadowRoot.getElementById(key);
-          formValues[key] = Number(input.value);
+
+          // check for withType used for load/save parameters
+          //
+          if (withType == 1) {
+            // create a dictionary of the type and input value
+            //
+            formValues[key] = {
+              type: param.type,
+              default: Number(input.value)
+            }
+          }
+          else {
+            // submit just the input value
+            //
+            formValues[key] = Number(input.value);
+          }
         }
       }
 
@@ -873,6 +915,7 @@ class FormContainer extends HTMLElement {
       let params;
       if (_params) { params = _params; }
       else { params = this.params; }
+      console.log(params.params);
 
       // iterate over the parameters and set the default values
       //
