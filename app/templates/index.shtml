@@ -36,6 +36,9 @@
   <!--                -->
   <link type = "text/css" rel="stylesheet" href="static/index.css">
 
+  <!--Load the web socket-->
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
   <!-- Load the web component -->
   <script src="static/components/ShareBtn.js"></script>
   <script src="static/components/MainToolbar.js"></script>
@@ -60,6 +63,7 @@
  <body>
 
   <script>
+
    const userID = Date.now().toString();
 
    // get the base URL (localhost:5000 or https://isip.piconepress.com)

@@ -42,6 +42,10 @@ class ProcessLog extends HTMLElement {
         // get the name of the class
         //
         this.name = this.constructor.name;
+
+        // initialize the web socket
+        //
+        this.socket = io();
     }
     //
     // end of method
@@ -63,6 +67,10 @@ class ProcessLog extends HTMLElement {
         // render the component to the webpage
         //
         this.render();
+
+        this.socket.on('log', (data) => {
+            this.writePlain(data.data);
+        });
     }
     //
     // end of method

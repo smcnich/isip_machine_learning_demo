@@ -4,8 +4,7 @@ from math import floor, ceil
 import nedc_ml_tools as mlt
 import nedc_ml_tools_data as mltd
 from nedc_file_tools import load_parameters
-
-
+from callback import callback
 
 def imld_callback(name:str, *, status:float=None, data:dict=None, msg:str=None) -> bool:
     '''
@@ -182,6 +181,8 @@ def train(model:mlt.Alg, data:mltd.MLToolsData):
       MLToolData class. Return the trained model, a goodness of fit score, a
       the labels generated while calculating the goodness of fit score.    
     '''
+
+    callback('log', {'data': 'Start Training'})
 
     # train the model
     #
