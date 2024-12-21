@@ -606,7 +606,12 @@ class Toolbar_OpenFileButton extends HTMLElement {
       };
   
       // Read the file as text, this will trigger the onload event
+      //
       reader.readAsText(file);
+
+      // reset the file input
+      //
+      event.target.value = '';
     }
   }  
 
@@ -696,6 +701,10 @@ class Toolbar_OpenFileButton extends HTMLElement {
       // Read the file as text, this will trigger the onload event
       //
       reader.readAsText(file);
+
+      // reset the file input
+      //
+      event.target.value = '';
     }
   }
 }
