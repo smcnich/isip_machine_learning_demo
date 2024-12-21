@@ -94,7 +94,6 @@ class AlgoTool extends HTMLElement {
       // save the data to the sender, to it can be saved 
       //
       sender.data.params = this.form.submitForm(null, null, 1);
-      console.log(sender.data.params)
       sender.data.name = algoName;
     });
 

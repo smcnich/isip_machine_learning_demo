@@ -759,6 +759,17 @@ class FormContainer extends HTMLElement {
           for (let i = 0; i < inputs.length; i++) {
             formValues[key].push(Number(inputs[i].value));
           }
+
+          // check for withType used for load/save parameters
+          //
+          if (withType == 1){
+            // create a dictionary for the type and input value
+            //
+            formValues[key] = {
+              type: param.type,
+              default: formValues[key]
+            }
+          }
         }
   
         // if the form is a matrix, get the input values in a 2D array
@@ -915,11 +926,35 @@ class FormContainer extends HTMLElement {
       let params;
       if (_params) { params = _params; }
       else { params = this.params; }
-      console.log(params.params);
 
       // iterate over the parameters and set the default values
       //
       for (const [key, param] of Object.entries(params.params)) {
+
+        // if the parameter is class-based 
+        //
+        if (param.type == 'class-based') {
+          
+          // get the container that holds the inputs of the matrix based
+          // on its aria-label
+          //
+          const inputDiv = this.shadowRoot.querySelector(`[aria-label="${key}"]`);
+          
+          // get all of the inputs inside of the matrix container
+          //
+          const inputs = inputDiv.getElementsByTagName('input');
+
+          // flatten the array completely. since the array is given as 2D
+          // in the parameter file, flatten it into a vector
+          //
+          const flattenedDefaults = param.default.flat(Infinity);
+          
+          // iterate over each input value, applying the default value
+          //
+          for (let i = 0; i < inputs.length; i++) {
+            inputs[i].value = parseFloat(flattenedDefaults[i]).toFixed(4);          
+          }
+        }
 
         // if the parameter is a matrix 
         //
