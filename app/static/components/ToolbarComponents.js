@@ -470,12 +470,12 @@ class Toolbar_OpenFileButton extends HTMLElement {
     this.fileInput = document.createElement('input');
     this.fileInput.type = 'file'; // Set the input type to file
     this.fileInput.style.display = 'none'; // Hide the input
-    this.fileInput.addEventListener('change', this.handleFileSelect.bind(this)); // Handle file selection
   }
 
   connectedCallback() {
     this.render();
     this.shadowRoot.appendChild(this.fileInput); // Append the hidden file input to the shadow DOM
+    this.addClickListener();
   }
 
   render() {
@@ -503,15 +503,114 @@ class Toolbar_OpenFileButton extends HTMLElement {
       <button class="toolbar-openfile-button">${label}</button>
     `;
 
-    // Add click event listener to the button to trigger file input
-    //
-    const button = this.shadowRoot.querySelector('.toolbar-openfile-button');
-    button.addEventListener('click', () => {
-      this.plotId = this.getAttribute('plotId');
-      this.fileInput.click()
-    });
   }
-  handleFileSelect(event) {
+
+  addClickListener() {
+
+    const button = this.shadowRoot.querySelector('.toolbar-openfile-button');
+
+    const label = this.getAttribute('label');
+
+    button.addEventListener('click', () => {
+
+      switch (label) {
+
+        case 'Load Train Data':
+        case 'Load Eval Data':
+          this.plotId = this.getAttribute('plotId');
+          this.fileInput.click();
+          break;
+        case 'Load Parameters':
+          this.fileInput.click();
+          break;
+        default:
+          break;
+
+      }
+
+    });
+
+    // Add the file input change listener and pass the label explicitly
+    this.fileInput.addEventListener('change', (event) => {
+      this.handleFileSelect(event, label); // Pass label to handleFileSelect
+      this.handleParamFileSelect(event, label);
+    });
+
+  }
+
+  handleParamFileSelect(event, label) {
+    /*
+    method: Toolbar_OpenFileButton::handleFileSelect
+    
+    args:
+     event: the event listener event
+    
+    returns:
+     None
+    
+    description:
+     This method is called when a file is selected. It reads the file and
+     extracts the algorithm name and parameters.
+    */
+  
+    if (label != 'Load Parameters') {
+      return;
+    }
+
+    // Get the selected file
+    //
+    const file = event.target.files[0];
+    
+    // if the file is valid
+    //
+    if (file) {
+      // create a filereader object
+      //
+      const reader = new FileReader();
+  
+      // when the reader is called (i.e. when the file is read)
+      //
+      reader.onload = (e) => {
+        // get the text from the file
+        //
+        const text = e.target.result;
+  
+        // Parse the JSON file
+        //
+        try {
+          const jsonData = JSON.parse(text);
+  
+          // Extract the first (and presumably only) value in the outermost dictionary
+          const [algoData] = Object.values(jsonData);
+
+          // Reformat the data to only include `name` and `params` at the root level
+          const formattedData = {
+            name: algoData.name,
+            params: algoData.params,
+          };
+
+          // Dispatch a custom event to load the parameter form
+          //
+          window.dispatchEvent(new CustomEvent('paramfileLoaded', {
+            detail: {
+              data: {
+                name: algoData.name,
+                params: formattedData
+              }
+            }
+          }));
+
+        } catch (err) {
+          console.error('Error parsing JSON:', err);
+        }
+      };
+  
+      // Read the file as text, this will trigger the onload event
+      reader.readAsText(file);
+    }
+  }  
+
+  handleFileSelect(event, label) {
     /*
     method: Toolbar_OpenFileButton::handleFileSelect
     
@@ -525,8 +624,12 @@ class Toolbar_OpenFileButton extends HTMLElement {
      This method is called when a file is selected. It reads the file and
      dispatches a custom event with the loaded file data.
     */
-    
-     // Get the selected file
+
+    if (label != 'Load Train Data' && label != 'Load Eval Data'){
+      return;
+    }
+
+    // Get the selected file
     //
     const file = event.target.files[0];
     
@@ -547,7 +650,7 @@ class Toolbar_OpenFileButton extends HTMLElement {
         // get the text from the file
         //
         const text = e.target.result;
-    
+
         // split the text into rows, filter out comments, and split the rows into columns
         //
         const rows = text.split("\n")

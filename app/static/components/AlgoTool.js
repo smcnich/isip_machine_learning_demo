@@ -97,6 +97,37 @@ class AlgoTool extends HTMLElement {
       sender.data.name = algoName;
     });
 
+    window.addEventListener('paramfileLoaded', (event) => {
+
+      // get the algoName and params
+      //
+      const algoName = event.detail.data.name;
+      const params = event.detail.data.params;
+
+      // get the algorithm select element from shadow DOM
+      //
+      const selectElement = this.shadowRoot.querySelector('.algo-select');
+
+      // loop through all options of select toolbar
+      //
+      for (const option of selectElement.options) {
+
+        // see if option from file exists and matches
+        //
+        if (option.text == algoName) {
+
+          // set to matching value and dispatch event to change toolbar and form container
+          //
+          selectElement.value = option.value;
+          selectElement.dispatchEvent(new Event('change'));
+          break;
+        }
+      }
+
+      // set default values of the form container
+      //
+      this.form.setDefaults(params);
+    });
   }
   //
   // end of method

@@ -903,24 +903,54 @@ class FormContainer extends HTMLElement {
           }
         }
 
-        // else, get the element and key
+        // if the parameter is an integer
         //
         else if (param.type == 'int') {
+
+          // get the input element from shadow DOM
+          //
           const input = this.shadowRoot.getElementById(key);
+
+          // set value of input to default value
+          //
           input.value = param.default;
         }
 
+        // if the parameter is a float
+        //
         else if (param.type == 'float') {
+
+          // get the input element from shadow DOM
+          //
           const input = this.shadowRoot.getElementById(key);
+
+          // set value of input to default value
+          //
           input.value = parseFloat(param.default).toFixed(4);
         }
 
+        // if the parameter is a select dropdown
+        //
         else if (param.type == 'select') {
+
+          // get the select element from shadow DOM
+          //
           const selectElement = this.shadowRoot.getElementById(key);
 
+          // if select Element exists
+          //
           if (selectElement) {
-            const options = selectElement.getElementsById('option');
+
+            // search for the options elements
+            //
+            const options = selectElement.getElementsByTagName('option');
+
+            // iterate through all options
+            //
             for (let option of options) {
+
+              // set matching option to default value
+              //
               if (option.value == param.default) {
                 option.selected = true;
                 break;
