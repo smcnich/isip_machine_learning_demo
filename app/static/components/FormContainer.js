@@ -338,7 +338,7 @@ class FormContainer extends HTMLElement {
         placeHolder = 'Integer Value';
       } else {
         // For floats, ensure values are displayed with 4 decimal places
-        inputDiv.step = '0.0001'; // Set the step to match the desired precision
+        inputDiv.step = 0.0001; // Set the step to match the desired precision
         inputDiv.value = parseFloat(inputDiv.value || 0).toFixed(4); // Default or format existing value
       }
       
@@ -509,13 +509,20 @@ class FormContainer extends HTMLElement {
           // if a range is given, set the min and max values
           //
           if (params.range) {
-            inputDiv.min = params.range[0];
-            inputDiv.max = params.range[1];
+            input.min = params.range[0];
+            input.max = params.range[1];
           }
 
           // if the input is an integer, set the step to 1
           //
-          if (int) { inputDiv.step = 1; }
+          if (int) { 
+            input.step = 1; 
+          } else {
+
+            // otherwise, step by 0.0001
+            //
+            input.step = 0.0001;
+          }
         
           // add the input to the input div
           //
