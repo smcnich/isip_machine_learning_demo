@@ -3,6 +3,7 @@ class Toolbar_Button extends HTMLElement {
       super();
       this.attachShadow({ mode: 'open' });
       this.processLog = document.querySelector('process-log');
+      this.socket = io();
     }
   
     connectedCallback() {
@@ -94,6 +95,13 @@ class Toolbar_Button extends HTMLElement {
           plotId: 'train' // Specify the plot to clear ('train' plot)
         }
       }));
+
+      // NEED TO FIX: CANNOT EMIT FROM FRONTEND YET
+      try {
+        this.socket.emit('progressbar', {'trainProgress': 0, 'evalProgress': 0})
+      } catch (error) {
+        console.log(error);
+      }
     }
 
 }

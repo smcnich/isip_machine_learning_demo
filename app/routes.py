@@ -2,7 +2,8 @@ import os
 import json
 import sys
 from flask import Blueprint, render_template, request, jsonify, current_app, url_for
-sys.path.append('/backend/')
+sys.path.append(os.path.join(os.path.dirname(__file__), 'backend/'))
+from callback import callback
 
 import nedc_ml_tools_data as mltd
 import nedc_imld_tools as imld
@@ -88,15 +89,18 @@ def train():
         # create the data object
         #
         data = imld.create_data(x, y, labels)
+        callback('progressbar', {'trainProgress': 5, 'evalProgress': 0})
 
         # train the model
         #
         model, metrics = imld.train(model, data)
+        callback('progressbar', {'trainProgress': 20, 'evalProgress': 0})
 
         # get the x y and z values from the decision surface
         # x and y will be 1D and z will be 2D
         #
         x, y, z = imld.generate_decision_surface(data, model)
+        callback('progressbar', {'trainProgress': 80, 'evalProgress': 0})
 
         # format the response
         #
@@ -112,6 +116,8 @@ def train():
         # save the model in the cache
         #
         model_cache[userID] = model
+        
+        callback('progressbar', {'trainProgress': 100, 'evalProgress': 0})
         
         # return the jsonified response
         #
@@ -149,9 +155,13 @@ def eval():
         #
         data = imld.create_data(x, y, labels)
 
+        callback('progressbar', {'trainProgress': 100, 'evalProgress': 30})
+
         # evaluate the model
         #
         metrics = imld.predict(model, data)
+
+        callback('progressbar', {'trainProgress': 100, 'evalProgress': 100})
 
         # return the jsonified response
         #

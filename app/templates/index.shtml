@@ -49,6 +49,7 @@
   <script src="static/components/ToolbarComponents.js"></script>
   <script src="static/components/DataParams.js"></script>
   <script src="static/components/FormContainer.js"></script>
+  <script src="static/components/ProgressBar.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
  </head>

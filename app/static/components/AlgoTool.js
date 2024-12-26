@@ -56,6 +56,10 @@ class AlgoTool extends HTMLElement {
     this.trainReady = false;
     this.evalReady = false;
     this.trained = false;
+
+    // intialize the web socket
+    //
+    this.socket = io();
   }
   //
   // end of method
@@ -76,7 +80,7 @@ class AlgoTool extends HTMLElement {
 
     // render the component to the webpage
     //
-    this.render();
+    await this.render();
 
     // Add a global listener for getAlgoParams
     //
@@ -128,6 +132,7 @@ class AlgoTool extends HTMLElement {
       //
       this.form.setDefaults(params);
     });
+
   }
   //
   // end of method
@@ -247,10 +252,16 @@ class AlgoTool extends HTMLElement {
             display: flex;
             flex-direction: row;
             justify-content: center;
-            margin-bottom: 0.2em;
-            margin-top: 1em;
             width: 100%;
             height: 10%;
+          }
+
+          #progress-bar-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            width: 100%;
+            height: 5%;
           }
 
           button { 
@@ -340,10 +351,21 @@ class AlgoTool extends HTMLElement {
             width: 100%;
             height: 100%;
           }
+
+          progress-bar {
+            width: 45%;  /* Same width as the buttons */
+            height: 70%; /* Same height as the buttons */
+            margin: 0 10px;
+          }
+
         </style>
 
         <!-- Add your HTML here -->
         <div class="main">
+          <div id="progress-bar-container">
+            <progress-bar id="trainProgressBar"></progress-bar>
+            <progress-bar id="evalProgressBar"></progress-bar>
+          </div>
           <div id="button-container">
             <button id="train" class=disabled>Train</button>
             <button id="eval" class=disabled>Evaluate</button>
@@ -355,6 +377,30 @@ class AlgoTool extends HTMLElement {
           <div id="paramBox"></div>
         </div>
       `;
+
+      // get elements for train and eval progress bar
+      //
+      const trainProgressBar = this.shadowRoot.querySelector('#trainProgressBar');
+      const evalProgressBar = this.shadowRoot.querySelector('#evalProgressBar');
+  
+      // Check if the progress bars exist in the DOM
+      //
+      if (trainProgressBar && evalProgressBar) {
+        this.socket.on('progressbar', (data) => {
+          if (trainProgressBar && evalProgressBar) { // Double check here as well
+
+            // set the train and eval progress bar values
+            //
+            console.log(data.trainProgress);
+            trainProgressBar.setProgress(data.trainProgress);
+            evalProgressBar.setProgress(data.evalProgress);
+          }
+        });
+      } else {
+        // warn if progress bars not found in DOM
+        //
+        console.warn("Progress bars not found in the DOM.");
+      }
 
       // get the algo select element to be used to monitor when the value changes
       //
