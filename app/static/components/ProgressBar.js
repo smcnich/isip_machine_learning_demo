@@ -76,7 +76,7 @@ class ProgressBar extends HTMLElement {
         /* Basic styling for the progress bar container */
         .progress-bar-container {
           width: 100%;
-          height: 23px;
+          height: 18px;
           background-color: #e0e0e0;
           border-radius: 20px;
           position: relative;
@@ -100,7 +100,7 @@ class ProgressBar extends HTMLElement {
           font-family: 'Inter', sans-serif;
           font-weight: bold;
           color: #000;
-          font-size: 16px;
+          font-size: 13px;
         }
       </style>
 

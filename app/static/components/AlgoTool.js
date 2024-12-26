@@ -383,24 +383,21 @@ class AlgoTool extends HTMLElement {
       const trainProgressBar = this.shadowRoot.querySelector('#trainProgressBar');
       const evalProgressBar = this.shadowRoot.querySelector('#evalProgressBar');
   
-      // Check if the progress bars exist in the DOM
+      // listen to web socket for updates to train progress bar key
       //
-      if (trainProgressBar && evalProgressBar) {
-        this.socket.on('progressbar', (data) => {
-          if (trainProgressBar && evalProgressBar) { // Double check here as well
-
-            // set the train and eval progress bar values
-            //
-            console.log(data.trainProgress);
-            trainProgressBar.setProgress(data.trainProgress);
-            evalProgressBar.setProgress(data.evalProgress);
-          }
-        });
-      } else {
-        // warn if progress bars not found in DOM
+      this.socket.on('trainProgressBar', (data) => {
+        // update progress value of trian progress bar
         //
-        console.warn("Progress bars not found in the DOM.");
-      }
+        trainProgressBar.setProgress(data.trainProgress);
+      });
+
+      // listen to web socket for updates to eval progress bar key
+      //
+      this.socket.on('evalProgressBar', (data) => {
+        // update progress value of eval progress bar
+        //
+        evalProgressBar.setProgress(data.evalProgress);
+      })
 
       // get the algo select element to be used to monitor when the value changes
       //

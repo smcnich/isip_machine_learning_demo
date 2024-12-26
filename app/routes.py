@@ -89,18 +89,18 @@ def train():
         # create the data object
         #
         data = imld.create_data(x, y, labels)
-        callback('progressbar', {'trainProgress': 5, 'evalProgress': 0})
+        callback('trainProgressBar', {'trainProgress': 5})
 
         # train the model
         #
         model, metrics = imld.train(model, data)
-        callback('progressbar', {'trainProgress': 20, 'evalProgress': 0})
+        callback('trainProgressBar', {'trainProgress': 20})
 
         # get the x y and z values from the decision surface
         # x and y will be 1D and z will be 2D
         #
         x, y, z = imld.generate_decision_surface(data, model)
-        callback('progressbar', {'trainProgress': 80, 'evalProgress': 0})
+        callback('trainProgressBar', {'trainProgress': 80})
 
         # format the response
         #
@@ -117,7 +117,7 @@ def train():
         #
         model_cache[userID] = model
         
-        callback('progressbar', {'trainProgress': 100, 'evalProgress': 0})
+        callback('trainProgressBar', {'trainProgress': 100})
         
         # return the jsonified response
         #
@@ -155,13 +155,13 @@ def eval():
         #
         data = imld.create_data(x, y, labels)
 
-        callback('progressbar', {'trainProgress': 100, 'evalProgress': 30})
+        callback('evalProgressBar', {'evalProgress': 30})
 
         # evaluate the model
         #
         metrics = imld.predict(model, data)
 
-        callback('progressbar', {'trainProgress': 100, 'evalProgress': 100})
+        callback('evalProgressBar', {'evalProgress': 100})
 
         # return the jsonified response
         #
