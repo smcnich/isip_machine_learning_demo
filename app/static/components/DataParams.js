@@ -405,7 +405,8 @@ class DataPopup extends HTMLElement {
               labels: result.labels, // Get the 'labels' from the response
               x: result.x, // Get the 'x' values from the response
               y: result.y, // Get the 'y' values from the response
-              colors: null
+              colors: null,
+              layout: null
             }
           }
         }));

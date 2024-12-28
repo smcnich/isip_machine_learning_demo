@@ -80,6 +80,13 @@ class Plot extends HTMLElement {
       //
       const sender = event.detail.ref;
 
+      // get the axis of the layout to send
+      //
+      this.data.layout = {
+        xaxis: this.layout.xaxis.range,
+        yaxis: this.layout.yaxis.range
+      };
+
       // save the data to the sender, to it can be saved to a
       // csv
       //
@@ -407,6 +414,20 @@ class Plot extends HTMLElement {
     // Prepare plot data by creating a trace for each label
     //
     this.plotData = this.createTraces(this.data);
+
+    // check if the layout data is null, if so, use the default layout values
+    //
+    if (this.data.layout != null) {
+      // get the axis values from the data
+      //
+      const xaxis = this.data.layout.xaxis;
+      const yaxis = this.data.layout.yaxis;
+
+      // update this.layout with new axis values
+      //
+      this.layout.xaxis.range = xaxis;
+      this.layout.yaxis.range = yaxis;
+    }
 
     // Create the plot with data
     //

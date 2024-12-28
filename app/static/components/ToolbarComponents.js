@@ -668,6 +668,16 @@ class Toolbar_OpenFileButton extends HTMLElement {
         //
         const colors = (text.match(/# colors:\s*\[(.*?)\]/) || [])[1]?.split(',').map(color => color.trim()) || null;
 
+        // Extract the limits from the comment
+        //
+        const commentLine = text.split('\n').find(line => line.startsWith('# limits:'));
+        const limits = commentLine ? commentLine.split(':')[1].trim().slice(1, -1).split(',').map(Number) : [];
+
+        // Assign to xaxis and yaxis
+        //
+        const xaxis = limits.slice(0, 2);
+        const yaxis = limits.slice(2);
+
         // split the text into rows, filter out comments, and split the rows into columns
         //
         const rows = text.split("\n")
@@ -705,8 +715,12 @@ class Toolbar_OpenFileButton extends HTMLElement {
               x: x,
               y: y,
               colors: colors,
-              start: start
-            }
+              start: start,
+              layout: {
+                xaxis: xaxis,
+                yaxis: yaxis
+              }
+            },
           }
         }));
       };
@@ -873,9 +887,18 @@ class Toolbar_SaveFileButton extends HTMLElement {
         window.dispatchEvent(new CustomEvent('getData', {
           detail: {
             ref: this,
-            plotId: this.plotId
+            plotId: this.plotId,
           }
         }));
+
+        // get the xaxis and yaxis ranges
+        //
+        const xaxis = this.data.layout.xaxis;
+        const yaxis = this.data.layout.yaxis;
+
+        // combine the ranges into one array
+        //
+        const limits = [...xaxis, ...yaxis];
 
         // write the csv headers
         //
@@ -884,7 +907,7 @@ class Toolbar_SaveFileButton extends HTMLElement {
         let text = `# filename: /Downloads/imld_${this.plotId}.csv\n` +
                     `# classes: [${uniqueLabels}]\n` +
                     `# colors: [${this.data.colors}]\n` +
-                    `# limits: [-1.0,1.0,-1.0,1.0]\n` +
+                    `# limits: [${limits}]\n` +
                     `#\n`;
 
         // write the csv row for each sample
