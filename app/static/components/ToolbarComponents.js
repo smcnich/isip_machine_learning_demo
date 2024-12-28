@@ -664,6 +664,10 @@ class Toolbar_OpenFileButton extends HTMLElement {
         //
         const text = e.target.result;
 
+        // get the colors from the file
+        //
+        const colors = (text.match(/# colors:\s*\[(.*?)\]/) || [])[1]?.split(',').map(color => color.trim()) || null;
+
         // split the text into rows, filter out comments, and split the rows into columns
         //
         const rows = text.split("\n")
@@ -700,6 +704,7 @@ class Toolbar_OpenFileButton extends HTMLElement {
               labels: labels,
               x: x,
               y: y,
+              colors: colors,
               start: start
             }
           }
@@ -872,10 +877,18 @@ class Toolbar_SaveFileButton extends HTMLElement {
           }
         }));
 
-        // write the csv row for each sample
+        // write the csv headers
         //
         let x, y, label;
-        let text = '';
+        let uniqueLabels = Array.from(new Set(this.data.labels));
+        let text = `# filename: /Downloads/imld_${this.plotId}.csv\n` +
+                    `# classes: [${uniqueLabels}]\n` +
+                    `# colors: [${this.data.colors}]\n` +
+                    `# limits: [-1.0,1.0,-1.0,1.0]\n` +
+                    `#\n`;
+
+        // write the csv row for each sample
+        //
         for (let i = 0; i < this.data.labels.length; i++) {
           label = this.data.labels[i];
           x = this.data.x[i];

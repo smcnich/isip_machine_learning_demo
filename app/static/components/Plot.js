@@ -196,8 +196,99 @@ class Plot extends HTMLElement {
     // set the default colors for the plot based on Plotly.js default
     // colors
     //
-    const defaultColors = Plotly.d3.scale.category10();
+    let defaultColors = null;
 
+    // old default colors
+    //
+
+    if (data.colors == null) {
+
+      // Create a mapping for unique labels to colors
+      //
+      let colorMapping = {};
+      let colorArray = [];
+      let colorIndex = 0;
+
+      // get default color values from plotly
+      //
+      const category10 = Plotly.d3.scale.category10();
+
+      // create array format of default colors
+      //
+      for (let i = 0; i < 10; i++) {
+        colorArray.push(category10(i));
+      }
+
+      // Assign a unique color to each label
+      //
+      data.labels.forEach((label) => {
+          if (!(label in colorMapping)) {
+              colorMapping[label] = colorArray[colorIndex % colorArray.length];
+              colorIndex++;
+          }
+      });
+
+      // Define the defaultColors function to return the color for a label
+      //
+      defaultColors = (label) => colorMapping[label];
+
+      // set plot colors value
+      //
+      this.data.colors = colorArray.slice(0, Object.keys(colorMapping).length);
+
+    } else {
+
+      // create a mapping for unique labels to colors
+      //
+      let colorMapping = {};
+      let colorIndex = 0;
+
+      // create color array and filter out empty strings
+      //
+      let colorArray = data.colors;
+      
+      // Filter out empty strings
+      if (Array.isArray(colorArray)) {
+        colorArray = colorArray.filter(color => color !== '');
+      }
+
+      // get the number of unique labels
+      //
+      let numUniqueLabels = new Set(data.labels).size;
+
+      // if not enough colors assigned (equal or less than unique labels),
+      // use the default colors instead
+      //
+      if (colorArray.length < numUniqueLabels) {
+        // get default color values from plotly
+        //
+        const category10 = Plotly.d3.scale.category10();
+
+        // create array format of default colors
+        //
+        for (let i = 0; i < numUniqueLabels; i++) {
+          colorArray.push(category10(i));
+        }
+      }
+
+      // assign a unique color to each label
+      //
+      data.labels.forEach((label) => {
+        if (!(label in colorMapping)) {
+          colorMapping[label] = colorArray[colorIndex % colorArray.length];
+          colorIndex++;
+        }
+      })
+
+      // set the default colors to the header colors
+      //
+      defaultColors = (label) => colorMapping[label];
+
+      // set plot colors value
+      //
+      this.data.colors = this.data.colors.slice(0, Object.keys(colorMapping).length);
+    }
+    
     // iterate over each value in the data and create a trace for each label
     //
     let traces = {};
@@ -219,7 +310,7 @@ class Plot extends HTMLElement {
           name: label,
           marker: { 
             size: 2, 
-            color: defaultColors(i)
+            color: defaultColors(label)
           },
           hoverinfo: 'none'
         }
