@@ -283,7 +283,7 @@ class ProcessLog extends HTMLElement {
             if (key != "Confusion Matrix") {
                 logObject.innerHTML += `
                     <div style="display: inline-block; margin-right: 50px;">
-                        <b>${key}:</b> ${metrics[key].toFixed(2)}
+                        <b>${key}:</b> ${metrics[key].toFixed(2)}%
                     </div>
                     `;
             }

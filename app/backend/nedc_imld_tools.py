@@ -287,12 +287,12 @@ def score(model:mlt.Alg, data:mltd.MLToolsData, hyp_labels:list):
     #
     return {
         'Confusion Matrix': conf_matrix.tolist(),
-        'Sensitivity': sens,
-        'Specificity': spec,
-        'Precision': prec,
-        'Accuracy': acc,
+        'Sensitivity': sens * 100,
+        'Specificity': spec * 100,
+        'Precision': prec * 100,
+        'Accuracy': acc * 100,
         'Error Rate': err,
-        'F1 Score': f1
+        'F1 Score': f1 * 100
     }
 #
 # end of function
