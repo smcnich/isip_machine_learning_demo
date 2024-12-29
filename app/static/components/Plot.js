@@ -477,7 +477,7 @@ class Plot extends HTMLElement {
       // then add to the custom color scale
       //
       let color = hexToRGBA(this.plotData[i].marker.color, 0.2);
-      colorScale.push([i, color]);
+      colorScale.push(color);
     }
 
     // Data for the contour plot
@@ -496,7 +496,7 @@ class Plot extends HTMLElement {
       name: 'Decision Surface',
       showscale: false,
       hoverinfo: 'none',
-      colorscale: colorScale,
+      colorscale: colorScale.map((color, index) => [index / (colorScale.length - 1), color]),
       showlegend: true
     };
 
