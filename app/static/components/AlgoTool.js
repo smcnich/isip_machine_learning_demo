@@ -755,6 +755,10 @@ class AlgoTool extends HTMLElement {
     });
     //
     // end of fetch
+
+    // keeps the message channel open for async response
+    //
+    return true;
   }
   //
   // end of method
@@ -865,6 +869,10 @@ class AlgoTool extends HTMLElement {
       console.log(`Train Time: ${end - start} ms`)
 
     });
+
+    // keeps the message channel open for async response
+    //
+    return true;
   }
   //
   // end of method
