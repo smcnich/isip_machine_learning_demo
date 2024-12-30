@@ -1,7 +1,9 @@
 import os
 import json
 import sys
-from flask import Blueprint, render_template, request, jsonify, current_app, url_for
+import io
+import pickle
+from flask import Blueprint, render_template, request, jsonify, current_app, url_for, send_file
 sys.path.append(os.path.join(os.path.dirname(__file__), 'backend/'))
 from callback import callback
 
@@ -56,13 +58,40 @@ def get_data_params():
         data = json.load(file)
 
     # Convert data to an OrderedDict to preserve the order of keys
+    #
     ordered_data = OrderedDict(data)
 
     # Manually serialize the ordered data and return it as JSON
+    #
     return current_app.response_class(
         json.dumps(ordered_data),  # Serialize ordered data to JSON
         mimetype='application/json'
     )
+
+@main.route('/api/get_model/', methods=['POST'])
+def get_model():
+
+    # get the data from the request
+    #
+    data = request.get_json()
+
+    # get the user id
+    #
+    userID = data['userID']
+
+    # retrieve model with corresponding user id key
+    #
+    model = model_cache[userID]
+
+    # Serialize the model using pickle and store it in a BytesIO stream
+    #
+    model_bytes = io.BytesIO()
+    pickle.dump(model, model_bytes)
+    model_bytes.seek(0)  # Reset the pointer to the beginning of the stream
+    
+    # Send the pickled model as a response, without writing to a file
+    #
+    return send_file(model_bytes, as_attachment=True, download_name=f'model.pkl', mimetype='application/octet-stream')
 
 @main.route('/api/train/', methods=['POST'])
 def train():

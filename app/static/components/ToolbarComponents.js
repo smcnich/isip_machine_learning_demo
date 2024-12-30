@@ -801,6 +801,8 @@ class Toolbar_SaveFileButton extends HTMLElement {
           case 'Save Parameters As...':
             this.openSaveParamsDialog();
             break;
+          case 'Save Model As...':
+            this.openSaveModel();
           default:
             break;
         }
@@ -978,6 +980,73 @@ class Toolbar_SaveFileButton extends HTMLElement {
       catch (err) {
         console.error('Error saving file:', err);
       }
+    }
+
+    async openSaveModel() {
+
+      
+      try {
+
+        const url = `${baseURL}api/get_model`;
+
+        const request = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            'userID': userID
+          })
+        };
+
+        const response = await fetch(url, request);
+        console.log('saving');
+        if (response.ok) {
+
+          let textFile;
+
+          const blob = await response.blob();
+
+          // If we are replacing a previously generated file we need to
+          // manually revoke the object URL to avoid memory leaks.
+          //
+          if (textFile !== null) {
+            window.URL.revokeObjectURL(textFile);
+          }
+
+          // create a download URL for the blob (csv file)
+          //
+          textFile = window.URL.createObjectURL(blob);          
+
+          // create a link element and add a download attribute
+          // connect the href to the download URL
+          // append the link to the document body
+          // this link is never displayed on the page.
+          // it acts as a dummy link that starts a download
+          //
+          var link = document.createElement('a');
+          link.setAttribute('download', `model.pkl`);
+          link.href = textFile;
+          document.body.appendChild(link);
+
+          // wait for the link to be added to the document
+          // then simulate a click event on the link
+          // the dummy link created above will start the download
+          // when a click event is dispatched
+          //
+          window.requestAnimationFrame(function () {
+            var event = new MouseEvent('click');
+            link.dispatchEvent(event);
+            document.body.removeChild(link);
+          }); 
+
+        }
+
+      }
+      catch (err) {
+        console.error('Error saving file:', err);
+      }
+
     }
 }
 
