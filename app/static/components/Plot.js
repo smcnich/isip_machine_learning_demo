@@ -149,6 +149,8 @@ class Plot extends HTMLElement {
     window.addEventListener('fileLoaded', (event) => {
       if(event.detail.plotId == this.plotId) {
         this.plot(event.detail.data);
+      } else {
+        return;
       }
 
       const end = Date.now()
