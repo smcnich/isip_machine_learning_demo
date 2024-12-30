@@ -93,6 +93,35 @@ def get_model():
     #
     return send_file(model_bytes, as_attachment=True, download_name=f'model.pkl', mimetype='application/octet-stream')
 
+@main.route('/api/load_model', methods=['POST'])
+def load_model():
+
+    # get the file and userID from the request
+    #
+    file = request.files['model']
+    user_ID = request.form.get('userID')
+
+    try: 
+        # read the model file
+        #
+        model_bytes = file.read()
+        # unpickle the model as BytesIO stream
+        #
+        model = pickle.loads(model_bytes)
+
+        # save the model to the corresponding userID
+        #
+        model_cache[user_ID] = model
+
+        # return message that it loaded properly
+        #
+        return jsonify({"message": "Model uploaded successfully"}), 200
+    
+    except Exception as e:
+        # return error message if model did not load
+        #
+        return f'Failed to load model: {e}', 500
+
 @main.route('/api/train/', methods=['POST'])
 def train():
     

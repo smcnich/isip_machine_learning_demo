@@ -82,6 +82,19 @@ class AlgoTool extends HTMLElement {
     //
     await this.render();
 
+    window.addEventListener('loadTrainedModel', (event) => {
+        if(event.detail.flag == true) {
+          this.trained = true;
+          this.trainReady = true;
+          this.form = true;
+
+          console.log(this.trained);
+          console.log(this.trainReady);
+          console.log(this.evalReady);
+          console.log(this.form);
+        }
+    })
+
     // Add a global listener for getAlgoParams
     //
     window.addEventListener('getAlgoParams', (event) => {

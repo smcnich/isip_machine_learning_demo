@@ -513,14 +513,22 @@ class Toolbar_OpenFileButton extends HTMLElement {
 
   }
 
+  // Method to add a click listener to the toolbar button
+  //
   addClickListener() {
-
+    // Get the buttom element from the shadow DOM
+    //
     const button = this.shadowRoot.querySelector('.toolbar-openfile-button');
 
+    // Get the label attribute value for conditional logic
+    //
     const label = this.getAttribute('label');
 
+    // Add an event listener to handle the button click event
+    //
     button.addEventListener('click', () => {
-
+      // Check the label to determine the action
+      //
       switch (label) {
 
         case 'Load Train Data':
@@ -531,22 +539,106 @@ class Toolbar_OpenFileButton extends HTMLElement {
         case 'Load Parameters':
           this.fileInput.click();
           break;
+        case 'Load Model':
+          this.fileInput.click();
         default:
           break;
-
       }
-
     });
 
     // Add the file input change listener and pass the label explicitly
+    //
     this.fileInput.addEventListener('change', (event) => {
-      this.handleFileSelect(event, label); // Pass label to handleFileSelect
-      this.handleParamFileSelect(event, label);
+
+      if (label == 'Load Train Data' || label == 'Load Eval Data') {
+        this.handleFileSelect(event); // Pass label to handleFileSelect
+      }
+      else if (label == 'Load Parameters') {
+        this.handleParamFileSelect(event);
+      }
+      else {
+        this.handleModelFileSelect(event);
+      }
     });
 
   }
 
-  handleParamFileSelect(event, label) {
+  handleModelFileSelect(event) {
+
+    // get the selected file
+    //
+    const file = event.target.files[0];
+
+    // if the file is valid
+    //
+    if (file) {
+
+      try {
+        // create a new form
+        //
+        const model = new FormData();
+
+        // add the model and userID to the form
+        //
+        model.append('model', file);
+        model.append('userID', userID);
+
+        // create the url for fetch
+        //
+        const url = `${baseURL}api/load_model`;
+
+        // create the request for fetch
+        //
+        const request = {
+          method: 'POST',
+          body: model
+        };
+
+        // fetch the url and request to backend
+        //
+        fetch(url, request)
+
+        // check the response of the fetch
+        //
+        .then(response => {
+          if (response.ok) {
+
+            console.log('Model uploaded successfully');
+
+            window.dispatchEvent(new CustomEvent('loadTrainedModel', {
+              detail: {
+                flag: true
+              }
+            }));
+
+            window.dispatchEvent (new CustomEvent('plotChange', {
+              detail: {
+                plotId: 'train',
+                status: true
+              }
+            }));
+
+            window.dispatchEvent (new CustomEvent('plotChange', {
+              detail: {
+                plotId: 'eval',
+                status: true
+              }
+            }));           
+          }
+        }) 
+
+      } catch (error) {
+        console.log('Error uploading model:', error);
+      }
+
+      // reset the file input
+      //
+      event.target.value = '';
+
+    }
+  }
+
+  handleParamFileSelect(event) {
     /*
     method: Toolbar_OpenFileButton::handleFileSelect
     
@@ -560,10 +652,6 @@ class Toolbar_OpenFileButton extends HTMLElement {
      This method is called when a file is selected. It reads the file and
      extracts the algorithm name and parameters.
     */
-  
-    if (label != 'Load Parameters') {
-      return;
-    }
 
     // Get the selected file
     //
@@ -623,7 +711,7 @@ class Toolbar_OpenFileButton extends HTMLElement {
     }
   }  
 
-  handleFileSelect(event, label) {
+  handleFileSelect(event) {
     /*
     method: Toolbar_OpenFileButton::handleFileSelect
     
@@ -637,10 +725,6 @@ class Toolbar_OpenFileButton extends HTMLElement {
      This method is called when a file is selected. It reads the file and
      dispatches a custom event with the loaded file data.
     */
-
-    if (label != 'Load Train Data' && label != 'Load Eval Data'){
-      return;
-    }
 
     // Get the selected file
     //
@@ -810,7 +894,6 @@ class Toolbar_SaveFileButton extends HTMLElement {
     }
 
     async openSaveParamsDialog() {
-
       try {
         
         // create an event to get the data from the Plot.js component
@@ -983,12 +1066,14 @@ class Toolbar_SaveFileButton extends HTMLElement {
     }
 
     async openSaveModel() {
-
-      
       try {
 
+        // create the url for the fetch
+        //
         const url = `${baseURL}api/get_model`;
 
+        // create the request for the fetch
+        //
         const request = {
           method: 'POST',
           headers: {
@@ -999,12 +1084,20 @@ class Toolbar_SaveFileButton extends HTMLElement {
           })
         };
 
+        // fetch for a response
+        //
         const response = await fetch(url, request);
-        console.log('saving');
+
+        // save the model if the fetch was successful
+        //
         if (response.ok) {
 
+          // create a textfile for saving
+          //
           let textFile;
 
+          // create a flob object from the data
+          //
           const blob = await response.blob();
 
           // If we are replacing a previously generated file we need to
