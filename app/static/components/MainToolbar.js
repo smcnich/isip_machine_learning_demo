@@ -352,9 +352,9 @@ class MainToolbar extends HTMLElement {
         <div class="menu">
           <button class="menubutton">Help</button>
           <div class="dropdown">
-            <toolbar-popup-button label="About"></toolbar-popup-button>
+            <about-popup label="About" version="1.0.0"></about-popup>
             <toolbar-popup-button label="User Guide"></toolbar-popup-button>
-            <toolbar-popup-button label="Report Issue"></toolbar-popup-button>
+            <report-popup label="Report Issue"></report-popup>
           </div>
         </div>
       </div>
