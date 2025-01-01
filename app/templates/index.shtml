@@ -94,7 +94,7 @@
    <h1>The ISIP Machine Learning Demo</h1>
    <div>
     <h2>Contact</h2>
-    <share-btn></share-btn>
+    <share-popup label="Share"></share-popup>
    </div>
   </header>
 

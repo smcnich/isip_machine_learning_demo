@@ -886,21 +886,33 @@ class SharePopup extends HTMLElement {
       <style>
         /* Button styles */
         .toolbar-popup-button {
-          background-color: white;
-          color: black;
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          background-color: transparent;
+          color: white; /* Adjust text color */
           font-family: 'Inter', sans-serif;
           font-weight: 100;
           font-size: 1em;
-          padding: 5px 30px;
+          padding: 5px 0; /* Adjust padding for better spacing */
           border: none;
           cursor: pointer;
-          min-width: 220px;
           white-space: nowrap;
           text-align: left;
+          height: 40px;
+          gap: 10px; /* Space between the icon and text */
         }
 
         .toolbar-popup-button:hover {
-          background-color: #c9c9c9;
+          filter: drop-shadow(7px 7px 7px rgb(65, 65, 65));
+          cursor: pointer;
+        }
+
+        /* Icon styles */
+        .toolbar-popup-button img {
+          height: 20px; /* Icon size */
+          width: 20px; /* Optional: ensure square */
+          object-fit: contain;
         }
 
         /* Popup styling */
@@ -939,8 +951,9 @@ class SharePopup extends HTMLElement {
 
         .popup h3 {
           font-family: 'Inter', sans-serif;
+          font-weight: normal;
           font-size: 1em;
-          margin: 0 0 8px 0;
+          margine 0 0 8px 0;
         }
 
         .popup .description {
@@ -977,11 +990,68 @@ class SharePopup extends HTMLElement {
         .overlay.show {
           display: block;
         }
+
+        .share-container {
+          display: flex;
+          height: 45px;
+          margin: 15px 0 10px 0;
+        }
+
+        .share-link-container {
+          display: flex;
+          align-items: center;
+          width: 90%;
+          border-radius: 10px;
+          border: 2px solid #ccc;
+          margin: 0 0 0 2px;
+        }
+
+        .link-section {
+          width: 80%;
+          margin: 0 0 0 10px;
+        }
+
+        .link-section:visited {
+          color: blue; /* Ensures the color stays blue after visiting */
+        }
+
+        .divider {
+          width: 3px;
+          height: 100%;
+          background-color: #ddd;
+          margin: 0 0 0 15px;
+        }
+
+        .copy-button {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: transparent;
+          border-top-right-radius: 9px;
+          border-bottom-right-radius: 9px;
+          cursor: pointer;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+        }
+
+        .copy-button img {
+          width: 23px;
+          height: 23px;
+        }
+
+        .copy-button:hover {
+          background-color: #D3D3D3;
+        }
       </style>
 
       <!-- Button to trigger the popup -->
-      <button class="toolbar-popup-button">${this.label}</button>
-      
+      <button class="toolbar-popup-button">
+        ${this.label}
+        <img src="static/icons/share.svg" alt="Share Icon">
+      </button>
+            
       <!-- Background overlay -->
       <div class="overlay" id="overlay"></div>
 
@@ -989,6 +1059,23 @@ class SharePopup extends HTMLElement {
       <div class="popup" id="popup">
         <button class="close-btn" id="close-btn">X</button>
         <h2>${this.label}</h2>
+
+        <div class="share-container">
+          <h3>Link: </h3>
+
+          <div class="share-link-container">
+
+            <a href="#" class="link-section" id="link">https://isip.piconepress.com/imld/</a>
+            <div class="divider"></div>
+
+            <div class="copy-button" id="copy-button">
+              <img src="static/icons/copy.png" alt="Copy">
+            </div>
+
+          </div>    
+
+        </div>
+
       </div>
     `;
 
@@ -997,6 +1084,29 @@ class SharePopup extends HTMLElement {
     const button = this.shadowRoot.querySelector('.toolbar-popup-button');
     const popup = this.shadowRoot.getElementById('popup');
     const closeBtn = this.shadowRoot.getElementById('close-btn');
+    const copyBtn = this.shadowRoot.getElementById('copy-button');
+
+    // Allow for the link to be copied to clipboard when copy button pressed
+    //
+    copyBtn.addEventListener('click', () => {
+
+      // get the content of the link to IMLD
+      //
+      const linkText = this.shadowRoot.getElementById('link').textContent;
+
+      // write to the clipboard the link
+      //
+      navigator.clipboard.writeText(linkText).then(() => {
+        // show popup alert on frontend if successful
+        //
+        alert('Link copied to clipboard!');
+      }).catch(err => {
+        // send error if unsuccessful
+        //
+        console.error('Failed to copy: ', err);
+      });
+
+    });
 
     // Show the popup when the button is clicked
     //
