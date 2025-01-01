@@ -505,7 +505,7 @@ class ReportPopup extends HTMLElement {
           border: none;
           cursor: pointer;
           font-family: 'Inter', sans-serif;
-          font-size: 1em;
+          font-size: 0.9em;
         }
   
         .button:hover {
@@ -583,14 +583,14 @@ class ReportPopup extends HTMLElement {
         <form> 
           <div class="report-container">
               <label>Issue Title</label>
-              <input type="text" placeholder="Insert Title" required></input>
+              <input type="text" id="issue-title" placeholder="Insert Title" autocomplete="off" required></input>
           </div>
           <div class="report-container">
               <label>Issue Description</label>
               <textarea id="issue-description" placeholder="Describe the Issue" required></textarea>
               <div class="word-count" id="word-count">Max words: 250</div>
           </div>
-          <button type="submit" class="button">Submit Issue</button>
+          <button type="submit" class="button" id="submitButton">Submit Issue</button>
         </form>
       </div>
     `;
@@ -600,6 +600,7 @@ class ReportPopup extends HTMLElement {
     const button = this.shadowRoot.querySelector('.toolbar-popup-button');
     const popup = this.shadowRoot.getElementById('popup');
     const closeBtn = this.shadowRoot.getElementById('close-btn');
+    const submitButton = this.shadowRoot.getElementById('submitButton')
     const textarea = this.shadowRoot.getElementById('issue-description');
     const wordCount = this.shadowRoot.getElementById('word-count');
     const maxWords = 250;
@@ -626,41 +627,95 @@ class ReportPopup extends HTMLElement {
       // Call closePopup method to hide popup
       //
       this.closePopup();
+
+    });
+
+    // Submit the report when clicking the submit button
+    //
+    submitButton.addEventListener('click', async (event) => {
+
+      // prevent default form action when submitting
+      //
+      event.preventDefault();
+
+      // get the title and textarea values
+      //
+      const issuetitle = this.shadowRoot.getElementById('issue-title').value;
+      const textarea = this.shadowRoot.getElementById('issue-description').value;
+
+      try {
+        // fetch the data to the issue log route in the backend
+        //
+        const response = await fetch(`${baseURL}/api/issue_log/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: issuetitle,
+            message: textarea,
+          }),
+        });
+    
+        // send an error if the response is not received from fetch
+        //
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        // close the popup if submitted successfully
+        //
+        this.closePopup();
+      } catch (error) {
+
+        // send an error message if cannot send to backend
+        //
+        console.error('Error sending data to backend:', error);
+      }
+
     });
 
     // Word count functionality
+    //
     textarea.addEventListener('input', () => {
       const words = textarea.value.trim().split(/\s+/).filter(word => word.length > 0);
       const currentWordCount = words.length;
 
       // Update word count display
+      //
       wordCount.textContent = `Max words: ${maxWords - currentWordCount}`;
 
       // If word count exceeds the max, trim excess words
+      //
       if (currentWordCount >= maxWords) {
         const trimmedText = words.slice(0, maxWords).join(' ');
         textarea.value = trimmedText;
         
         // Reset word count display to 0 words left
+        //
         wordCount.textContent = `Max words: 0`;
       }
     });
 
     // Handle paste event to ensure word count doesn't go negative
+    //
     textarea.addEventListener('paste', (event) => {
       setTimeout(() => {
         const words = textarea.value.trim().split(/\s+/).filter(word => word.length > 0);
         const currentWordCount = words.length;
 
         // If word count exceeds max, trim the text to maxWords
+        //
         if (currentWordCount > maxWords) {
           const trimmedText = words.slice(0, maxWords).join(' ');
           textarea.value = trimmedText;
           
           // Reset word count display to 0 words left
+          //
           wordCount.textContent = `Max words: 0`;
         } else {
           // Update word count if it's within limit
+          //
           wordCount.textContent = `Max words: ${maxWords - currentWordCount}`;
         }
       }, 0); // Delay to allow paste to complete before adjusting
@@ -738,6 +793,308 @@ class ReportPopup extends HTMLElement {
 //
 // end of class
 
+class SharePopup extends HTMLElement {
+  /*
+  class: AboutPopup
+
+  description:
+    This class creates a customizable About button that, when clicked, displays a popup containing 
+    information about the IMLD tool, including its purpose, features, and history. The popup provides 
+    a focused user experience by using an overlay to isolate content and includes functionality for 
+    closing it with a close button or by clicking outside the popup.
+
+    The AboutPopup component is encapsulated using Shadow DOM to ensure its styles and logic remain 
+    independent of other components. It dynamically updates its contents using attributes such as 
+    'label' and 'version'.
+  */
+
+  constructor() {
+    /*
+    method: AboutPopup::constructor
+
+    args:
+      None
+
+    returns:
+      AboutPopup instance
+
+    description:
+      Initializes the AboutPopup component. The constructor creates the shadow DOM and sets 
+      an initial state for `isPopupOpen`, which tracks whether the popup is visible or not.
+    */
+
+    // Call the parent HTMLElement constructor
+    //
+    super();
+
+    // Attach a shadow DOM
+    //
+    this.attachShadow({ mode: 'open' });
+
+    // Set initial popup status
+    //
+    this.isPopupOpen = false;
+  }
+  //
+  // end of method
+
+  connectedCallback() {
+    /*
+    method: AboutPopup::connectedCallback
+
+    args:
+      None
+
+    return:
+      None
+
+    description:
+      Invoked when the AboutPopup component is added to the DOM. This method renders the component's 
+      structure and styles, initializes attributes such as 'label' and 'version', and provides 
+      information about the IMLD tool, including its interactive features and historical evolution.
+    */
+
+    // Retrieve the button label from attributes
+    //
+    this.label = this.getAttribute('label') || 'About';
+
+    // Render the HTML and styles for the component
+    //
+    this.render();
+  }
+  //
+  // end of method  
+  
+  render() {
+    /*
+    method: AboutPopup::render
+      
+    args:
+     None
+
+    return:
+    None
+
+    description:
+      Renders the HTML and CSS for the ShareBtn component by setting the shadow root's
+      `innerHTML`. This defines the layout and appearance of the component.
+    */
+
+    // Define the HTML structure and CSS styles for the component
+    //
+    this.shadowRoot.innerHTML = `
+      <style>
+        /* Button styles */
+        .toolbar-popup-button {
+          background-color: white;
+          color: black;
+          font-family: 'Inter', sans-serif;
+          font-weight: 100;
+          font-size: 1em;
+          padding: 5px 30px;
+          border: none;
+          cursor: pointer;
+          min-width: 220px;
+          white-space: nowrap;
+          text-align: left;
+        }
+
+        .toolbar-popup-button:hover {
+          background-color: #c9c9c9;
+        }
+
+        /* Popup styling */
+        .popup {
+          display: none;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) scale(0);
+          width: 25vw;
+          max-width: 90%;
+          max-height: 80vh;
+          padding: 15px;
+          padding-top: 10px;
+          padding-bottom: 10px;
+          background-color: white;
+          border-radius: 15px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+          z-index: 1000;
+          opacity: 0;
+          transition: opacity 0.1s ease, transform 0.2s ease;
+          overflow: auto;
+        }
+
+        .popup.show {
+          display: block;
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+
+        .popup h2 {
+          font-family: 'Inter', sans-serif;
+          font-size: 1.2em;
+          margin: 0 0 8px 0;
+        }
+
+        .popup h3 {
+          font-family: 'Inter', sans-serif;
+          font-size: 1em;
+          margin: 0 0 8px 0;
+        }
+
+        .popup .description {
+          font-family: 'Inter', sans-serif;
+          font-size: 0.9em;
+          margin: 10px 0 0 0;
+          text-align: justify;
+        }
+
+        /* Close button styling */
+        .close-btn {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: transparent;
+          border: none;
+          font-size: 16px;
+          cursor: pointer;
+          color: #333;
+        }
+
+        /* Overlay styling */
+        .overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 999;
+        }
+
+        .overlay.show {
+          display: block;
+        }
+      </style>
+
+      <!-- Button to trigger the popup -->
+      <button class="toolbar-popup-button">${this.label}</button>
+      
+      <!-- Background overlay -->
+      <div class="overlay" id="overlay"></div>
+
+      <!-- Popup container -->
+      <div class="popup" id="popup">
+        <button class="close-btn" id="close-btn">X</button>
+        <h2>${this.label}</h2>
+      </div>
+    `;
+
+    // Get elements within the shadow DOM
+    //
+    const button = this.shadowRoot.querySelector('.toolbar-popup-button');
+    const popup = this.shadowRoot.getElementById('popup');
+    const closeBtn = this.shadowRoot.getElementById('close-btn');
+
+    // Show the popup when the button is clicked
+    //
+    button.addEventListener('click', (event) => {
+      // Prevent event propagation to avoid unintended behavior
+      //
+      event.stopPropagation();
+
+      // Call togglePopup method to show/hide popup
+      //
+      this.togglePopup();
+    });
+
+    // Close the popup when clicking the close button
+    //
+    closeBtn.addEventListener('click', (event) => {
+      // Prevent event propagation to avoid conflicts
+      //
+      event.stopPropagation();
+
+      // Call closePopup method to hide popup
+      //
+      this.closePopup();
+    });
+
+    // Add a global click listener to close the popup if clicked outside
+    //
+    document.addEventListener('click', (event) => {
+      // Check if popup is open and if the click is outside the component
+      //
+      if (this.isPopupOpen && !this.contains(event.target)) {
+        this.closePopup(); // Close the popup if the conditions are met
+      }
+    });
+
+    // Stop event propagation on popup to avoid closing when clicking inside it
+    //
+    popup.addEventListener('click', (event) => {
+      event.stopPropagation(); // Stop event from bubbling up to parent listeners
+    });
+  }
+  //
+  // end of method
+
+  // Toggle the visibility of the popup
+  togglePopup() {
+    // Create popup and overlay element
+    //
+    const popup = this.shadowRoot.getElementById('popup');
+    const overlay = this.shadowRoot.getElementById('overlay');
+
+    // Toggle popup state
+    //
+    this.isPopupOpen = !this.isPopupOpen;
+
+    // Show popup and overlap and ensure they are both visible
+    if (this.isPopupOpen) {
+      popup.classList.add('show');
+      overlay.classList.add('show');
+      popup.style.display = 'block';
+      overlay.style.display = 'block';
+    } else {
+      // Close popup if already open
+      //
+      this.closePopup();
+    }
+  }
+  //
+  // end of method
+
+  // Close the popup and overlay
+  closePopup() {
+    // Create popup and overlay element
+    const popup = this.shadowRoot.getElementById('popup');
+    const overlay = this.shadowRoot.getElementById('overlay');
+
+    // Remove show class from popup and overlay
+    popup.classList.remove('show');
+    overlay.classList.remove('show');
+
+    // Hide popup and overlay after transition ends
+    //
+    setTimeout(() => {
+      popup.style.display = 'none';
+      overlay.style.display = 'none';
+    }, 100);
+
+    // Set popup state to closed
+    //
+    this.isPopupOpen = false;
+  }
+  //
+  // end of method
+}
+//
+// end of class
+
 // Register the custom element
 customElements.define('about-popup', AboutPopup);
 customElements.define('report-popup', ReportPopup);
+customElements.define('share-popup', SharePopup);

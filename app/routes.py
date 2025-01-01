@@ -3,6 +3,7 @@ import json
 import sys
 import io
 import pickle
+from datetime import datetime
 from flask import Blueprint, render_template, request, jsonify, current_app, url_for, send_file
 sys.path.append(os.path.join(os.path.dirname(__file__), 'backend/'))
 from callback import callback
@@ -19,6 +20,9 @@ main = Blueprint('main', __name__)
 # create a global variable to hold the models
 #
 model_cache = {}
+
+# Define the relative path to the target folder
+LOG_FILE_PATH = os.path.join(os.path.dirname(__file__), './backend/IssueLog.txt')
 
 # Define a route within the Blueprint
 #
@@ -122,6 +126,48 @@ def load_model():
         #
         return f'Failed to load model: {e}', 500
 
+@main.route('/api/issue_log/', methods=['POST'])
+def write_issue():
+
+    try:
+        # Get JSON data from the request
+        #
+        data = request.get_json()
+
+        # Extract title and message from the data
+        #
+        title = data.get('title', 'No Title')
+        message = data.get('message', 'No Message')
+
+        # Get the current date in the format month/day/year
+        #
+        current_date = datetime.now().strftime('%m/%d/%Y')
+
+        # Format the log entry
+        #
+        log_entry = f"Date: {current_date}\nTitle: {title}\nIssue: {message}\n\n"
+
+        # Debug line to check if the file exists in the target folder
+        #
+        if os.path.exists(LOG_FILE_PATH):
+            print(f"{LOG_FILE_PATH} exists.")
+        else:
+            print(f"{LOG_FILE_PATH} does not exist, creating a new file.")
+
+        # Write to the file
+        #
+        with open(LOG_FILE_PATH, 'a') as file:
+            file.write(log_entry)
+
+        # Return a success response
+        #
+        return {'status': 'success', 'message': 'Issue logged successfully'}, 200
+
+    except Exception as e:
+        # Handle any errors and return a failure response
+        #
+        return {'status': 'error', 'message': str(e)}, 500
+    
 @main.route('/api/train/', methods=['POST'])
 def train():
     
