@@ -893,7 +893,7 @@ class SharePopup extends HTMLElement {
           color: white; /* Adjust text color */
           font-family: 'Inter', sans-serif;
           font-weight: 100;
-          font-size: 1em;
+          font-size: 1.2em;
           padding: 5px 0; /* Adjust padding for better spacing */
           border: none;
           cursor: pointer;
@@ -922,7 +922,7 @@ class SharePopup extends HTMLElement {
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%) scale(0);
-          width: 25vw;
+          width: 24vw;
           max-width: 90%;
           max-height: 80vh;
           padding: 15px;
@@ -997,10 +997,14 @@ class SharePopup extends HTMLElement {
           margin: 15px 0 10px 0;
         }
 
+        .share-container-label {
+          width: 90px;
+        }
+
         .share-link-container {
           display: flex;
           align-items: center;
-          width: 90%;
+          width: 82%;
           border-radius: 10px;
           border: 2px solid #ccc;
           margin: 0 0 0 2px;
@@ -1061,7 +1065,10 @@ class SharePopup extends HTMLElement {
         <h2>${this.label}</h2>
 
         <div class="share-container">
-          <h3>Link: </h3>
+
+          <div class="share-container-label">
+            <h3>Share Link: </h3>
+          </div>
 
           <div class="share-link-container">
 
@@ -1204,7 +1211,458 @@ class SharePopup extends HTMLElement {
 //
 // end of class
 
+class ContactPopup extends HTMLElement {
+  /*
+  class: AboutPopup
+
+  description:
+    This class creates a customizable About button that, when clicked, displays a popup containing 
+    information about the IMLD tool, including its purpose, features, and history. The popup provides 
+    a focused user experience by using an overlay to isolate content and includes functionality for 
+    closing it with a close button or by clicking outside the popup.
+
+    The AboutPopup component is encapsulated using Shadow DOM to ensure its styles and logic remain 
+    independent of other components. It dynamically updates its contents using attributes such as 
+    'label' and 'version'.
+  */
+
+  constructor() {
+    /*
+    method: AboutPopup::constructor
+
+    args:
+      None
+
+    returns:
+      AboutPopup instance
+
+    description:
+      Initializes the AboutPopup component. The constructor creates the shadow DOM and sets 
+      an initial state for `isPopupOpen`, which tracks whether the popup is visible or not.
+    */
+
+    // Call the parent HTMLElement constructor
+    //
+    super();
+
+    // Attach a shadow DOM
+    //
+    this.attachShadow({ mode: 'open' });
+
+    // Set initial popup status
+    //
+    this.isPopupOpen = false;
+  }
+  //
+  // end of method
+
+  connectedCallback() {
+    /*
+    method: AboutPopup::connectedCallback
+
+    args:
+      None
+
+    return:
+      None
+
+    description:
+      Invoked when the AboutPopup component is added to the DOM. This method renders the component's 
+      structure and styles, initializes attributes such as 'label' and 'version', and provides 
+      information about the IMLD tool, including its interactive features and historical evolution.
+    */
+
+    // Retrieve the button label from attributes
+    //
+    this.label = this.getAttribute('label') || 'About';
+
+    // Render the HTML and styles for the component
+    //
+    this.render();
+  }
+  //
+  // end of method  
+  
+  render() {
+    /*
+    method: AboutPopup::render
+      
+    args:
+     None
+
+    return:
+    None
+
+    description:
+      Renders the HTML and CSS for the ShareBtn component by setting the shadow root's
+      `innerHTML`. This defines the layout and appearance of the component.
+    */
+
+    // Define the HTML structure and CSS styles for the component
+    //
+    this.shadowRoot.innerHTML = `
+      <style>
+        /* Button styles */
+        .toolbar-popup-button {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          background-color: transparent;
+          color: white; /* Adjust text color */
+          font-family: 'Inter', sans-serif;
+          font-weight: 100;
+          font-size: 1.2em;
+          padding: 5px 0; /* Adjust padding for better spacing */
+          border: none;
+          cursor: pointer;
+          white-space: nowrap;
+          text-align: left;
+          height: 40px;
+          margin: 0 30px 0 0;
+        }
+
+        .toolbar-popup-button:hover {
+          filter: drop-shadow(7px 7px 7px rgb(65, 65, 65));
+          cursor: pointer;
+        }
+
+        /* Popup styling */
+        .popup {
+          display: none;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) scale(0);
+          width: 24vw;
+          max-width: 90%;
+          max-height: 80vh;
+          padding: 15px;
+          padding-top: 10px;
+          padding-bottom: 10px;
+          background-color: white;
+          border-radius: 15px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+          z-index: 1000;
+          opacity: 0;
+          transition: opacity 0.1s ease, transform 0.2s ease;
+          overflow: auto;
+        }
+
+        .popup.show {
+          display: block;
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+
+        .popup h2 {
+          font-family: 'Inter', sans-serif;
+          font-size: 1.2em;
+          margin: 0 0 8px 0;
+        }
+
+        .popup h3 {
+          font-family: 'Inter', sans-serif;
+          font-weight: normal;
+          font-size: 1em;
+          margine 0 0 8px 0;
+        }
+
+        .popup .description {
+          font-family: 'Inter', sans-serif;
+          font-size: 0.9em;
+          margin: 10px 0 0 0;
+          text-align: justify;
+        }
+
+        /* Close button styling */
+        .close-btn {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: transparent;
+          border: none;
+          font-size: 16px;
+          cursor: pointer;
+          color: #333;
+        }
+
+        /* Overlay styling */
+        .overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 999;
+        }
+
+        .overlay.show {
+          display: block;
+        }
+
+        .share-container {
+          display: flex;
+          height: 45px;
+          margin: 15px 0 10px 0;
+        }
+
+        .share-container-label {
+          width: 70px;
+        }
+
+        .share-link-container {
+          display: flex;
+          align-items: center;
+          width: 82%;
+          border-radius: 10px;
+          border: 2px solid #ccc;
+          margin: 0 0 0 5px;
+        }
+
+        .link-section {
+          width: 80%;
+          margin: 0 0 0 10px;
+        }
+
+        .link-section:visited {
+          color: blue; /* Ensures the color stays blue after visiting */
+        }
+
+        .divider {
+          width: 3px;
+          height: 100%;
+          background-color: #ddd;
+          margin: 0 0 0 15px;
+        }
+
+        .copy-button {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: transparent;
+          border-top-right-radius: 9px;
+          border-bottom-right-radius: 9px;
+          cursor: pointer;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+        }
+
+        .copy-button img {
+          width: 23px;
+          height: 23px;
+        }
+
+        .copy-button:hover {
+          background-color: #D3D3D3;
+        }
+      </style>
+
+      <!-- Button to trigger the popup -->
+      <button class="toolbar-popup-button">
+        ${this.label}
+      </button>
+            
+      <!-- Background overlay -->
+      <div class="overlay" id="overlay"></div>
+
+      <!-- Popup container -->
+      <div class="popup" id="popup">
+        <button class="close-btn" id="close-btn">X</button>
+        <h2>${this.label}</h2>
+
+        <div class="share-container">
+
+          <div class="share-container-label">
+            <h3>Email Us: </h3>
+          </div>
+
+          <div class="share-link-container">
+
+            <a href="#" class="link-section" id="link1">ece_sd_2024f_imld@googlegroups.com</a>
+            <div class="divider"></div>
+
+            <div class="copy-button" id="copy-button1">
+              <img src="static/icons/copy.png" alt="Copy">
+            </div>
+
+          </div>    
+        </div>
+
+        <div class="share-container">
+
+          <div class="share-container-label">
+            <h3>Github: </h3>
+          </div>
+
+          <div class="share-link-container">
+
+            <a href="#" class="link-section" id="link2">https://github.com/smcnich/IMLD/tree/research</a>
+            <div class="divider"></div>
+
+            <div class="copy-button" id="copy-button2">
+              <img src="static/icons/copy.png" alt="Copy">
+            </div>
+            
+          </div>    
+        </div>
+
+      </div>
+    `;
+
+    // Get elements within the shadow DOM
+    //
+    const button = this.shadowRoot.querySelector('.toolbar-popup-button');
+    const popup = this.shadowRoot.getElementById('popup');
+    const closeBtn = this.shadowRoot.getElementById('close-btn');
+    const copyBtn1 = this.shadowRoot.getElementById('copy-button1');
+    const copyBtn2 = this.shadowRoot.getElementById('copy-button2');
+
+    // Allow for the link to be copied to clipboard when copy button pressed
+    //
+    copyBtn1.addEventListener('click', () => {
+
+      // get the content of the link to IMLD
+      //
+      const linkText = this.shadowRoot.getElementById('link1').textContent;
+
+      // write to the clipboard the link
+      //
+      navigator.clipboard.writeText(linkText).then(() => {
+        // show popup alert on frontend if successful
+        //
+        alert('Link copied to clipboard!');
+      }).catch(err => {
+        // send error if unsuccessful
+        //
+        console.error('Failed to copy: ', err);
+      });
+
+    });
+
+    // Allow for the link to be copied to clipboard when copy button pressed
+    //
+    copyBtn2.addEventListener('click', () => {
+
+      // get the content of the link to IMLD
+      //
+      const linkText = this.shadowRoot.getElementById('link2').textContent;
+
+      // write to the clipboard the link
+      //
+      navigator.clipboard.writeText(linkText).then(() => {
+        // show popup alert on frontend if successful
+        //
+        alert('Link copied to clipboard!');
+      }).catch(err => {
+        // send error if unsuccessful
+        //
+        console.error('Failed to copy: ', err);
+      });
+
+    });
+
+    // Show the popup when the button is clicked
+    //
+    button.addEventListener('click', (event) => {
+      // Prevent event propagation to avoid unintended behavior
+      //
+      event.stopPropagation();
+
+      // Call togglePopup method to show/hide popup
+      //
+      this.togglePopup();
+    });
+
+    // Close the popup when clicking the close button
+    //
+    closeBtn.addEventListener('click', (event) => {
+      // Prevent event propagation to avoid conflicts
+      //
+      event.stopPropagation();
+
+      // Call closePopup method to hide popup
+      //
+      this.closePopup();
+    });
+
+    // Add a global click listener to close the popup if clicked outside
+    //
+    document.addEventListener('click', (event) => {
+      // Check if popup is open and if the click is outside the component
+      //
+      if (this.isPopupOpen && !this.contains(event.target)) {
+        this.closePopup(); // Close the popup if the conditions are met
+      }
+    });
+
+    // Stop event propagation on popup to avoid closing when clicking inside it
+    //
+    popup.addEventListener('click', (event) => {
+      event.stopPropagation(); // Stop event from bubbling up to parent listeners
+    });
+  }
+  //
+  // end of method
+
+  // Toggle the visibility of the popup
+  togglePopup() {
+    // Create popup and overlay element
+    //
+    const popup = this.shadowRoot.getElementById('popup');
+    const overlay = this.shadowRoot.getElementById('overlay');
+
+    // Toggle popup state
+    //
+    this.isPopupOpen = !this.isPopupOpen;
+
+    // Show popup and overlap and ensure they are both visible
+    if (this.isPopupOpen) {
+      popup.classList.add('show');
+      overlay.classList.add('show');
+      popup.style.display = 'block';
+      overlay.style.display = 'block';
+    } else {
+      // Close popup if already open
+      //
+      this.closePopup();
+    }
+  }
+  //
+  // end of method
+
+  // Close the popup and overlay
+  closePopup() {
+    // Create popup and overlay element
+    const popup = this.shadowRoot.getElementById('popup');
+    const overlay = this.shadowRoot.getElementById('overlay');
+
+    // Remove show class from popup and overlay
+    popup.classList.remove('show');
+    overlay.classList.remove('show');
+
+    // Hide popup and overlay after transition ends
+    //
+    setTimeout(() => {
+      popup.style.display = 'none';
+      overlay.style.display = 'none';
+    }, 100);
+
+    // Set popup state to closed
+    //
+    this.isPopupOpen = false;
+  }
+  //
+  // end of method
+}
+//
+// end of class
+
 // Register the custom element
 customElements.define('about-popup', AboutPopup);
 customElements.define('report-popup', ReportPopup);
 customElements.define('share-popup', SharePopup);
+customElements.define('contact-popup', ContactPopup);

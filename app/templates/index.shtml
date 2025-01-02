@@ -93,7 +93,7 @@
   <header>
    <h1>The ISIP Machine Learning Demo</h1>
    <div>
-    <h2>Contact</h2>
+    <contact-popup label="Contact"></contact-popup>
     <share-popup label="Share"></share-popup>
    </div>
   </header>
