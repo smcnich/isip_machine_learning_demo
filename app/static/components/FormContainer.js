@@ -1,3 +1,11 @@
+class InvalidLabelsError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'NoLabelsError';
+  }
+}
+
+
 class FormContainer extends HTMLElement {
     /*
     class: FormContainer
@@ -51,7 +59,23 @@ class FormContainer extends HTMLElement {
       //
       this.params = params;
 
+      // save the styling to the class
+      //
       this.styleStr = styleStr;
+
+      // create a form through the parameters and save it to the class
+      //
+      this.form = this.createForm(this.params);
+
+      // if an error occurs during form creation, return the error
+      //
+      if (this.form instanceof Error) {
+        return this.form;
+      }
+
+      // else, return the constructed class
+      //
+      return this;
     }
     //
     // end of method
@@ -112,11 +136,8 @@ class FormContainer extends HTMLElement {
         <div id="form-div"></div>
       `;
 
-      // save the form element as a class property
+      // on render, append the form created in the constructor to the form-div
       //
-      this.form = this.createForm(this.params);
-
-
       this.shadowRoot.getElementById('form-div').appendChild(this.form);
     }
     //
@@ -153,50 +174,106 @@ class FormContainer extends HTMLElement {
       //
       const type = param.type;
 
-      // If the parameter is of type 'int'
-      //
-      if (type === 'int') {
-        return this.generate_numeric_input(key, param, true);
-      }
+      try {
 
-      // if the input is of type 'float'
-      //
-      else if (type === 'float') {
-        return this.generate_numeric_input(key, param, false);
-      }
-
-      else if (type == 'select') {
-        return this.generate_select_input(key, param);
-      }
-
-      // if the input is of type 'matrix'
-      //
-      else if (type === 'matrix') {
-        return this.generate_matrix_input(key, param, false);
-      }
-
-      // If the parameter is of type 'group' and has nested params
-      //
-      else if (type === 'group' && param.params) {
-
-        // Create a div for the group container
+        // If the parameter is of type 'int'
         //
-        const groupHTML = document.createElement('div');
-        groupHTML.className = "group-container";
-        groupHTML.style.display = "flex";
-
-        // Iterate over nested params inside the group and process each one
-        //
-        for (const [nestedKey, nestedParam] of Object.entries(param.params)) {
-          groupHTML.appendChild(this.processParam(nestedKey, nestedParam));  // Recursively process each nested parameter
+        if (type === 'int') {
+          return this.generate_numeric_input(key, param, true);
         }
 
-        // Return the group HTML
+        // if the input is of type 'float'
         //
-        return groupHTML;  
+        else if (type === 'float') {
+          return this.generate_numeric_input(key, param, false);
+        }
+
+        else if (type == 'select') {
+          return this.generate_select_input(key, param);
+        }
+
+        // if the input is of type 'matrix'
+        //
+        else if (type === 'matrix') {
+          return this.generate_matrix_input(key, param, false);
+        }
+
+        else if (type === "class-based") {
+
+          // iterate over each plot card, looking for the training plot
+          // to get the labels in the data
+          //
+          let uniqClasses;
+          document.querySelectorAll('plot-card').forEach((plot) => {
+
+            // If the plot is a training plot, get the unique classes
+            //
+            if (plot.getAttribute('plotID') == 'train') {
+
+              // if the plot data is empty, return null
+              //
+              if (!plot.data) {
+                throw new InvalidLabelsError('No labels available for class-based parameter')
+              }
+
+              // create a set of unique classes, then convert back to array
+              //
+              uniqClasses = [...new Set(plot.data.labels)];
+            }
+          })
+
+          // Recursively process each nested parameter
+          //
+          return this.generate_class_based_input(key, param, uniqClasses);
+        }
+
+        // If the parameter is of type 'group' and has nested params
+        //
+        else if (type === 'group' && param.params) {
+
+          // Create a div for the group container
+          //
+          const groupHTML = document.createElement('div');
+          groupHTML.className = "group-container";
+          groupHTML.style.display = "flex";
+
+          // Iterate over nested params inside the group and process each one
+          //
+          let htmlParam;
+          for (const [nestedKey, nestedParam] of Object.entries(param.params)) {
+
+            // process the parameter into html
+            //
+            htmlParam = this.processParam(nestedKey, nestedParam);
+
+            // if an error occurs during parameter processing, return the error
+            //
+            if (htmlParam instanceof Error) {
+              return htmlParam
+            }
+
+            // Recursively process each nested parameter
+            //
+            groupHTML.appendChild(htmlParam);  
+          }
+
+          // Return the group HTML
+          //
+          return groupHTML;  
+        }
+
       }
 
-      return null;  // Return an empty string if no valid type is found
+      // catch the error and return it
+      //
+      catch (error) {
+        return error;
+      }
+
+      // Return an empty string if no valid type is found
+      // should never reach this point
+      //
+      return null;
     }
 
     generate_numeric_input(key, params, int=false) {
@@ -261,7 +338,7 @@ class FormContainer extends HTMLElement {
         placeHolder = 'Integer Value';
       } else {
         // For floats, ensure values are displayed with 4 decimal places
-        inputDiv.step = '0.0001'; // Set the step to match the desired precision
+        inputDiv.step = 0.0001; // Set the step to match the desired precision
         inputDiv.value = parseFloat(inputDiv.value || 0).toFixed(4); // Default or format existing value
       }
       
@@ -342,6 +419,13 @@ class FormContainer extends HTMLElement {
         let opt = document.createElement('option');
         opt.value = option;
         opt.innerText = option;
+
+        // set the input value as the default value
+        //
+        if (option == params.default) {
+          opt.selected = true;
+        }
+
         inputDiv.appendChild(opt);
       });
 
@@ -425,13 +509,20 @@ class FormContainer extends HTMLElement {
           // if a range is given, set the min and max values
           //
           if (params.range) {
-            inputDiv.min = params.range[0];
-            inputDiv.max = params.range[1];
+            input.min = params.range[0];
+            input.max = params.range[1];
           }
 
           // if the input is an integer, set the step to 1
           //
-          if (int) { inputDiv.step = 1; }
+          if (int) { 
+            input.step = 1; 
+          } else {
+
+            // otherwise, step by 0.0001
+            //
+            input.step = 0.0001;
+          }
         
           // add the input to the input div
           //
@@ -471,6 +562,78 @@ class FormContainer extends HTMLElement {
     //
     // end of method
 
+    generate_class_based_input(key, params, labels) {
+      /*
+      method: FormContainer::generate_matrix_input
+  
+      args:
+       key (String): the key of the parameter, should match nedc ml tools data
+       params (Object): a parameter block for classed based input. should follow the
+                        format:
+
+                          params = {
+                            "name": "Name",
+                            "type": "class-based",
+                            "default": 1
+                          }
+
+       labels (List): the labels to make inputs for
+  
+      returns:
+       HTMLDivElement: a container with labeled input fields for a matrix
+  
+      description:
+       This method generates numeric inputs for every label present in the dataset
+       Primarily used for the Euclidean algorithm
+      */
+
+      // create an input div for the matrix inputs
+      //
+      const inputDiv = document.createElement('div');
+      inputDiv.className = 'class-input';
+
+      // iterate over each label
+      //
+      labels.forEach(label =>  {
+
+        // create parameter block for numeric input
+        //
+        let nestedParam = {
+          "name": label,
+          "type": 'float',
+          "range": [1, "inf"],
+          "default": 1
+        };
+
+        // create a numeric input and add it to the input div
+        //
+        inputDiv.appendChild(this.generate_numeric_input(label, nestedParam));
+      });
+
+      // create the label for the input
+      //
+      const label = document.createElement('label');
+      label.textContent = params.name;
+      label.for = key;
+
+      // Create a container with label and input grid
+      // make sure it has the correct aria label that matches
+      // the label
+      //
+      const container = document.createElement('div');
+      container.className = 'class-container';
+      container.ariaLabel = key;
+
+      // append the label and input div to the container
+      //
+      container.appendChild(label);
+      container.appendChild(inputDiv);
+  
+      // return the container that contains the label and the matrix input
+      //
+      return container;    
+    }
+
     createForm(params) {
       /*
       method: FormContainer::createForm
@@ -501,8 +664,22 @@ class FormContainer extends HTMLElement {
 
       // iterate over each parameter and create an input field for it
       //
+      let htmlParam;
       for (const [key, param] of Object.entries(params.params)) {
-        form.appendChild(this.processParam(key, param));
+
+        // process the parameter into an html object
+        //
+        htmlParam = this.processParam(key, param);
+
+        // if an error occurs during parameter processing, return the error
+        //
+        if (htmlParam instanceof Error) {
+          return htmlParam;
+        }
+
+        // add the parameter html to the form
+        //
+        form.appendChild(htmlParam);
       }
 
       // return the form element
@@ -512,7 +689,7 @@ class FormContainer extends HTMLElement {
     //
     // end of method
 
-    submitForm(_params, _formValues) {
+    submitForm(_params, _formValues, _withType) {
       /*
       method: FormContainer::submitForm
 
@@ -547,6 +724,18 @@ class FormContainer extends HTMLElement {
         formValues = _formValues;
       }
 
+      // create a variable to track whether or not to submit the form with the 
+      // input type. This is used for the load/save parameters features because
+      // setDefaults funciton requires a type to determine how to autofill
+      //
+      let withType;
+      if (!_withType) {
+        withType = 0;
+      }
+      else {
+        withType = _withType;
+      }
+
       // iterate over the parameters and get the input values
       //
       for (const [key, param] of Object.entries(params.params)) {
@@ -555,9 +744,41 @@ class FormContainer extends HTMLElement {
         // to get the input values of the group
         //
         if (param.type == 'group') {
-          this.submitForm(param, formValues);
-        } 
-        
+          this.submitForm(param, formValues, withType);
+        }
+
+        // if the parameter is classed based
+        //
+        else if (param.type == 'class-based') {
+
+          // get the container that holds the inputs of the matrix based
+          // on its aria-label
+          //
+          const inputDiv = this.shadowRoot.querySelector(`[aria-label="${key}"]`);
+
+          // get all of the inputs inside of the matrix container
+          //
+          const inputs = inputDiv.getElementsByTagName('input');
+
+          // iterate over each input and add it the array
+          //
+          formValues[key] = [];
+          for (let i = 0; i < inputs.length; i++) {
+            formValues[key].push(Number(inputs[i].value));
+          }
+
+          // check for withType used for load/save parameters
+          //
+          if (withType == 1){
+            // create a dictionary for the type and input value
+            //
+            formValues[key] = {
+              type: param.type,
+              default: formValues[key]
+            }
+          }
+        }
+  
         // if the form is a matrix, get the input values in a 2D array
         //
         else if (param.type == 'matrix') {
@@ -592,14 +813,44 @@ class FormContainer extends HTMLElement {
         //
         else if (param.type == 'select') {
           const input = this.shadowRoot.getElementById(key);
-          formValues[key] = input.value;
+          
+          // check for withType used for load/save parameters
+          //
+          if (withType == 1) {
+            // create a dictionary of the type and input value
+            //
+            formValues[key] = {
+              type: param.type,
+              default: input.value
+            }
+          }
+          else {
+            // submit just the input value
+            //
+            formValues[key] = input.value;
+          }
         }
         
         // else, get the simple input value
         //
         else {
           const input = this.shadowRoot.getElementById(key);
-          formValues[key] = Number(input.value);
+
+          // check for withType used for load/save parameters
+          //
+          if (withType == 1) {
+            // create a dictionary of the type and input value
+            //
+            formValues[key] = {
+              type: param.type,
+              default: Number(input.value)
+            }
+          }
+          else {
+            // submit just the input value
+            //
+            formValues[key] = Number(input.value);
+          }
         }
       }
 
@@ -687,6 +938,31 @@ class FormContainer extends HTMLElement {
       //
       for (const [key, param] of Object.entries(params.params)) {
 
+        // if the parameter is class-based 
+        //
+        if (param.type == 'class-based') {
+          
+          // get the container that holds the inputs of the matrix based
+          // on its aria-label
+          //
+          const inputDiv = this.shadowRoot.querySelector(`[aria-label="${key}"]`);
+          
+          // get all of the inputs inside of the matrix container
+          //
+          const inputs = inputDiv.getElementsByTagName('input');
+
+          // flatten the array completely. since the array is given as 2D
+          // in the parameter file, flatten it into a vector
+          //
+          const flattenedDefaults = param.default.flat(Infinity);
+          
+          // iterate over each input value, applying the default value
+          //
+          for (let i = 0; i < inputs.length; i++) {
+            inputs[i].value = parseFloat(flattenedDefaults[i]).toFixed(4);          
+          }
+        }
+
         // if the parameter is a matrix 
         //
         if (param.type == 'matrix') {
@@ -708,19 +984,64 @@ class FormContainer extends HTMLElement {
           // iterate over each input value, applying the default value
           //
           for (let i = 0; i < inputs.length; i++) {
-            inputs[i].value = parseFloat(flattenedDefaults[i]).toFixed(4);          }
+            inputs[i].value = parseFloat(flattenedDefaults[i]).toFixed(4);          
+          }
         }
 
-        // else, get the element and key
+        // if the parameter is an integer
         //
         else if (param.type == 'int') {
+
+          // get the input element from shadow DOM
+          //
           const input = this.shadowRoot.getElementById(key);
+
+          // set value of input to default value
+          //
           input.value = param.default;
         }
 
+        // if the parameter is a float
+        //
         else if (param.type == 'float') {
+
+          // get the input element from shadow DOM
+          //
           const input = this.shadowRoot.getElementById(key);
+
+          // set value of input to default value
+          //
           input.value = parseFloat(param.default).toFixed(4);
+        }
+
+        // if the parameter is a select dropdown
+        //
+        else if (param.type == 'select') {
+
+          // get the select element from shadow DOM
+          //
+          const selectElement = this.shadowRoot.getElementById(key);
+
+          // if select Element exists
+          //
+          if (selectElement) {
+
+            // search for the options elements
+            //
+            const options = selectElement.getElementsByTagName('option');
+
+            // iterate through all options
+            //
+            for (let option of options) {
+
+              // set matching option to default value
+              //
+              if (option.value == param.default) {
+                option.selected = true;
+                break;
+              }
+            }
+          }
         }
 
         // if the type is a group, recursively call the function

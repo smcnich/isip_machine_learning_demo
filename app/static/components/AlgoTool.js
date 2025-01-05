@@ -56,6 +56,10 @@ class AlgoTool extends HTMLElement {
     this.trainReady = false;
     this.evalReady = false;
     this.trained = false;
+
+    // intialize the web socket
+    //
+    this.socket = io();
   }
   //
   // end of method
@@ -76,7 +80,72 @@ class AlgoTool extends HTMLElement {
 
     // render the component to the webpage
     //
-    this.render();
+    await this.render();
+
+    window.addEventListener('loadTrainedModel', (event) => {
+        if(event.detail.flag == true) {
+          this.trained = true;
+          this.trainReady = true;
+          this.form = true;
+
+          console.log(this.trained);
+          console.log(this.trainReady);
+          console.log(this.evalReady);
+          console.log(this.form);
+        }
+    })
+
+    // Add a global listener for getAlgoParams
+    //
+    window.addEventListener('getAlgoParams', (event) => {
+      // get the event sender so the data can be sent back to the correct component
+      //
+      const sender = event.detail.ref;
+
+      sender.data = {};
+
+      // Get the selected algorithm name from the AlgoTool component
+      const selectElement = this.shadowRoot.querySelector('.algo-select');
+      const algoName = selectElement.selectedOptions[0].textContent;
+
+      // save the data to the sender, to it can be saved 
+      //
+      sender.data.params = this.form.submitForm(null, null, 1);
+      sender.data.name = algoName;
+    });
+
+    window.addEventListener('paramfileLoaded', (event) => {
+
+      // get the algoName and params
+      //
+      const algoName = event.detail.data.name;
+      const params = event.detail.data.params;
+
+      // get the algorithm select element from shadow DOM
+      //
+      const selectElement = this.shadowRoot.querySelector('.algo-select');
+
+      // loop through all options of select toolbar
+      //
+      for (const option of selectElement.options) {
+
+        // see if option from file exists and matches
+        //
+        if (option.text == algoName) {
+
+          // set to matching value and dispatch event to change toolbar and form container
+          //
+          selectElement.value = option.value;
+          selectElement.dispatchEvent(new Event('change'));
+          break;
+        }
+      }
+
+      // set default values of the form container
+      //
+      this.form.setDefaults(params);
+    });
+
   }
   //
   // end of method
@@ -100,7 +169,7 @@ class AlgoTool extends HTMLElement {
 
       // fetch the parameters from the Flask server. make sure to wait for the response
       //
-      const response = await fetch('/api/get_alg_params');
+      const response = await fetch(`${baseURL}api/get_alg_params/`);
       
       // if the fetch fails, throw an error
       //
@@ -196,10 +265,16 @@ class AlgoTool extends HTMLElement {
             display: flex;
             flex-direction: row;
             justify-content: center;
-            margin-bottom: 0.2em;
-            margin-top: 1em;
             width: 100%;
             height: 10%;
+          }
+
+          #progress-bar-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            width: 100%;
+            height: 5%;
           }
 
           button { 
@@ -289,10 +364,21 @@ class AlgoTool extends HTMLElement {
             width: 100%;
             height: 100%;
           }
+
+          progress-bar {
+            width: 45%;  /* Same width as the buttons */
+            height: 70%; /* Same height as the buttons */
+            margin: 0 10px;
+          }
+
         </style>
 
         <!-- Add your HTML here -->
         <div class="main">
+          <div id="progress-bar-container">
+            <progress-bar id="trainProgressBar"></progress-bar>
+            <progress-bar id="evalProgressBar"></progress-bar>
+          </div>
           <div id="button-container">
             <button id="train" class=disabled>Train</button>
             <button id="eval" class=disabled>Evaluate</button>
@@ -300,10 +386,31 @@ class AlgoTool extends HTMLElement {
           <select class="algo-select">
             <option value="" disabled selected>Select an Algorithm</option>
             ${options}
-          <select>
+          </select>
           <div id="paramBox"></div>
         </div>
       `;
+
+      // get elements for train and eval progress bar
+      //
+      const trainProgressBar = this.shadowRoot.querySelector('#trainProgressBar');
+      const evalProgressBar = this.shadowRoot.querySelector('#evalProgressBar');
+  
+      // listen to web socket for updates to train progress bar key
+      //
+      this.socket.on('trainProgressBar', (data) => {
+        // update progress value of trian progress bar
+        //
+        trainProgressBar.setProgress(data.trainProgress);
+      });
+
+      // listen to web socket for updates to eval progress bar key
+      //
+      this.socket.on('evalProgressBar', (data) => {
+        // update progress value of eval progress bar
+        //
+        evalProgressBar.setProgress(data.evalProgress);
+      })
 
       // get the algo select element to be used to monitor when the value changes
       //
@@ -401,6 +508,13 @@ class AlgoTool extends HTMLElement {
           flex-direction: row;
           width: 100%;
         }
+
+        .class-container {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          width: 100%;
+        }
     
         /* Styling for individual input containers */
         .num-container {
@@ -453,19 +567,39 @@ class AlgoTool extends HTMLElement {
           border-width: 2px;
           outline: none;
         }
-      `;
+        `;
 
-      // create a dynamic form container for the distribution key
-      //
-      this.form = new FormContainer(data[this.selectedValue], style);
+        // create a dynamic form container for the distribution key
+        //
+        this.form = new FormContainer(data[this.selectedValue], style);
 
-      // add the params to the params container
-      //
-      paramsContainer.appendChild(this.form);
+        // if the form is an instance of InvalidLabelsError, then the user
+        // has not created training data yet. print to the process log that
+        // the user needs to create training data before selecting an algorithm
+        // 
+        if (this.form instanceof InvalidLabelsError) {
+          this.processLog.writePlain(`Please create training data before selecting ${this.selectedValue} algorithm`);
 
-      // modify the status of the buttons after the changes
-      //
-      this.check_button();
+          // reset the form
+          //
+          this.form = null;
+
+          // reset the the value on the select element to default
+          //
+          event.target.selectedIndex = 0;
+          
+          // end this function
+          //
+          return;
+        }
+
+        // add the params to the params container
+        //
+        paramsContainer.appendChild(this.form);
+
+        // modify the status of the buttons after the changes
+        //
+        this.check_button();
       });
       //
       // end of event listener
@@ -556,7 +690,8 @@ class AlgoTool extends HTMLElement {
     // since the eval button was clicked, we know that the plot is the eval plot
     //
     let plot = 'eval';
-    let route = '/api/' + plot + '/';
+
+    const start = Date.now()
 
     // write to the process log that the eval data is being evaluated
     //
@@ -608,7 +743,7 @@ class AlgoTool extends HTMLElement {
 
     // make a train request to the server
     //
-    fetch(route, request)
+    fetch(`${baseURL}api/${plot}/`, request)
     
     // if the fetch fails, throw an error and log it to the 
     // process log
@@ -627,10 +762,13 @@ class AlgoTool extends HTMLElement {
     // if the fetch is successful, plot the decision surface
     //
     .then((data) => {
-      this.processLog.writeMetrics(data);
+      this.processLog.writeMetrics('Eval', data);
+      const end = Date.now()
+      console.log(`Eval Time: ${end - start} ms`)
     });
     //
     // end of fetch
+
   }
   //
   // end of method
@@ -655,7 +793,8 @@ class AlgoTool extends HTMLElement {
     // since the train button was clicked, we know that the plot is the train plot
     //
     let plot = 'train';
-    let route = '/api/' + plot + '/';
+
+    const start = Date.now()
 
     // get the form data
     //
@@ -709,7 +848,7 @@ class AlgoTool extends HTMLElement {
 
     // make a train request to the server
     //
-    fetch(route, request)
+    fetch(`${baseURL}api/${plot}/`, request)
     
     // if the fetch fails, throw an error and log it to the 
     // process log
@@ -735,12 +874,12 @@ class AlgoTool extends HTMLElement {
 
       // write the metrics to the process log
       //
-      this.processLog.writeMetrics(data.metrics);
+      this.processLog.writeMetrics('Train', data.metrics);
+      const end = Date.now()
+      console.log(`Train Time: ${end - start} ms`)
 
-      // write to the process log that the model was trained successfully
-      //
-      this.processLog.writePlain('Model trained successfully!');
     });
+
   }
   //
   // end of method

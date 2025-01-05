@@ -1,8 +1,12 @@
 import os
 import json
 import sys
-from flask import Blueprint, render_template, request, jsonify, current_app
-sys.path.append('/backend/')
+import io
+import pickle
+from datetime import datetime
+from flask import Blueprint, render_template, request, jsonify, current_app, url_for, send_file
+sys.path.append(os.path.join(os.path.dirname(__file__), 'backend/'))
+from callback import callback
 
 import nedc_ml_tools_data as mltd
 import nedc_imld_tools as imld
@@ -17,7 +21,11 @@ main = Blueprint('main', __name__)
 #
 model_cache = {}
 
+# Define the relative path to the target folder
+LOG_FILE_PATH = os.path.join(os.path.dirname(__file__), './backend/IssueLog.txt')
+
 # Define a route within the Blueprint
+#
 @main.route('/')
 def index():
     return render_template('index.shtml')
@@ -54,14 +62,112 @@ def get_data_params():
         data = json.load(file)
 
     # Convert data to an OrderedDict to preserve the order of keys
+    #
     ordered_data = OrderedDict(data)
 
     # Manually serialize the ordered data and return it as JSON
+    #
     return current_app.response_class(
         json.dumps(ordered_data),  # Serialize ordered data to JSON
         mimetype='application/json'
     )
 
+@main.route('/api/get_model/', methods=['POST'])
+def get_model():
+
+    # get the data from the request
+    #
+    data = request.get_json()
+
+    # get the user id
+    #
+    userID = data['userID']
+
+    # retrieve model with corresponding user id key
+    #
+    model = model_cache[userID]
+
+    # Serialize the model using pickle and store it in a BytesIO stream
+    #
+    model_bytes = io.BytesIO()
+    pickle.dump(model, model_bytes)
+    model_bytes.seek(0)  # Reset the pointer to the beginning of the stream
+    
+    # Send the pickled model as a response, without writing to a file
+    #
+    return send_file(model_bytes, as_attachment=True, download_name=f'model.pkl', mimetype='application/octet-stream')
+
+@main.route('/api/load_model', methods=['POST'])
+def load_model():
+
+    # get the file and userID from the request
+    #
+    file = request.files['model']
+    user_ID = request.form.get('userID')
+
+    try: 
+        # read the model file
+        #
+        model_bytes = file.read()
+        # unpickle the model as BytesIO stream
+        #
+        model = pickle.loads(model_bytes)
+
+        # save the model to the corresponding userID
+        #
+        model_cache[user_ID] = model
+
+        # return message that it loaded properly
+        #
+        return jsonify({"message": "Model uploaded successfully"}), 200
+    
+    except Exception as e:
+        # return error message if model did not load
+        #
+        return f'Failed to load model: {e}', 500
+
+@main.route('/api/issue_log/', methods=['POST'])
+def write_issue():
+
+    try:
+        # Get JSON data from the request
+        #
+        data = request.get_json()
+
+        # Extract title and message from the data
+        #
+        title = data.get('title', 'No Title')
+        message = data.get('message', 'No Message')
+
+        # Get the current date in the format month/day/year
+        #
+        current_date = datetime.now().strftime('%m/%d/%Y')
+
+        # Format the log entry
+        #
+        log_entry = f"Date: {current_date}\nTitle: {title}\nIssue: {message}\n\n"
+
+        # Debug line to check if the file exists in the target folder
+        #
+        if os.path.exists(LOG_FILE_PATH):
+            print(f"{LOG_FILE_PATH} exists.")
+        else:
+            print(f"{LOG_FILE_PATH} does not exist, creating a new file.")
+
+        # Write to the file
+        #
+        with open(LOG_FILE_PATH, 'a') as file:
+            file.write(log_entry)
+
+        # Return a success response
+        #
+        return {'status': 'success', 'message': 'Issue logged successfully'}, 200
+
+    except Exception as e:
+        # Handle any errors and return a failure response
+        #
+        return {'status': 'error', 'message': str(e)}, 500
+    
 @main.route('/api/train/', methods=['POST'])
 def train():
     
@@ -87,15 +193,18 @@ def train():
         # create the data object
         #
         data = imld.create_data(x, y, labels)
+        callback('trainProgressBar', {'trainProgress': 5})
 
         # train the model
         #
         model, metrics = imld.train(model, data)
+        callback('trainProgressBar', {'trainProgress': 20})
 
         # get the x y and z values from the decision surface
         # x and y will be 1D and z will be 2D
         #
         x, y, z = imld.generate_decision_surface(data, model)
+        callback('trainProgressBar', {'trainProgress': 80})
 
         # format the response
         #
@@ -111,6 +220,8 @@ def train():
         # save the model in the cache
         #
         model_cache[userID] = model
+        
+        callback('trainProgressBar', {'trainProgress': 100})
         
         # return the jsonified response
         #
@@ -148,9 +259,13 @@ def eval():
         #
         data = imld.create_data(x, y, labels)
 
+        callback('evalProgressBar', {'evalProgress': 30})
+
         # evaluate the model
         #
         metrics = imld.predict(model, data)
+
+        callback('evalProgressBar', {'evalProgress': 100})
 
         # return the jsonified response
         #
@@ -172,8 +287,8 @@ def data_gen():
     # Extract the key and parameters from the received data
     #
     if data:
-        key = data[0]
-        paramsDict = data[1]
+        key = data['key']
+        paramsDict = data['paramsDict']
 
     try:
 
@@ -197,5 +312,6 @@ def data_gen():
     #    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 #
 # end of function

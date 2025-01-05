@@ -41,9 +41,6 @@ class MainToolbar extends HTMLElement {
     //
     this.attachShadow({ mode: 'open' });
 
-    // Bind the handleOutsideClick method to the current instance
-    //
-    this.handleOutsideClick = this.handleOutsideClick.bind(this);
   }
   //
   // end of method
@@ -73,11 +70,8 @@ class MainToolbar extends HTMLElement {
 
     // Add click event listeners to the menu buttons
     //
-    this.addClickEvents();
-
-    // Attach an event listener to the document for outside clicks
-    //
-    document.addEventListener('click', this.handleOutsideClick);
+    this.addHoverEvents();
+    
   }
   //
   // end of method
@@ -87,7 +81,7 @@ class MainToolbar extends HTMLElement {
 
       // Fetch the JSON data from the server\
       //
-      const response = await fetch('/api/get_data_params'); 
+      const response = await fetch(`${baseURL}api/get_data_params/`); 
       const jsonText = await response.json(); 
       this.jsonData = jsonText; 
     } 
@@ -97,52 +91,6 @@ class MainToolbar extends HTMLElement {
       console.error("Error loading JSON data:", error);
     }
   }  
-
-  disconnectedCallback() {
-    /*
-    method: ToolbarBtn::disconnectedCallback
-
-    args:
-     None
-
-    return:
-     None
-
-    description:
-     This method is called when the component is removed from the DOM.
-     It removes the event listener for outside clicks to prevent memory leaks.
-    */
-
-    // Remove the event listener for outside clicks
-    //
-    document.removeEventListener('click', this.handleOutsideClick);
-  }
-  //
-  // end of method
-
-  handleOutsideClick(event) {
-    /*
-    method: ToolbarBtn::handleOutsideClick
-
-    args:
-     event: MouseEvent - The click event that triggered the handler.
-
-    return:
-     None
-
-    description:
-     This method checks if a click event occurred outside the shadow root
-     of the component. If so, it calls closeAllDropdowns to close any open dropdowns.
-    */
-
-    // Check if the click was outside the component's shadow root
-    //
-    if (!this.shadowRoot.contains(event.target)) {
-        this.closeAllDropdowns();
-    }
-  }
-  //
-  // end of method
 
   closeAllDropdowns() {
     /*
@@ -172,9 +120,9 @@ class MainToolbar extends HTMLElement {
   //
   // end of method
 
-  addClickEvents() {
+  addHoverEvents() {
     /*
-    method: ToolbarBtn::addClickEvents
+    method: ToolbarBtn::addHoverEvents
 
     args:
      None
@@ -183,52 +131,47 @@ class MainToolbar extends HTMLElement {
      None
 
     description:
-     This method adds click event listeners to all menu buttons. When a button 
-     is clicked, it toggles the visibility of the associated dropdown and 
-     ensures that only one dropdown is open at a time by calling closeAllDropdowns.
+     This method adds hover (mouseenter and mouseleave) event listeners to all menu buttons. 
+     When a button is hovered, it toggles the visibility of the associated dropdown.
     */
 
     // Select all menu buttons within the component's shadow root
     //
     const buttons = this.shadowRoot.querySelectorAll('.menubutton');
 
-    // Add a click event listener to each menu button
+    // Add hover event listeners to each menu button
     //
     buttons.forEach(button => {
-        button.addEventListener('click', (event) => {
-            // Stop the event from bubbling up to prevent it from closing dropdown immediately
-            //
-            event.stopPropagation();  
+        const dropdown = button.nextElementSibling;
 
-            // Retrieve the dropdown associated with the current button
-            // 
-            const dropdown = button.nextElementSibling;
+        // Ensure there's a dropdown to work with
+        if (dropdown) {
+            // Show dropdown on mouseenter
+            button.addEventListener('mouseenter', () => {
+                this.closeAllDropdowns(); // Close other dropdowns
+                dropdown.style.display = 'block';
+                button.classList.add('active');
+            });
 
-            // Check if the dropdown is currently visible
-            //
-            if (dropdown) {
-                const isVisible = dropdown.style.display === 'block';
+            // Hide dropdown on mouseleave
+            button.addEventListener('mouseleave', () => {
+                dropdown.style.display = 'none';
+                button.classList.remove('active');
+            });
 
-                // Close all other dropdowns and deactivate buttons
-                //
-                this.closeAllDropdowns();
+            // Keep dropdown open when hovering over it directly
+            dropdown.addEventListener('mouseenter', () => {
+                dropdown.style.display = 'block';
+                button.classList.add('active');
+            });
 
-                // If the dropdown was not already visible, open it and mark the button as active
-                //
-                if (!isVisible) {
-                    dropdown.style.display = 'block';
-                    button.classList.add('active');
-                }
-            } else {
-                // Close all if it's just a button without a dropdown
-                //
-                this.closeAllDropdowns();
-            }
-        });
+            dropdown.addEventListener('mouseleave', () => {
+                dropdown.style.display = 'none';
+                button.classList.remove('active');
+            });
+        }
     });
   }
-  //
-  // end of method
 
   render() {
     /*
@@ -244,8 +187,6 @@ class MainToolbar extends HTMLElement {
       This method renders the component to the webpage by setting the innerHTML of the
       shadow root to what is in the string below.
     */
-
-    
 
     const dataButtons = Object.entries(this.jsonData).map(([key, value]) => {
       const button = document.createElement('data-button');
@@ -333,12 +274,6 @@ class MainToolbar extends HTMLElement {
           cursor: pointer;
         }
 
-        /* Hover Effect for menu buttons */
-        .menubutton:hover {
-          color: #808080;
-          border-bottom: 2px solid #808080; /* Gray border when hovered */
-        }
-
         /* Active button: Keeps a button visually active after being clicked */
         .menubutton.active {
           color: #7441BA;
@@ -357,7 +292,7 @@ class MainToolbar extends HTMLElement {
             <toolbar-openfile-button label="Load Eval Data" plotId="eval"></toolbar-openfile-button>
             <div class="separator"></div>
             <toolbar-savefile-button label="Save Train As..." plotId="train"></toolbar-savefile-button>
-            <toolbar-savefile-button label="Save Eval As..."> plotId="eval"</toolbar-savefile-button>
+            <toolbar-savefile-button label="Save Eval As..." plotId="eval"></toolbar-savefile-button>
             <div class="separator"></div>
             <toolbar-openfile-button label="Load Model"></toolbar-openfile-button>
             <toolbar-openfile-button label="Load Parameters"></toolbar-openfile-button>
@@ -372,11 +307,10 @@ class MainToolbar extends HTMLElement {
           <button class="menubutton">Edit</button>
           <div class="dropdown">
             <toolbar-dropdown-settings label="Settings"></toolbar-dropdown-settings>
-            <toolbar-button label="Process Log"></toolbar-button>
             <toolbar-dropdown-clear label="Clear Train" plotId="train"></toolbar-dropdown-clear>
             <toolbar-dropdown-clear label="Clear Eval" plotId="eval"></toolbar-dropdown-clear>
+            <toolbar-button label="Clear Process Log"></toolbar-button>
             <toolbar-button label="Clear All"></toolbar-button>
-            <toolbar-button label="Reset"></toolbar-button>
           </div>
         </div>
 
@@ -417,6 +351,11 @@ class MainToolbar extends HTMLElement {
         <!-- "Help" menu with static help button for guidance -->
         <div class="menu">
           <button class="menubutton">Help</button>
+          <div class="dropdown">
+            <about-popup label="About" version="1.0.0"></about-popup>
+            <toolbar-popup-button label="User Guide"></toolbar-popup-button>
+            <report-popup label="Report Issue"></report-popup>
+          </div>
         </div>
       </div>
     `;

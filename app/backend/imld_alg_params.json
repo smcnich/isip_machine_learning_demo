@@ -1,4 +1,15 @@
 {
+    "EUCLIDEAN": {
+        "name": "Euclidean Distance (EUCLIDEAN)",
+        "params": {
+            "weights": {
+                "name": "Weights",
+                "type": "class-based",
+                "default": 1
+            }
+        }
+    },
+
     "PCA" : {
         "name": "Principal Component Analysis (PCA)",
         "params": {

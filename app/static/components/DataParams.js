@@ -370,16 +370,19 @@ class DataPopup extends HTMLElement {
       // set the defaults through the form object
       //
       const paramsDict = this.form.submitForm();
-      const dataPackage = [this.key, paramsDict];
+      const key = this.key;
 
       // Send the dataPackage to the backend via a POST request
       //
-      fetch('/api/data_gen', { 
+      fetch(`${baseURL}/api/data_gen/`, { 
         method: 'POST', // Use the POST method to send the data
         headers: {
             'Content-Type': 'application/json', // Ensure the server expects JSON
         },
-        body: JSON.stringify(dataPackage), // Convert the paramsDict to a JSON string
+        body: JSON.stringify({
+          'key': key,
+          'paramsDict': paramsDict
+        }) // Convert the paramsDict to a JSON string
       })
       .then(response => {
         // Check if the response is OK
@@ -401,10 +404,14 @@ class DataPopup extends HTMLElement {
             data: {
               labels: result.labels, // Get the 'labels' from the response
               x: result.x, // Get the 'x' values from the response
-              y: result.y // Get the 'y' values from the response
+              y: result.y, // Get the 'y' values from the response
+              colors: null,
+              layout: null
             }
           }
         }));
+
+        this.closePopup();
       })
       .catch(error => {
         // Handle any network or other errors during the fetch operation

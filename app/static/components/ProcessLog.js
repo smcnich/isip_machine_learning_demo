@@ -42,6 +42,10 @@ class ProcessLog extends HTMLElement {
         // get the name of the class
         //
         this.name = this.constructor.name;
+
+        // initialize the web socket
+        //
+        this.socket = io();
     }
     //
     // end of method
@@ -63,6 +67,10 @@ class ProcessLog extends HTMLElement {
         // render the component to the webpage
         //
         this.render();
+
+        this.socket.on('log', (data) => {
+            this.writePlain(data.data);
+        });
     }
     //
     // end of method
@@ -163,6 +171,31 @@ class ProcessLog extends HTMLElement {
     //
     // end of method
 
+    clearAll() {
+        /*
+        method: Toolbar_Button::clearAll
+        
+        args:
+         None
+      
+        return:
+         None
+      
+        description:
+         This method clears the contents of the log container by setting its innerHTML to an empty string.
+        */
+      
+        // Get the log container element
+        //
+        let logObject = this.shadowRoot.querySelector('.scroll-object');
+    
+        // Clear the content of the log container by setting innerHTML to an empty string
+        //
+        logObject.innerHTML = '';
+    }
+    //
+    // end of method
+
     writePlain(log) {
         /*
         method: ProcessLog::writePlain
@@ -187,7 +220,8 @@ class ProcessLog extends HTMLElement {
   
         // Scroll to the bottom of the log container
         //
-        logObject.scrollTop = logObject.scrollHeight;
+        let logDiv = this.shadowRoot.querySelector('.scroll-div'); // This is the scroll container
+        logDiv.scrollTop = logDiv.scrollHeight;        
     }
     //
     // end of method
@@ -217,10 +251,11 @@ class ProcessLog extends HTMLElement {
 
         // Scroll to the bottom of the log container
         //
-        logObject.scrollTop = logObject.scrollHeight;   
+        let logDiv = this.shadowRoot.querySelector('.scroll-div'); // This is the scroll container
+        logDiv.scrollTop = logDiv.scrollHeight;        
     }
 
-    writeMetrics(metrics) {
+    writeMetrics(label, metrics) {
         /*
         method: ProcessLog::writeMetrics
         
@@ -240,13 +275,17 @@ class ProcessLog extends HTMLElement {
         let logObject = this.shadowRoot.querySelector('.scroll-object');
 
         // write a metrics header
-        this.writeHeader('Metrics:', 'h3');
+        this.writeHeader(`${label} Metrics:`, 'h3');
 
         // iterate over each metric in the log and write it to the process log
         //
         Object.keys(metrics).forEach((key) => {
             if (key != "Confusion Matrix") {
-                logObject.innerHTML += `<b>${key}:</b> ${metrics[key].toFixed(2)}<br>`;
+                logObject.innerHTML += `
+                    <div style="display: inline-block; margin-right: 50px;">
+                        <b>${key}:</b> ${metrics[key].toFixed(2)}%
+                    </div>
+                    `;
             }
         });
 
@@ -254,7 +293,8 @@ class ProcessLog extends HTMLElement {
 
         // Scroll to the bottom of the log container
         //
-        logObject.scrollTop = logObject.scrollHeight;
+        let logDiv = this.shadowRoot.querySelector('.scroll-div'); // This is the scroll container
+        logDiv.scrollTop = logDiv.scrollHeight;        
     }
     //
     // end of method

@@ -80,6 +80,13 @@ class Plot extends HTMLElement {
       //
       const sender = event.detail.ref;
 
+      // get the axis of the layout to send
+      //
+      this.data.layout = {
+        xaxis: this.layout.xaxis.range,
+        yaxis: this.layout.yaxis.range
+      };
+
       // save the data to the sender, to it can be saved to a
       // csv
       //
@@ -142,7 +149,13 @@ class Plot extends HTMLElement {
     window.addEventListener('fileLoaded', (event) => {
       if(event.detail.plotId == this.plotId) {
         this.plot(event.detail.data);
+      } else {
+        return;
       }
+
+      const end = Date.now()
+      const start = event.detail.data.start
+      console.log(`Load Time: ${end - start} ms`)
     });
 
     window.addEventListener('clearPlot', (event) => {
@@ -150,13 +163,17 @@ class Plot extends HTMLElement {
       // empty the plot when the clear buttons are selected
       //
       if ((event.detail.plotId == this.plotId) || (event.detail.plotId == null)) {
-        this.plot_empty();
+        
+        // clear entire plot if select data or all
+        //
+        if ((event.detail.type == 'all') || event.detail.type == 'data'){
+          this.plot_empty();
+        }
+        // clear just decision surface if select results
+        if (event.detail.type == 'results'){
+          this.clear_decision_surface();
+        }
       }
-
-      // TODO: make logic to clear specific parts of the plot based on
-      //       on what button is sent. use event.detail.type to determine
-      //       what to clear (data, results, all). currently, there is no
-      //       function to clear results, so this must be done first.
     
     });
 
@@ -188,8 +205,99 @@ class Plot extends HTMLElement {
     // set the default colors for the plot based on Plotly.js default
     // colors
     //
-    const defaultColors = Plotly.d3.scale.category10();
+    let defaultColors = null;
 
+    // old default colors
+    //
+
+    if (data.colors == null) {
+
+      // Create a mapping for unique labels to colors
+      //
+      let colorMapping = {};
+      let colorArray = [];
+      let colorIndex = 0;
+
+      // get default color values from plotly
+      //
+      const category10 = Plotly.d3.scale.category10();
+
+      // create array format of default colors
+      //
+      for (let i = 0; i < 10; i++) {
+        colorArray.push(category10(i));
+      }
+
+      // Assign a unique color to each label
+      //
+      data.labels.forEach((label) => {
+          if (!(label in colorMapping)) {
+              colorMapping[label] = colorArray[colorIndex % colorArray.length];
+              colorIndex++;
+          }
+      });
+
+      // Define the defaultColors function to return the color for a label
+      //
+      defaultColors = (label) => colorMapping[label];
+
+      // set plot colors value
+      //
+      this.data.colors = colorArray.slice(0, Object.keys(colorMapping).length);
+
+    } else {
+
+      // create a mapping for unique labels to colors
+      //
+      let colorMapping = {};
+      let colorIndex = 0;
+
+      // create color array and filter out empty strings
+      //
+      let colorArray = data.colors;
+      
+      // Filter out empty strings
+      if (Array.isArray(colorArray)) {
+        colorArray = colorArray.filter(color => color !== '');
+      }
+
+      // get the number of unique labels
+      //
+      let numUniqueLabels = new Set(data.labels).size;
+
+      // if not enough colors assigned (equal or less than unique labels),
+      // use the default colors instead
+      //
+      if (colorArray.length < numUniqueLabels) {
+        // get default color values from plotly
+        //
+        const category10 = Plotly.d3.scale.category10();
+
+        // create array format of default colors
+        //
+        for (let i = 0; i < numUniqueLabels; i++) {
+          colorArray.push(category10(i));
+        }
+      }
+
+      // assign a unique color to each label
+      //
+      data.labels.forEach((label) => {
+        if (!(label in colorMapping)) {
+          colorMapping[label] = colorArray[colorIndex % colorArray.length];
+          colorIndex++;
+        }
+      })
+
+      // set the default colors to the header colors
+      //
+      defaultColors = (label) => colorMapping[label];
+
+      // set plot colors value
+      //
+      this.data.colors = this.data.colors.slice(0, Object.keys(colorMapping).length);
+    }
+    
     // iterate over each value in the data and create a trace for each label
     //
     let traces = {};
@@ -211,7 +319,7 @@ class Plot extends HTMLElement {
           name: label,
           marker: { 
             size: 2, 
-            color: defaultColors(i)
+            color: defaultColors(label)
           },
           hoverinfo: 'none'
         }
@@ -309,6 +417,20 @@ class Plot extends HTMLElement {
     //
     this.plotData = this.createTraces(this.data);
 
+    // check if the layout data is null, if so, use the default layout values
+    //
+    if (this.data.layout != null) {
+      // get the axis values from the data
+      //
+      const xaxis = this.data.layout.xaxis;
+      const yaxis = this.data.layout.yaxis;
+
+      // update this.layout with new axis values
+      //
+      this.layout.xaxis.range = xaxis;
+      this.layout.yaxis.range = yaxis;
+    }
+
     // Create the plot with data
     //
     Plotly.newPlot(plotDiv, this.plotData, this.layout, this.config);
@@ -357,7 +479,7 @@ class Plot extends HTMLElement {
       // then add to the custom color scale
       //
       let color = hexToRGBA(this.plotData[i].marker.color, 0.2);
-      colorScale.push([i, color]);
+      colorScale.push(color);
     }
 
     // Data for the contour plot
@@ -376,7 +498,7 @@ class Plot extends HTMLElement {
       name: 'Decision Surface',
       showscale: false,
       hoverinfo: 'none',
-      colorscale: colorScale,
+      colorscale: colorScale.map((color, index) => [index / (colorScale.length - 1), color]),
       showlegend: true
     };
 
