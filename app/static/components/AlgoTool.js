@@ -492,7 +492,11 @@ class AlgoTool extends HTMLElement {
           // if the plot is eval, evaluate the model
           //
           else if (plot == 'eval') {
-            this.evaluate();
+            EventBus.dispatchEvent(new CustomEvent('eval', { 
+              detail: {
+                'userID': userID
+                }
+            }));
           }
         }
       });
@@ -679,110 +683,6 @@ class AlgoTool extends HTMLElement {
   }
   // end of method
 
-  evaluate() {
-    /*
-    method: AlgoTool::evaluate
-
-    args:
-     None
-
-    return:
-     None
-
-    description:
-     this method sends the data from the eval plot to the server to be evaluated. it then
-     plots the decision surface on the eval plot and writes the results to the process log.
-     the server will know which model to use because it is stored in a server side cache.
-     the cache is a dictionary with the key being the user id (a timestamp) and the value 
-     being the model.
-    */
-
-    // since the eval button was clicked, we know that the plot is the eval plot
-    //
-    let plot = 'eval';
-
-    const start = Date.now()
-
-    // write to the process log that the eval data is being evaluated
-    //
-    this.processLog.writePlain('Evaluating data...');
-
-    // get the train and the eval plot card
-    //
-    let evalCard, trainCard;
-    document.querySelectorAll('plot-card').forEach((card) => {
-      if(card.getAttribute('plotId') == "train") {
-        trainCard = card;
-      }
-      else if (card.getAttribute('plotId') == 'eval') {
-        evalCard = card;
-      }
-    });
-
-    // get the decision surface data from the train plot
-    //
-    const dsData = trainCard.get_decision_surface();
-
-    // if the data is null, print to the process log that the model could not be evaluated
-    //
-    if (dsData == null) {
-      this.processLog.writePlain('Could not evaluate model. Please train the model first.');
-      return null;
-    }
-
-    // plot the decision surface on the eval plot
-    //
-    evalCard.decision_surface(dsData);
-
-    // get the data from the eval plot
-    //
-    const plotData = evalCard.data;
-
-    // build the request
-    //
-    const request = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        'userID': userID,
-        'plotData': plotData
-      })
-    };
-
-    // make a train request to the server
-    //
-    fetch(`${baseURL}api/${plot}/`, request)
-    
-    // if the fetch fails, throw an error and log it to the 
-    // process log
-    //
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      }
-
-      else {
-        this.processLog.writePlain('Model could not be trained due to a server error. Please try again.');
-        throw new Error('Network response was not ok.');
-      }
-    })
-    
-    // if the fetch is successful, plot the decision surface
-    //
-    .then((data) => {
-      this.processLog.writeMetrics('Eval', data);
-      const end = Date.now()
-      console.log(`Eval Time: ${end - start} ms`)
-    });
-    //
-    // end of fetch
-
-  }
-  //
-  // end of method
-  
 }
 //
 // end of class

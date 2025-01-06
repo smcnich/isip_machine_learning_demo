@@ -515,7 +515,7 @@ class Plot extends HTMLElement {
     Plotly.react(plotDiv, this.plotData, this.layout, this.config);
   }
 
-  get_decision_surface() {
+  getDecisionSurface() {
     /*
     method: Plot::get_decision_surface
 

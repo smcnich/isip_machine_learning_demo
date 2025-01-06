@@ -131,7 +131,7 @@
         <h3 class="card-title">Eval</h3>
         <info-icon></info-icon>
       </div>
-      <plot-card plotId="eval"></plot-card>
+      <plot-card plotId="eval" id="eval-plot"></plot-card>
      </div>
 
 
