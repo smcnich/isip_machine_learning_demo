@@ -1,22 +1,31 @@
-import os
-from flask import Flask, request
-from werkzeug.middleware.proxy_fix import ProxyFix
-from .routes import main
-from .socketio import socketio
+from os.path import abspath
 
-class Config:
-    APP = os.path.abspath(os.path.dirname(__file__))
-    BACKEND = os.path.join(APP, 'backend')
+from .extensions.base import app
+from .extensions.blueprint import main
+from .extensions.socketio import socketio
+from .extensions.scheduler import scheduler
 
-def IMLD():
-    return app, socketio
 
-app = Flask(__name__)
-socketio.init_app(app)
-app.register_blueprint(main)
-app.config.from_object(Config)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+class IMLD():
+    def __init__(self):
 
-@app.before_request
-def log_request():
-    print(f"Request path: {request.path}")
+        # add the root path to the app
+        #
+        app.set_root(abspath(__file__))
+
+        # add the blueprint to the app
+        #
+        app.register_blueprint(main)
+
+        # create a socketio instance that will be used to emit real-time updates
+        # through the app
+        #
+        socketio.init_app(app)
+
+        # Initialize and start the scheduler
+        #
+        scheduler.init_app(app)
+        scheduler.start()
+
+    def run(self):
+        socketio.run(app, debug=True)

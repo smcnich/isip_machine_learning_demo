@@ -1,17 +1,16 @@
 import os
 import json
-import sys
 import io
 import pickle
+from collections import OrderedDict
 from datetime import datetime
-from flask import Blueprint, render_template, request, jsonify, current_app, url_for, send_file
-sys.path.append(os.path.join(os.path.dirname(__file__), 'backend/'))
-from callback import callback
+from flask import Blueprint, render_template, request, jsonify, current_app, send_file
 
 import nedc_ml_tools_data as mltd
 import nedc_imld_tools as imld
 import nedc_ml_tools as mlt
-from collections import OrderedDict
+
+from .socketio import callback
 
 # Create a Blueprint
 #
@@ -21,8 +20,20 @@ main = Blueprint('main', __name__)
 #
 model_cache = {}
 
-# Define the relative path to the target folder
-LOG_FILE_PATH = os.path.join(os.path.dirname(__file__), './backend/IssueLog.txt')
+
+def clean_cache():
+
+    # get the current time
+    #
+    now = datetime.now()
+
+    # iterate through the model cache and remove any models that are older than 5 minutes
+    #
+    for key in list(model_cache.keys()):
+        if (now - model_cache[key]['timestamp']).seconds > 300:
+            del model_cache[key]
+#
+# end of function
 
 # Define a route within the Blueprint
 #
@@ -85,7 +96,7 @@ def get_model():
 
     # retrieve model with corresponding user id key
     #
-    model = model_cache[userID]
+    model = model_cache[userID]['model']
 
     # Serialize the model using pickle and store it in a BytesIO stream
     #
@@ -115,7 +126,10 @@ def load_model():
 
         # save the model to the corresponding userID
         #
-        model_cache[user_ID] = model
+        model_cache[user_ID] = {
+            'model': model,
+            'timestamp': datetime.now()
+        }
 
         # return message that it loaded properly
         #
@@ -149,14 +163,14 @@ def write_issue():
 
         # Debug line to check if the file exists in the target folder
         #
-        if os.path.exists(LOG_FILE_PATH):
-            print(f"{LOG_FILE_PATH} exists.")
+        if os.path.exists(current_app.config['LOG_FILE_PATH']):
+            print(f"{current_app.config['LOG_FILE_PATH']} exists.")
         else:
-            print(f"{LOG_FILE_PATH} does not exist, creating a new file.")
+            print(f"{current_app.config['LOG_FILE_PATH']} does not exist, creating a new file.")
 
         # Write to the file
         #
-        with open(LOG_FILE_PATH, 'a') as file:
+        with open(current_app.config['LOG_FILE_PATH'], 'a') as file:
             file.write(log_entry)
 
         # Return a success response
@@ -219,7 +233,10 @@ def train():
 
         # save the model in the cache
         #
-        model_cache[userID] = model
+        model_cache[userID] = {
+            'model': model,
+            'timestamp': datetime.now()
+        }
         
         callback('trainProgressBar', {'trainProgress': 100})
         
@@ -253,7 +270,7 @@ def eval():
 
         # get the model from the cache
         #
-        model = model_cache[userID]
+        model = model_cache[userID]['model']
 
         # create the data object
         #
