@@ -36,22 +36,26 @@
   <!--                -->
   <link type = "text/css" rel="stylesheet" href="static/index.css">
 
-  <!--Load the web socket-->
+  <!--Load libraries-->
+  <!--              -->
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
-  <!-- Load the web component -->
+  <!-- Load custom components -->
+  <!--                        -->
+  
+  <script type="module" src="static/components/Events.js"></script>
   <script src="static/components/ShareBtn.js"></script>
   <script src="static/components/MainToolbar.js"></script>
   <script src="static/components/ProcessLog.js"></script>
   <script src="static/components/Plot.js"></script>
-  <script src="static/components/AlgoTool.js"></script>
+  <script type="module" src="static/components/AlgoTool.js"></script>
   <script src="static/components/InfoIcon.js"></script>
   <script src="static/components/ToolbarComponents.js"></script>
   <script src="static/components/DataParams.js"></script>
   <script src="static/components/FormContainer.js"></script>
   <script src="static/components/ProgressBar.js"></script>
   <script src="static/components/HelpComponents.js"></script>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
  </head>
  <style>
@@ -118,7 +122,7 @@
         <h3 class="card-title">Train</h3>
         <info-icon></info-icon>
       </div>
-      <plot-card plotId="train"></plot-card>
+      <plot-card plotId="train" id="train-plot"></plot-card>
      </div>    
 
      <!---------------------- define a card for the eval plot -------------------->
@@ -134,12 +138,12 @@
     </div>
 
     <!---------------------- define a row for the process log -------------------->
-    <div class="card" id="process-log">
+    <div class="card">
       <div class="card-title-container">
         <h3 class="card-title">Process Log</h3>
         <info-icon></info-icon>
       </div>
-      <process-log></process-log>
+      <process-log id="process-log"></process-log>
     </div>
    
    </div>

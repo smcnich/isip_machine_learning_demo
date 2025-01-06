@@ -191,6 +191,10 @@ class Plot extends HTMLElement {
   //
   // end of method
 
+  getData() {
+    return this.data;
+  }
+
   createTraces(data) {
 
     // make the all the data labels are the same

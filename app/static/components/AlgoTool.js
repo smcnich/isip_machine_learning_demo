@@ -1,4 +1,4 @@
-const ALGO_PARAMS = "algo_params";
+import { EventBus } from "./Events.js";
 
 class AlgoTool extends HTMLElement {
   /*
@@ -458,7 +458,7 @@ class AlgoTool extends HTMLElement {
       // to listen for when the button is clicked
       //
       submitButtons.forEach((button) => {
-        button.addEventListener('click', () => {
+        button.onclick = () => {
           
           // if the button is disabled, do not do anything
           //
@@ -470,11 +470,21 @@ class AlgoTool extends HTMLElement {
           //
           let plot = button.getAttribute('id');
 
+          console.log(plot)
+
           // if the plot is train, train the model
           // and set the trained flag to true
           //
           if (plot == 'train') {
-            this.train();
+
+            EventBus.dispatchEvent(new CustomEvent('train', { 
+              detail: {
+                'userID': userID,
+                'algo': this.selectedValue.toString(),
+                'params': this.form.submitForm()
+                }
+            }));
+
             this.trained = true;
             this.check_button();
           }
@@ -484,7 +494,7 @@ class AlgoTool extends HTMLElement {
           else if (plot == 'eval') {
             this.evaluate();
           }
-        });
+        }
       });
       
       // create an event listener that listens to when the value of the select element changes
@@ -768,117 +778,6 @@ class AlgoTool extends HTMLElement {
     });
     //
     // end of fetch
-
-  }
-  //
-  // end of method
-
-  train() {
-    /*
-    method: AlgoTool::train
-
-    args:
-     None
-
-    return:
-     None
-
-    description:
-     this method sends the data from the train plot to the server to be trained. it then
-     plots the decision surface on the train plot and writes the results to the process log.
-     the server will store the model in the server side cache. the cache is a dictionary with 
-     the key being the user id (a timestamp) and the value being the model.
-    */
-    
-    // since the train button was clicked, we know that the plot is the train plot
-    //
-    let plot = 'train';
-
-    const start = Date.now()
-
-    // get the form data
-    //
-    const formData = this.form.submitForm();
-
-    this.processLog.writeHeader(this.selectedName.toString(), 'h2');
-
-    // write to the process log that the model is being trained
-    //
-    this.processLog.writePlain('Training model...');
-
-    // get the plot card to be used to plot the decision surface
-    //
-    let plotCard;
-    document.querySelectorAll('plot-card').forEach((card) => {
-      if(card.getAttribute('plotId') == plot) {
-        plotCard = card;
-      }
-    });
-
-    // clear the decision surface before plotting the new one
-    //
-    plotCard.clear_decision_surface();
-
-    // get the data from the plot
-    //
-    let plotData = plotCard.data;
-
-    // if the data in the plot is nothing, 
-    // print to the process log that the model could not be trained
-    //
-    if (plotData == null) {
-      this.processLog.writePlain('Could not train model. Please plot training data first.');
-      return null;
-    }
-
-    // build the request
-    //
-    const request = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        'userID': userID,
-        'algo': this.selectedValue.toString(),
-        'params': formData,
-        'plotData': plotData
-      })
-    };
-
-    // make a train request to the server
-    //
-    fetch(`${baseURL}api/${plot}/`, request)
-    
-    // if the fetch fails, throw an error and log it to the 
-    // process log
-    //
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      }
-
-      else {
-        this.processLog.writePlain('Model could not be trained due to a server error. Please try again.');
-        throw new Error('Network response was not ok.');
-      }
-    })
-    
-    // if the fetch is successful, plot the decision surface
-    //
-    .then((data) => {
-
-      // plot the decision surface
-      //
-      plotCard.decision_surface(data.decision_surface);
-
-      // write the metrics to the process log
-      //
-      this.processLog.writeMetrics('Train', data.metrics);
-      const end = Date.now()
-      console.log(`Train Time: ${end - start} ms`)
-
-    });
 
   }
   //
