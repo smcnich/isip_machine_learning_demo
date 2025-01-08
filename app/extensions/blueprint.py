@@ -108,37 +108,62 @@ def get_model():
     #
     return send_file(model_bytes, as_attachment=True, download_name=f'model.pkl', mimetype='application/octet-stream')
 
-@main.route('/api/load_model', methods=['POST'])
+@main.route('/api/load_model/', methods=['POST'])
 def load_model():
 
-    # get the file and userID from the request
+    # get the file, userID, and plot bounds from the request
     #
     file = request.files['model']
     user_ID = request.form.get('userID')
+    x = json.loads(request.form.get('x'))
+    y = json.loads(request.form.get('y'))
 
-    try: 
-        # read the model file
-        #
-        model_bytes = file.read()
-        # unpickle the model as BytesIO stream
-        #
-        model = pickle.loads(model_bytes)
+    # read the model file
+    #
+    model_bytes = file.read()
 
-        # save the model to the corresponding userID
-        #
-        model_cache[user_ID] = {
-            'model': model,
-            'timestamp': datetime.now()
-        }
+    # unpickle the model as BytesIO stream
+    #
+    model = pickle.loads(model_bytes)
 
-        # return message that it loaded properly
-        #
-        return jsonify({"message": "Model uploaded successfully"}), 200
+    # save the model to the corresponding userID
+    #
+    model_cache[user_ID] = {
+        'model': model,
+        'timestamp': datetime.now()
+    }
+
+    # create the data object
+    # this should only have a single x and y value
+    # representing the bounds of the plot
+    # no labels are needed
+    #
+    data = imld.create_data(x, y, [])
+
+    # get the x y and z values from the decision surface
+    # x and y will be 1D and z will be 2D
+    #
+    x, y, z = imld.generate_decision_surface(data, model)
+
+    # format the response
+    #
+    response = {
+        'x': x.tolist(), 
+        'y': y.tolist(), 
+        'z': z.tolist()
+    }
+
+    # return the jsonified response
+    #
+    return jsonify(response)
+
+    # try: 
+
     
-    except Exception as e:
-        # return error message if model did not load
-        #
-        return f'Failed to load model: {e}', 500
+    # except Exception as e:
+    #     # return error message if model did not load
+    #     #
+    #     return f'Failed to load model: {e}', 500
 
 @main.route('/api/issue_log/', methods=['POST'])
 def write_issue():

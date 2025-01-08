@@ -1,3 +1,5 @@
+import { EventBus } from "./Events.js";
+
 class Toolbar_Button extends HTMLElement {
     constructor() {
       super();
@@ -556,18 +558,26 @@ class Toolbar_OpenFileButton extends HTMLElement {
       else if (label == 'Load Parameters') {
         this.handleParamFileSelect(event);
       }
-      else {
-        this.handleModelFileSelect(event);
+      else if (label == 'Load Model') {
+
+        // dispatch the loadModel event to the EventBus
+        // the event listener is in Events.js
+        //  
+        EventBus.dispatchEvent(new CustomEvent('loadModel', {
+          detail: {
+            'file': event.target.files[0]
+          }
+        }));
+
+        // reset the file input
+        //
+        event.target.value = '';
       }
     });
 
   }
 
   handleModelFileSelect(event) {
-
-    // get the selected file
-    //
-    const file = event.target.files[0];
 
     // if the file is valid
     //
@@ -605,7 +615,7 @@ class Toolbar_OpenFileButton extends HTMLElement {
 
             console.log('Model uploaded successfully');
 
-            window.dispatchEvent(new CustomEvent('loadTrainedModel', {
+            window.dispatchEvent(new CustomEvent('loadModel', {
               detail: {
                 flag: true
               }

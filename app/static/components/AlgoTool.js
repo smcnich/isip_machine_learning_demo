@@ -50,13 +50,6 @@ class AlgoTool extends HTMLElement {
     this.form = null;
     this.selectedValue = null;
 
-    // create variables to hold flags that are used in the state-machine
-    // that controls which buttons are enabled and disabled
-    //
-    this.trainReady = false;
-    this.evalReady = false;
-    this.trained = false;
-
     // intialize the web socket
     //
     this.socket = io();
@@ -81,19 +74,6 @@ class AlgoTool extends HTMLElement {
     // render the component to the webpage
     //
     await this.render();
-
-    window.addEventListener('loadTrainedModel', (event) => {
-        if(event.detail.flag == true) {
-          this.trained = true;
-          this.trainReady = true;
-          this.form = true;
-
-          console.log(this.trained);
-          console.log(this.trainReady);
-          console.log(this.evalReady);
-          console.log(this.form);
-        }
-    })
 
     // Add a global listener for getAlgoParams
     //
@@ -149,6 +129,38 @@ class AlgoTool extends HTMLElement {
   }
   //
   // end of method
+
+  get_form() {
+    /*
+    method: AlgoTool::get_form
+
+    args:
+      None
+
+    return:
+      form (Object): The form object that is created by the FormContainer class
+
+    description:
+      this method returns the form object that is created by the FormContainer class
+    */
+   return this.form;
+  }
+
+  get_algo() {
+    /*
+    method: AlgoTool::get_algo
+
+    args:
+      None
+
+    return:
+      selectedValue (String): The name of the selected algorithm
+
+    description:
+      this method returns the name of the selected algorithm
+    */
+    return this.selectedValue;
+  }
 
   async fetch_params() {
     /*
@@ -425,35 +437,6 @@ class AlgoTool extends HTMLElement {
       //
       const submitButtons = this.shadowRoot.querySelectorAll('button');
 
-      // listen for a plotChange event that comes from the Plot component
-      // when this event is fired, one of the plots have changed
-      // and the button should be enabled or disabled accordingly
-      //
-      window.addEventListener('plotChange', (event) => {
-
-        // if the plotId is train, set the trainReady flag to the status of the event
-        //
-        if (event.detail.plotId == 'train') {
-          this.trainReady = event.detail.status;
-          
-          // if the train plot is not ready, set the trained flag to false
-          //
-          if (!this.trainReady) {
-            this.trained = false;
-          }
-        }
-
-        // if the plotId is eval, set the evalReady flag to the status of the event
-        //
-        else if (event.detail.plotId == 'eval') {
-          this.evalReady = event.detail.status;
-        }
-
-        // modify the status of the buttons after the changes
-        //
-        this.check_button();
-      });
-
       // add an event listener to the submit buttons
       // to listen for when the button is clicked
       //
@@ -470,8 +453,6 @@ class AlgoTool extends HTMLElement {
           //
           let plot = button.getAttribute('id');
 
-          console.log(plot)
-
           // if the plot is train, train the model
           // and set the trained flag to true
           //
@@ -484,9 +465,8 @@ class AlgoTool extends HTMLElement {
                 'params': this.form.submitForm()
                 }
             }));
-
-            this.trained = true;
-            this.check_button();
+            
+            EventBus.dispatchEvent(new CustomEvent('stateChange'));
           }
 
           // if the plot is eval, evaluate the model
@@ -497,6 +477,8 @@ class AlgoTool extends HTMLElement {
                 'userID': userID
                 }
             }));
+
+            EventBus.dispatchEvent(new CustomEvent('stateChange'));
           }
         }
       });
@@ -611,9 +593,7 @@ class AlgoTool extends HTMLElement {
         //
         paramsContainer.appendChild(this.form);
 
-        // modify the status of the buttons after the changes
-        //
-        this.check_button();
+        EventBus.dispatchEvent(new CustomEvent('stateChange'));
       });
       //
       // end of event listener
@@ -626,63 +606,57 @@ class AlgoTool extends HTMLElement {
   //
   // end of method
 
-  check_button() {
+  change_train_state(state) {
     /*
-    method: AlgoTool::check_button
+    method: AlgoTool::change_train_state
 
     args:
-      plotId (string): the id of the plot that the button is associated with
+     state (Boolean): The state of the train button. True if the button is enabled, 
+                      false if the button is disabled.
 
     return:
-      None
+     None
 
     description:
-      this method checks the status of the button associated with the plotId. if the button is
-      disabled, the method will enable the button. if the button is enabled, the method will disable
-      the button.
+     This method changes the state of the train button. If the state is true, the button is enabled.
+     If the state is false, the button is disabled.
     */
 
-    // get the train and eval buttons
+    // get the train button
     //
     const trainButton = this.shadowRoot.querySelector('button#train');
+
+    // change the state accordingly
+    //
+    if (state) { trainButton.className = ''; }
+    else { trainButton.className = 'disabled'; }
+  }
+
+  change_eval_state(state) {
+    /*
+    method: AlgoTool::change_eval_state
+
+    args:
+     state (Boolean): The state of the eval button. True if the button is enabled, 
+                      false if the button is disabled.
+
+    return:
+     None
+
+    description:
+     This method changes the state of the eval button. If the state is true, the button is enabled.
+     If the state is false, the button is disabled.
+    */
+
+    // get the eval button
+    //
     const evalButton = this.shadowRoot.querySelector('button#eval');
 
-    // if the train and eval plots are ready and the form is ready and the model is trained
-    // then allow both buttons to be clicked
+    // change the state accordingly
     //
-    if (this.trainReady && this.evalReady && this.form && this.trained) {
-      trainButton.className = '';
-      evalButton.className = '';
-    }
-
-    // if the train plot is ready and the form is ready, allow the train button to be clicked
-    //
-    if (this.trainReady && this.form) {
-      trainButton.className = '';
-    }
-
-    // if the eval plot is ready and the model is trained, allow the eval button to be clicked
-    //
-    if (this.evalReady && this.form && this.trained) {
-      evalButton.className = '';
-    }
-
-    // if the train plot is not ready or the form is not ready, disable the train button
-    // and set the trained flag to false
-    //
-    if (!this.trainReady || !this.form) {
-      trainButton.className = 'disabled';
-      this.trained = false;
-    }
-
-    // if the eval plot is not ready or the model is not trained, disable the eval button
-    //
-    if (!this.evalReady || !this.trained) {
-      evalButton.className = 'disabled';
-    }
+    if (state) { evalButton.className = ''; }
+    else { evalButton.className = 'disabled'; }
   }
-  // end of method
-
 }
 //
 // end of class

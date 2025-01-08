@@ -1,3 +1,5 @@
+import { EventBus } from "./Events.js";
+
 class Plot extends HTMLElement {
   /*
   class: Plot
@@ -35,6 +37,42 @@ class Plot extends HTMLElement {
     // get the name of the class
     //
     this.name = this.constructor.name;
+  }
+  //
+  // end of method
+
+  render() {
+    /*
+    method: Plot::render
+    
+    args:
+     None
+
+    return:
+     None
+
+    description:
+     This method renders the component to the webpage by setting the innerHTML of the
+     shadow root with the defined HTML and CSS content.
+    */
+
+    // Define HTML and CSS structure for the component
+    //
+    this.innerHTML = `
+      <style>
+        .js-plotly-plot .plotly .cursor-crosshair {
+          cursor: default;
+        }
+
+        .modebar {
+          display: flex;
+          flex-direction: row;
+        }
+      </style>
+
+      <div id="plot"></div>
+    `;
+
   }
   //
   // end of method
@@ -167,7 +205,7 @@ class Plot extends HTMLElement {
         // clear entire plot if select data or all
         //
         if ((event.detail.type == 'all') || event.detail.type == 'data'){
-          this.plot_empty();
+          this.clear_plot()
         }
         // clear just decision surface if select results
         if (event.detail.type == 'results'){
@@ -191,9 +229,88 @@ class Plot extends HTMLElement {
   //
   // end of method
 
+  getBounds() {
+    /*
+    method: Plot::getBounds
+
+    args:
+     None
+
+    return:
+     Object: an object containing the x and y axis bounds of the plot
+
+    description:
+     This method returns the x and y axis bounds of the plot as it currently appears
+    */
+
+    // get the x and y axis bounds
+    //
+    return {
+      x: this.layout.xaxis.range,
+      y: this.layout.yaxis.range
+    }
+
+  }
+  //
+  // end of method
+
   getData() {
+    /*
+    method: Plot::getData
+
+    args:
+      None
+
+    return:
+      Object: an object containing the data that was plotted
+
+    description:  
+      This method returns the data that was plotted on the plot. This is useful for saving
+      the data to a file or sending it to the backend.
+    */
     return this.data;
   }
+  //
+  // end of method
+
+  getDecisionSurface() {
+    /*
+    method: Plot::get_decision_surface
+
+    args:
+     None
+
+    return:
+     z (Array): the z values of the decision surface
+     x (Array): the x values of the decision surface
+     y (Array): the y values of the decision surface
+
+    description:
+     This method returns the z, x, and y values of the decision surface.
+     This is useful for saving the decision surface to a file or replotting
+     the surface on another plot
+    */
+
+    // Get the contour trace from the plot data
+    //
+    const contourTrace = this.plotData.find(trace => trace.type === 'contour');
+
+    // If the contour trace is not found, return null
+    //
+    if (!contourTrace) {
+      return null;
+    }
+
+    // Return the z, x, and y values of the contour trace
+    //
+    return {
+      z: contourTrace.z,
+      x: contourTrace.x,
+      y: contourTrace.y
+    };
+  }
+  //
+  // end of method
 
   createTraces(data) {
 
@@ -249,7 +366,9 @@ class Plot extends HTMLElement {
       //
       this.data.colors = colorArray.slice(0, Object.keys(colorMapping).length);
 
-    } else {
+    } 
+    
+    else {
 
       // create a mapping for unique labels to colors
       //
@@ -261,6 +380,7 @@ class Plot extends HTMLElement {
       let colorArray = data.colors;
       
       // Filter out empty strings
+      //
       if (Array.isArray(colorArray)) {
         colorArray = colorArray.filter(color => color !== '');
       }
@@ -273,6 +393,7 @@ class Plot extends HTMLElement {
       // use the default colors instead
       //
       if (colorArray.length < numUniqueLabels) {
+
         // get default color values from plotly
         //
         const category10 = Plotly.d3.scale.category10();
@@ -375,17 +496,6 @@ class Plot extends HTMLElement {
     // Create the empty plot
     //
     Plotly.newPlot(plotDiv, this.plotData, this.layout, this.config);
-
-    // dispatch an event to the algoTool to update the plot status
-    // of the current plot. this will effect which buttons are enabled
-    // in the algoTool
-    //
-    window.dispatchEvent(new CustomEvent('plotChange', {
-      detail: {
-        plotId: this.plotId,
-        status: false
-      }
-    }));
   }
 
   plot(data) {
@@ -440,17 +550,46 @@ class Plot extends HTMLElement {
     Plotly.newPlot(plotDiv, this.plotData, this.layout, this.config);
 
     // dispatch an event to the algoTool to update the plot status
-    // of the current plot
+    // of the current plot. this will effect which buttons are enabled
+    // in the algoTool
     //
-    window.dispatchEvent(new CustomEvent('plotChange', {
-      detail: {
-        plotId: this.plotId,
-        status: true
-      }
-    }));
+    EventBus.dispatchEvent(new CustomEvent('stateChange'));
   }
   //
   // end of method
+
+  clear_plot() {
+    /*
+    method: Plot::clear_plot
+
+    args:
+     None
+
+    return:
+     None
+
+    description:
+     This method clears the plot by removing all traces from the plot.
+    */
+
+    // Get the plot div element
+    //
+    const plotDiv = this.querySelector('#plot');
+
+    // remove all traces from the plot data
+    //
+    this.plotData = [];
+
+    // update the plot to remove all traces
+    //
+    Plotly.react(plotDiv, this.plotData, this.layout, this.config);
+
+    // dispatch an event to the algoTool to update the plot status
+    // of the current plot. this will effect which buttons are enabled
+    // in the algoTool
+    //
+    EventBus.dispatchEvent(new CustomEvent('stateChange'));
+  }
 
   decision_surface(data) {
     /*
@@ -477,13 +616,44 @@ class Plot extends HTMLElement {
     // Retrieve colors from scatter plots
     //
     let colorScale = []
-    for (let i = 0; i < this.plotData.length; i++) {
 
-      // Get the color of the marker and convert it to RGBA to make it transparent
-      // then add to the custom color scale
+    // if the plot has data points, use the colors from the data points
+    // to create a decision surface
+    //
+    if (this.plotData.length > 0) {
+      for (let i = 0; i < this.plotData.length; i++) {
+
+        // Get the color of the marker and convert it to RGBA to make it transparent
+        // then add to the custom color scale
+        //
+        let color = hexToRGBA(this.plotData[i].marker.color, 0.2);
+        colorScale.push(color);
+      }
+    }
+
+    // if the plot does not have data points, use default colors to 
+    // create the decision surface
+    //
+    else {
+      
+      // get all of the unique labels in the data
       //
-      let color = hexToRGBA(this.plotData[i].marker.color, 0.2);
-      colorScale.push(color);
+      const uniqLabels = new Set(data.z.flat());
+      
+      // get plotly default colors
+      //
+      const category10 = Plotly.d3.scale.category10();
+      
+      // iterate over each unique label and create a color for it
+      //
+      for (let i = 0; i < uniqLabels.size; i++) {
+        
+        // Get a default color and convert it to RGBA to make it transparent
+        // then add to the custom color scale
+        //
+        let color = hexToRGBA(category10(i), 0.2);
+        colorScale.push(color);
+      }
     }
 
     // Data for the contour plot
@@ -513,46 +683,13 @@ class Plot extends HTMLElement {
     // update the plot to add the decision surface
     //
     Plotly.react(plotDiv, this.plotData, this.layout, this.config);
+
+    // dispatch an event to the algoTool to update the plot status
+    // of the current plot. this will effect which buttons are enabled
+    // in the algoTool
+    //
+    EventBus.dispatchEvent(new CustomEvent('stateChange'));
   }
-
-  getDecisionSurface() {
-    /*
-    method: Plot::get_decision_surface
-
-    args:
-     None
-
-    return:
-     z (Array): the z values of the decision surface
-     x (Array): the x values of the decision surface
-     y (Array): the y values of the decision surface
-
-    description:
-     This method returns the z, x, and y values of the decision surface.
-     This is useful for saving the decision surface to a file or replotting
-     the surface on another plot
-    */
-
-    // Get the contour trace from the plot data
-    //
-    const contourTrace = this.plotData.find(trace => trace.type === 'contour');
-
-    // If the contour trace is not found, return null
-    //
-    if (!contourTrace) {
-      return null;
-    }
-
-    // Return the z, x, and y values of the contour trace
-    //
-    return {
-      z: contourTrace.z,
-      x: contourTrace.x,
-      y: contourTrace.y
-    };
-  }
-  //
-  // end of method
 
   clear_decision_surface() {
     /*
@@ -578,44 +715,10 @@ class Plot extends HTMLElement {
 
     // update the plot to remove the decision surface
     //
-    Plotly.react(plotDiv, this.plotData, this.layout, this.config);  
-  }
-
-  render() {
-    /*
-    method: Plot::render
+    Plotly.react(plotDiv, this.plotData, this.layout, this.config); 
     
-    args:
-     None
-
-    return:
-     None
-
-    description:
-     This method renders the component to the webpage by setting the innerHTML of the
-     shadow root with the defined HTML and CSS content.
-    */
-
-    // Define HTML and CSS structure for the component
-    //
-    this.innerHTML = `
-      <style>
-        .js-plotly-plot .plotly .cursor-crosshair {
-          cursor: default;
-        }
-
-        .modebar {
-          display: flex;
-          flex-direction: row;
-        }
-      </style>
-
-      <div id="plot"></div>
-    `;
-
+    EventBus.dispatchEvent(new CustomEvent('stateChange'));
   }
-  //
-  // end of method
 
 }
 //

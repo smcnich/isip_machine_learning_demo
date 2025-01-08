@@ -288,10 +288,26 @@ def load_alg_params(pfile:str) -> dict:
     #
     return params
 
-# TODO: [Optional for Sprint 3] create a function that generates the decision surface
-#       for a model. Base it on the prep_decision_surface, predict_decision_surface, and
-#       plot_decision_surface functions in imld_model.py
 def generate_decision_surface(data:mltd.MLToolsData, model:mlt.Alg):
+    '''
+    function: generate_decision_surface
+
+    args:
+     data (mltd.MLToolsData): the data to generate the decision surface from
+     model (mlt.Alg)        : the trained model to use to generate the decision surface
+
+    return:
+     x (list) : the x values of the decision surface
+     y (list) : the y values of the decision surface
+     z (list) : the z values of the decision surface
+
+    description:
+     generate the decision surface of a model given a set of data. 
+     generate the decision surface by finding the x and y bounds of the data,
+     then create a meshgrid of the data (a grid of points within the bounds).
+     then use the model to predict the classification at each point in the
+     meshgrid. return the x, y, and z (class) values of the decision surface
+    '''
 
     # get the raw data from the ML Tools data object
     #

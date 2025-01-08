@@ -48,10 +48,10 @@
   <script src="static/components/ShareBtn.js"></script>
   <script src="static/components/MainToolbar.js"></script>
   <script src="static/components/ProcessLog.js"></script>
-  <script src="static/components/Plot.js"></script>
+  <script type="module" src="static/components/Plot.js"></script>
   <script type="module" src="static/components/AlgoTool.js"></script>
   <script src="static/components/InfoIcon.js"></script>
-  <script src="static/components/ToolbarComponents.js"></script>
+  <script type='module' src="static/components/ToolbarComponents.js"></script>
   <script src="static/components/DataParams.js"></script>
   <script src="static/components/FormContainer.js"></script>
   <script src="static/components/ProgressBar.js"></script>
@@ -157,7 +157,7 @@
       <h3>Algorithm Toolbar</h3>
       <info-icon></info-icon>
      </div>
-     <algorithm-toolbar></algorithm-toolbar>
+     <algorithm-toolbar id="algo-tool"></algorithm-toolbar>
     </div>
 
    </div>

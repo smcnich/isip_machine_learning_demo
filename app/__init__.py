@@ -28,4 +28,4 @@ class IMLD():
         scheduler.start()
 
     def run(self):
-        socketio.run(app, debug=True)
+        socketio.run(app, debug=True, log_output=False)
