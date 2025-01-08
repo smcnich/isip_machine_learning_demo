@@ -330,7 +330,7 @@ def data_gen():
     #
     if data:
         key = data['key']
-        paramsDict = data['paramsDict']
+        paramsDict = data['params']
 
     try:
 

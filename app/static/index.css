@@ -20,6 +20,18 @@ html, body{
   flex-direction: column;
 }
 
+/* BODY LOADING CLASS */
+
+/* When loading is set, set the cursor type to wait */
+body.loading {
+  cursor: wait;
+}
+
+/* When loading is set, disable pointer events */
+body.loading * {
+  pointer-events: none;
+}
+
 /* Header */
 header {
   display: flex;

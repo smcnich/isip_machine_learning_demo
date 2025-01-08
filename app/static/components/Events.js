@@ -8,6 +8,7 @@ export const EventBus = new EventTarget();
 const TRAIN_URL = `${baseURL}api/train/`;
 const EVAL_URL = `${baseURL}api/eval/`;
 const LOADMODEL_URL = `${baseURL}api/load_model/`;
+const DATAGEN_URL = `${baseURL}api/data_gen/`;
 
 // get the component instances from the HTML document
 //
@@ -33,6 +34,10 @@ EventBus.addEventListener('train', (event) => {
      on the algo tool. the data from the train plot is sent to the server to
      be trained and the metrics are written to the process log
     */
+
+    // suspend the application as loading
+    //
+    EventBus.dispatchEvent(new CustomEvent('suspend'));
 
     // get the current time for benchmarking purposes
     //
@@ -80,6 +85,7 @@ EventBus.addEventListener('train', (event) => {
         // otherwise, throw an error
         //
         else {
+            EventBus.dispatchEvent(new CustomEvent('continue'));
             processLog.writePlain('Model could not be trained due to a server error. Please try again.');
             throw new Error('Network response was not ok.');
         }
@@ -104,6 +110,10 @@ EventBus.addEventListener('train', (event) => {
         // log the time taken to train the model
         //
         console.log(`Train Time: ${end - start} ms`)
+
+        // continue the application\
+        //
+        EventBus.dispatchEvent(new CustomEvent('continue'));
     })
 });
 //
@@ -127,6 +137,10 @@ EventBus.addEventListener('eval', (event) => {
      on the algo tool. the data from the eval plot is sent to the server to
      be evaluated and the metrics are written to the process log
     */
+
+    // suspend the application as loading
+    //
+    EventBus.dispatchEvent(new CustomEvent('suspend'));
 
     // get the current time for benchmarking purposes
     //
@@ -184,6 +198,7 @@ EventBus.addEventListener('eval', (event) => {
         // otherwise, throw an error
         //
         else {
+            EventBus.dispatchEvent(new CustomEvent('continue'));
             processLog.writePlain('Data could not be evaluated due to a server error. Please try again.');
             throw new Error('Network response was not ok.');
         }
@@ -204,6 +219,10 @@ EventBus.addEventListener('eval', (event) => {
         // log the time taken to train the model
         //
         console.log(`Train Time: ${end - start} ms`)
+
+        // continue the application
+        //
+        EventBus.dispatchEvent(new CustomEvent('continue'));
     });
 });
 
@@ -221,6 +240,10 @@ EventBus.addEventListener('loadModel', (event) => {
      to be loaded. the model file is sent to the server to be loaded and
      the decision surface is plotted on the train plot
     */
+
+    // suspend the application as loading
+    //
+    EventBus.dispatchEvent(new CustomEvent('suspend'));
 
     // get the current time for benchmarking purposes
     //
@@ -296,10 +319,9 @@ EventBus.addEventListener('loadModel', (event) => {
                 //
                 console.log(`Load Model Time: ${end - start} ms`)
 
-                // dispatch a state change event to change the state of the
-                // algo tool buttons
+                // continue the application
                 //
-                EventBus.dispatchEvent(new CustomEvent('stateChange'));
+                EventBus.dispatchEvent(new CustomEvent('continue'));
             });
         }
 
@@ -312,6 +334,83 @@ EventBus.addEventListener('loadModel', (event) => {
 });
 //
 // end of event listener
+
+EventBus.addEventListener('dataGen', (event) => {
+    /*
+    eventListener: dataGen
+
+    dispatcher: DataParams
+
+    args:
+     event.detail.plotID: the ID of the plot that the data is being generated for 
+     event.detail.key: the key of the data generation type
+     event.detail.params: the parameters of the data generation
+
+    description:
+     this event listener is triggered when the user clicks the data
+     generation button. the data generation modal is opened
+    */
+
+    // get the plot that the data is being generated for
+    //
+    let plot;
+    if (event.detail.plotID == 'train') { plot = trainPlot; }
+    else if (event.detail.plotID == 'eval') { plot = evalPlot; }
+
+    // suspend the application as loading
+    //
+    EventBus.dispatchEvent(new CustomEvent('suspend'));
+
+    try {
+
+        // send the data to the server and get the response
+        //
+        fetch(DATAGEN_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'key': event.detail.key,
+                'params': event.detail.params
+            })
+        })
+
+        // parse the response
+        //
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            }
+            else {
+                EventBus.dispatchEvent(new CustomEvent('continue'));
+                processLog.writePlain('Data could not be generated due to a server error. Please try again.');
+                throw new Error('Network response was not ok.');
+            }
+        })
+
+        // get the data from the response
+        //
+        .then((data) => {
+
+            // plot the response data on the plot
+            //
+            plot.plot(data);
+
+            // continue the application
+            //
+            EventBus.dispatchEvent(new CustomEvent('continue'));
+        });
+
+    }
+
+    // catch any errors and continue the application
+    //
+    catch {
+        processLog.writePlain('Data could not be generated due to a server error. Please try again.');
+        EventBus.dispatchEvent(new CustomEvent('continue'));
+    }
+})
 
 EventBus.addEventListener('stateChange', () => {
     /*
@@ -355,6 +454,56 @@ EventBus.addEventListener('stateChange', () => {
 });
 //
 // end of event listener
+
+EventBus.addEventListener('suspend', () => {
+    /*
+    eventListener: suspend
+
+    dispatcher: Plot, AlgoTool
+
+    args:
+     None
+
+    description:
+     this event listener is triggered when the application is 
+     loading something. the event listener changes the class of
+     the body to 'loading' to show the loading spinner and disable
+     selecting in the UI
+    */
+
+    // get the body
+    //
+    const body = document.querySelector('body');
+
+    // change the body class to 'loading'
+    //
+    body.className = 'loading';
+});
+
+EventBus.addEventListener('continue', () => {
+    /*
+    eventListener: continue
+
+    dispatcher: Plot, AlgoTool
+
+    args:
+     None
+
+    description:
+     this event listener is triggered when the application is done
+     loading something. the event listener changes the class of
+     the body to '' to hide the loading spinner and enable
+     selecting in the UI
+    */
+
+    // get the body
+    //
+    const body = document.querySelector('body');
+
+    // change the body class to ''
+    //
+    body.className = '';
+})
 
 // Event listeners that depend on the website being loaded
 // before being triggered
