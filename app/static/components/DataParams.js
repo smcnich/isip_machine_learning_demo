@@ -297,7 +297,7 @@ class DataPopup extends HTMLElement {
 
     // Show the popup when the button is clicked
     //
-    button.addEventListener('click', (event) => {
+    button.onclick = (event) => {
       // Prevent event propagation to avoid unintended behavior
       //
       event.stopPropagation();
@@ -305,11 +305,11 @@ class DataPopup extends HTMLElement {
       // Call togglePopup method to show/hide popup
       //
       this.togglePopup();
-    });
+    };
 
     // Close the popup when clicking the close button
     //
-    closeBtn.addEventListener('click', (event) => {
+    closeBtn.onclick = (event) => {
       // Prevent event propagation to avoid conflicts
       //
       event.stopPropagation();
@@ -317,23 +317,13 @@ class DataPopup extends HTMLElement {
       // Call closePopup method to hide popup
       //
       this.closePopup();
-    });
-
-    // Add a global click listener to close the popup if clicked outside
-    //
-    document.addEventListener('click', (event) => {
-      // Check if popup is open and if the click is outside the component
-      //
-      if (this.isPopupOpen && !this.contains(event.target)) {
-        this.closePopup(); // Close the popup if the conditions are met
-      }
-    });
+    };
 
     // Stop event propagation on popup to avoid closing when clicking inside it
     //
-    popup.addEventListener('click', (event) => {
+    popup.onclick = (event) => {
       event.stopPropagation(); // Stop event from bubbling up to parent listeners
-    });
+    };
   }
   //
   // end of method

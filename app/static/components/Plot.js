@@ -717,8 +717,38 @@ class Plot extends HTMLElement {
     //
     Plotly.react(plotDiv, this.plotData, this.layout, this.config); 
     
+    // dispatch an event to the algoTool to update the plot status
+    //
     EventBus.dispatchEvent(new CustomEvent('stateChange'));
   }
+
+  delete_class(label) {
+    /*
+    method: Plot::delete_class
+
+    args:
+      label (String): the label of the class to delete
+
+    return:
+      None
+
+    description:
+      This method removes a class from the plot.
+    */
+
+    // remove any trace with the same name as the label
+    //
+    this.plotData = this.plotData.filter( (trace) => {
+      return trace.name.toLowerCase() !== label.toLowerCase()
+    });
+
+    // clear the decision surface
+    // this will also update the plot with the removed class
+    //
+    this.clear_decision_surface();
+  }
+  //
+  // end of method
 
 }
 //

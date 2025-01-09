@@ -3,6 +3,9 @@
 //
 export const EventBus = new EventTarget();
 
+import { Label, LabelManager } from './ClassManager.js';
+const labelManager = new LabelManager();
+
 // URL definitions
 //
 const TRAIN_URL = `${baseURL}api/train/`;
@@ -16,6 +19,7 @@ const trainPlot = document.getElementById('train-plot');
 const evalPlot = document.getElementById('eval-plot');
 const processLog = document.getElementById('process-log');
 const algoTool = document.getElementById('algo-tool');
+const mainToolbar = document.getElementById('main-toolbar');
 
 
 // Listen for the 'train' event emitted from AlgoTool Component
@@ -397,6 +401,31 @@ EventBus.addEventListener('dataGen', (event) => {
             //
             plot.plot(data);
 
+            // get the unique labels from the data
+            //
+            const uniqLabels = Array.from(new Set(data.labels));
+
+            // loop through the unique labels and add them to the label manager
+            //
+            let label;
+            for (let i = 0; i < uniqLabels.length; i++) {
+                    
+                // add the class to the label manager
+                //
+                label = new Label(uniqLabels[i], data.colors[i]);
+
+                // try to add the class to the manager
+                // if it already exists, it is ok
+                //
+                if (labelManager.addLabel(label)) {
+                    processLog.writePlain(`Added class: ${uniqLabels[i]}`);
+                }
+            }
+
+            // update the class list in the main toolbar
+            //
+            mainToolbar.updateClassList(labelManager.getLabels());
+
             // continue the application
             //
             EventBus.dispatchEvent(new CustomEvent('continue'));
@@ -411,6 +440,95 @@ EventBus.addEventListener('dataGen', (event) => {
         EventBus.dispatchEvent(new CustomEvent('continue'));
     }
 })
+
+EventBus.addEventListener('addClass', (event) => {
+    /*
+    eventListener: addClass
+
+    dispatcher: ClassesComponents::AddClassPopup
+
+    args:
+     event.detail.name: the name of the class to add
+     event.detail.color: the hex code of the color for the name
+
+    description:
+     this event listener is triggered when the user clicks the add
+     class button in the add class popup. the event listener adds the
+     class to the class list in the class manager
+    */
+
+    const name = event.detail.name;
+    const color = event.detail.color;
+
+    // add the class to the label manager
+    //
+    const label = new Label(name, color);
+
+    // try to add the class to the manager
+    // if it already exists, let the user know
+    //
+    if (!labelManager.addLabel(label)) {
+        processLog.writePlain(`Could not add class ${name} because it already exists.`);
+    }
+    else {    
+        processLog.writePlain(`Added class: ${name}`);
+    }
+
+    // update the class list in the main toolbar
+    //
+    mainToolbar.updateClassList(labelManager.getLabels());
+});
+// 
+// end of event listener
+
+EventBus.addEventListener('deleteClass', (event) => {
+    /*
+    eventListener: deleteClass
+
+    dispatcher: ClassesComponents::DeleteClassButton
+
+    args:
+     event.detail.name: the name of the class to delete
+
+    description:
+     this event listener is triggered when the user clicks the delete
+     class button in a classes dropdown. the event listener deletes
+     the class from the label manager. if the class exists, also remove
+     the class data from the train and eval plots
+    */
+
+    // get the name of the class to delete
+    //
+    const name = event.detail.name;
+
+    // attempt to remove the class from the label manager
+    // if successfully removed, remove the class data from the train 
+    // and eval plots
+    //
+    if (labelManager.remove_label(name)) {
+
+        // tell the user the class has been deleted
+        //
+        processLog.writePlain(`Deleted class: ${name}`);
+
+        // remove the class data from the train and eval plots
+        //  
+        trainPlot.delete_class(name);
+        evalPlot.delete_class(name);
+    }
+
+    // if the class does not exist, tell the user
+    //
+    else {
+        processLog.writePlain(`Could not delete class ${name} because it does not exist.`);
+    }
+
+    // update the class list in the main toolbar
+    //
+    mainToolbar.updateClassList(labelManager.getLabels());
+});
+//
+// end of event listener
 
 EventBus.addEventListener('stateChange', () => {
     /*

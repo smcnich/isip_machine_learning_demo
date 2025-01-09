@@ -173,6 +173,56 @@ class MainToolbar extends HTMLElement {
     });
   }
 
+  updateClassList(labels) {
+    /*
+    method: MainToolbar::updateClassList
+
+    args:
+     labels (Array): an array of Class objects (from ClassManager.js)
+
+    return:
+     None
+
+    description:
+     this method updates the class list in the toolbar with new class buttons 
+     based on the provided labels. It dynamically creates and inserts class 
+     buttons into the dropdown menu.
+    */
+
+    // get the class dropdown object
+    //
+    const classDropdown = this.shadowRoot.getElementById('class-dropdown');
+
+    // get the add class button on the dropdown
+    // all class buttons are inserted before this button
+    //
+    const addClassBtn = classDropdown.querySelector('add-class-popup');
+
+    // get all class buttons in the dropdown
+    //
+    const classButtons = classDropdown.querySelectorAll('class-button')
+
+    // clear the class buttons from the dropdown
+    //
+    classButtons.forEach(button => {
+      classDropdown.removeChild(button);
+    })
+    
+    // for each label, create a new class button
+    //
+    labels.forEach(label => {
+
+      // Create a new class button element
+      //
+      const button = document.createElement('class-button');
+      button.setAttribute('label', label.name);
+
+      // Insert the button as the first child of classDropdown
+      //
+      classDropdown.insertBefore(button, addClassBtn);
+    })
+  }
+
   render() {
     /*
     method: ToolbarBtn::render
@@ -325,9 +375,8 @@ class MainToolbar extends HTMLElement {
         <!-- "Classes" menu with options to add and delete classes -->
         <div class="menu">
           <button class="menubutton">Classes</button>
-          <div class="dropdown">
-            <toolbar-popup-button label="Add Class"></toolbar-popup-button>
-            <toolbar-popup-button label="Delete Class"></toolbar-popup-button>
+          <div class="dropdown" id="class-dropdown">
+            <add-class-popup label="Add Class"></add-class-popup>
           </div>
         </div>
 

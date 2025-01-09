@@ -1662,6 +1662,7 @@ class ContactPopup extends HTMLElement {
 // end of class
 
 // Register the custom element
+//
 customElements.define('about-popup', AboutPopup);
 customElements.define('report-popup', ReportPopup);
 customElements.define('share-popup', SharePopup);
