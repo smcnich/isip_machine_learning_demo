@@ -656,6 +656,12 @@ class Plot extends HTMLElement {
       }
     }
 
+    // Ensure colorScale has at least two colors
+    //
+    if (colorScale.length === 1) {
+      colorScale.push(colorScale[0]); // Duplicate the single color to create a gradient
+    }
+
     // Data for the contour plot
     //
     const contourData = {
@@ -722,6 +728,47 @@ class Plot extends HTMLElement {
     EventBus.dispatchEvent(new CustomEvent('stateChange'));
   }
 
+  traces_to_data(traces=null) {
+
+    // if no traces are provided, use the current plot data
+    //
+    const plotData = traces || this.plotData;
+
+    // create empty arrays to store the data
+    //
+    const labels = [], x = [], y = [];
+
+    // iterate over each trace in the plot data
+    //
+    plotData.forEach((trace) => {
+      
+      // if the trace is a scatter plot, add the data to the arrays
+      //
+      if (trace.type === 'scattergl') {
+        
+        // iterate over each point in the trace and add the data to the arrays
+        //
+        for (let i = 0; i < trace.x.length; i++) {
+          labels.push(trace.name);
+          x.push(trace.x[i]);
+          y.push(trace.y[i]);
+        }
+      }
+    });
+
+    // create the data object
+    //
+    this.data = {
+      'labels': labels,
+      'x': x,
+      'y': y
+    }
+
+    // return the data object
+    //
+    return this.data;
+  }
+
   delete_class(label) {
     /*
     method: Plot::delete_class
@@ -741,6 +788,10 @@ class Plot extends HTMLElement {
     this.plotData = this.plotData.filter( (trace) => {
       return trace.name.toLowerCase() !== label.toLowerCase()
     });
+
+    // make sure to change the raw data to reflect the removed class
+    //
+    this.data = this.traces_to_data();
 
     // clear the decision surface
     // this will also update the plot with the removed class
