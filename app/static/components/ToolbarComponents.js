@@ -455,7 +455,11 @@ class Toolbar_DropdownSettings extends HTMLElement {
   
       // Hide the dropdown when not hovering over both the button and dropdown
       button.addEventListener('mouseleave', () => {
-        if (!dropdownMenu.matches(':hover')) {
+
+         // Check if any popup inside the dropdown is open
+        const openPopup = dropdownMenu.querySelector('toolbar-popup-button');
+
+        if (!dropdownMenu.matches(':hover') && (!openPopup || !openPopup.isPopupOpen)) {
           dropdownMenu.classList.remove('show');
           button.classList.remove('active'); // Remove active class when hiding
         }
@@ -467,8 +471,14 @@ class Toolbar_DropdownSettings extends HTMLElement {
       });
   
       dropdownMenu.addEventListener('mouseleave', () => {
-        dropdownMenu.classList.remove('show'); // Hide when not hovering over dropdown
-        button.classList.remove('active'); // Remove highlight when leaving dropdown
+
+        // Check if any popup inside the dropdown is open
+        const openPopup = dropdownMenu.querySelector('toolbar-popup-button');
+
+        if (!openPopup || !openPopup.isPopupOpen) {
+          dropdownMenu.classList.remove('show'); // Hide when not hovering over dropdown
+          button.classList.remove('active'); // Remove highlight when leaving dropdown
+        }
       });
     }
 }
@@ -1269,13 +1279,6 @@ class Toolbar_PopupButton extends HTMLElement {
     closeBtn.addEventListener('click', (event) => {
       event.stopPropagation();
       this.closePopup();
-    });
-
-    // Add a global click listener to close the popup if clicked outside
-    document.addEventListener('click', (event) => {
-      if (this.isPopupOpen && !this.contains(event.target)) {
-        this.closePopup();
-      }
     });
 
     // Stop event propagation on popup to avoid closing when clicking inside it

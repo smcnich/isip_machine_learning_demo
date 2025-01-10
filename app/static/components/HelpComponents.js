@@ -235,16 +235,6 @@ class AboutPopup extends HTMLElement {
       this.closePopup();
     });
 
-    // Add a global click listener to close the popup if clicked outside
-    //
-    document.addEventListener('click', (event) => {
-      // Check if popup is open and if the click is outside the component
-      //
-      if (this.isPopupOpen && !this.contains(event.target)) {
-        this.closePopup(); // Close the popup if the conditions are met
-      }
-    });
-
     // Stop event propagation on popup to avoid closing when clicking inside it
     //
     popup.addEventListener('click', (event) => {
@@ -721,16 +711,6 @@ class ReportPopup extends HTMLElement {
       }, 0); // Delay to allow paste to complete before adjusting
     });
 
-    // Add a global click listener to close the popup if clicked outside
-    //
-    document.addEventListener('click', (event) => {
-      // Check if popup is open and if the click is outside the component
-      //
-      if (this.isPopupOpen && !this.contains(event.target)) {
-        this.closePopup(); // Close the popup if the conditions are met
-      }
-    });
-
     // Stop event propagation on popup to avoid closing when clicking inside it
     //
     popup.addEventListener('click', (event) => {
@@ -1137,16 +1117,6 @@ class SharePopup extends HTMLElement {
       // Call closePopup method to hide popup
       //
       this.closePopup();
-    });
-
-    // Add a global click listener to close the popup if clicked outside
-    //
-    document.addEventListener('click', (event) => {
-      // Check if popup is open and if the click is outside the component
-      //
-      if (this.isPopupOpen && !this.contains(event.target)) {
-        this.closePopup(); // Close the popup if the conditions are met
-      }
     });
 
     // Stop event propagation on popup to avoid closing when clicking inside it
@@ -1587,16 +1557,6 @@ class ContactPopup extends HTMLElement {
       // Call closePopup method to hide popup
       //
       this.closePopup();
-    });
-
-    // Add a global click listener to close the popup if clicked outside
-    //
-    document.addEventListener('click', (event) => {
-      // Check if popup is open and if the click is outside the component
-      //
-      if (this.isPopupOpen && !this.contains(event.target)) {
-        this.closePopup(); // Close the popup if the conditions are met
-      }
     });
 
     // Stop event propagation on popup to avoid closing when clicking inside it
