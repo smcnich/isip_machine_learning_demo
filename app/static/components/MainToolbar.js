@@ -206,21 +206,49 @@ class MainToolbar extends HTMLElement {
     */
 
     // Define a list of all potential popup query selectors
-    //
-    const popupSelectors = [
+    const PopupSelectors = [
       'toolbar-popup-button',
       'about-popup',
       'report-popup',
       'data-popup',
-      'add-class-popup'
+      'add-class-popup',
     ];
 
-    // Check if any popup matching the selectors is open
-    //
-    return popupSelectors.some(selector => {
-      const popup = dropdown.querySelector(selector);
-      return popup && popup.isPopupOpen;
-    });
+    // Define a list of nested dropdown selectors
+    const nestedDropdownSelectors = [
+      'toolbar-dropdown-settings',  // This can be expanded with more dropdown types
+      'data-button',
+    ];
+
+    // Define a list of nested popup selectors
+    const NestedPopupSelectors = [
+      'toolbar-popup-button',
+      'data-popup',  // Include any other nested popup types as needed
+    ];
+
+    // First, check the popups in the current dropdown
+    const openPopups = dropdown.querySelectorAll(PopupSelectors.join(','));
+
+    // If any of the popups inside the dropdown are open, return true
+    if (Array.from(openPopups).some(popup => popup.isPopupOpen)) {
+      return true;
+    }
+
+    // Check if there are any nested dropdowns inside the current dropdown
+    const nestedDropdowns = dropdown.querySelectorAll(nestedDropdownSelectors.join(','));
+
+    // If there are nested dropdowns, check each one for open popups
+    for (let nestedDropdown of nestedDropdowns) {
+      // For each nested dropdown, check for popups in its shadow DOM
+      const nestedPopups = nestedDropdown.shadowRoot.querySelectorAll(NestedPopupSelectors.join(','));
+
+      // If any nested popups are open, return true
+      if (Array.from(nestedPopups).some(popup => popup.isPopupOpen)) {
+        return true;
+      }
+    }
+
+    return false; // No popups are open in the dropdown or its nested dropdowns
 
   }
 

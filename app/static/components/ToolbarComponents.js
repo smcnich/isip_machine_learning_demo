@@ -456,15 +456,18 @@ class Toolbar_DropdownSettings extends HTMLElement {
       // Hide the dropdown when not hovering over both the button and dropdown
       button.addEventListener('mouseleave', () => {
 
-         // Check if any popup inside the dropdown is open
-        const openPopup = dropdownMenu.querySelector('toolbar-popup-button');
+        // Check if any popup inside the dropdown is open
+        const openPopups = dropdownMenu.querySelectorAll('toolbar-popup-button');
 
-        if (!dropdownMenu.matches(':hover') && (!openPopup || !openPopup.isPopupOpen)) {
+        // Check if any of the popups is open
+        const isAnyPopupOpen = Array.from(openPopups).some(popup => popup.isPopupOpen);
+
+        if (!dropdownMenu.matches(':hover') && !isAnyPopupOpen) {
           dropdownMenu.classList.remove('show');
           button.classList.remove('active'); // Remove active class when hiding
         }
       });
-  
+      
       dropdownMenu.addEventListener('mouseenter', () => {
         dropdownMenu.classList.add('show'); // Keep dropdown open
         button.classList.add('active'); // Keep button highlighted
@@ -473,9 +476,12 @@ class Toolbar_DropdownSettings extends HTMLElement {
       dropdownMenu.addEventListener('mouseleave', () => {
 
         // Check if any popup inside the dropdown is open
-        const openPopup = dropdownMenu.querySelector('toolbar-popup-button');
-
-        if (!openPopup || !openPopup.isPopupOpen) {
+        const openPopups = dropdownMenu.querySelectorAll('toolbar-popup-button');
+    
+        // Check if any of the popups is open
+        const isAnyPopupOpen = Array.from(openPopups).some(popup => popup.isPopupOpen);
+    
+        if (!isAnyPopupOpen) {
           dropdownMenu.classList.remove('show'); // Hide when not hovering over dropdown
           button.classList.remove('active'); // Remove highlight when leaving dropdown
         }
