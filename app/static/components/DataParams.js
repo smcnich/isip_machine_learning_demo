@@ -663,7 +663,14 @@ class DataButton extends HTMLElement {
     // Hide the dropdown when not hovering over both the button and dropdown
     //
     button.addEventListener('mouseleave', () => {
-      if (!dropdownMenu.matches(':hover')) {
+
+      // Check if any popup inside the dropdown is open
+      const openPopups = dropdownMenu.querySelectorAll('data-popup');
+
+      // Check if any of the popups is open
+      const isAnyPopupOpen = Array.from(openPopups).some(popup => popup.isPopupOpen);
+
+      if (!dropdownMenu.matches(':hover') && !isAnyPopupOpen) {
         dropdownMenu.classList.remove('show'); // Hide dropdown
         button.classList.remove('active'); // Remove highlight
       }
@@ -679,8 +686,17 @@ class DataButton extends HTMLElement {
     // Hide dropdown when leaving it
     //
     dropdownMenu.addEventListener('mouseleave', () => {
-      dropdownMenu.classList.remove('show'); // Hide when not hovering over dropdown
-      button.classList.remove('active'); // Remove highlight when leaving dropdown
+
+      // Check if any popup inside the dropdown is open
+      const openPopups = dropdownMenu.querySelectorAll('data-popup');
+    
+      // Check if any of the popups is open
+      const isAnyPopupOpen = Array.from(openPopups).some(popup => popup.isPopupOpen);
+    
+      if (!isAnyPopupOpen) {
+        dropdownMenu.classList.remove('show'); // Hide when not hovering over dropdown
+        button.classList.remove('active'); // Remove highlight when leaving dropdown
+      }
     });
   }
   //
