@@ -142,35 +142,114 @@ class MainToolbar extends HTMLElement {
     // Add hover event listeners to each menu button
     //
     buttons.forEach(button => {
-        const dropdown = button.nextElementSibling;
+      const dropdown = button.nextElementSibling;
 
-        // Ensure there's a dropdown to work with
-        if (dropdown) {
-            // Show dropdown on mouseenter
-            button.addEventListener('mouseenter', () => {
-                this.closeAllDropdowns(); // Close other dropdowns
-                dropdown.style.display = 'block';
-                button.classList.add('active');
-            });
+      // Ensure there's a dropdown to work with
+      //
+      if (dropdown) {
+          // Show dropdown on mouseenter
+          //
+          button.addEventListener('mouseenter', () => {
+              this.closeAllDropdowns(); // Close other dropdowns
+              dropdown.style.display = 'block';
+              button.classList.add('active');
+          });
 
-            // Hide dropdown on mouseleave
-            button.addEventListener('mouseleave', () => {
-                dropdown.style.display = 'none';
-                button.classList.remove('active');
-            });
+          // Hide dropdown on mouseleave
+          //
+          button.addEventListener('mouseleave', () => {
+            const isAnyPopupOpen = this.isAnyPopupOpen(dropdown);
+            // Only close the dropdown if the popup isn't open
+            //
+            if (!isAnyPopupOpen) {
+              dropdown.style.display = 'none';
+              button.classList.remove('active');
+            }
+          });
 
-            // Keep dropdown open when hovering over it directly
-            dropdown.addEventListener('mouseenter', () => {
-                dropdown.style.display = 'block';
-                button.classList.add('active');
-            });
+          // Keep dropdown open when hovering over it directly
+          //
+          dropdown.addEventListener('mouseenter', () => {
+              dropdown.style.display = 'block';
+              button.classList.add('active');
+          });
 
-            dropdown.addEventListener('mouseleave', () => {
-                dropdown.style.display = 'none';
-                button.classList.remove('active');
-            });
-        }
+          // Hide dropdown on mouseleave
+          //
+          dropdown.addEventListener('mouseleave', () => {
+            const isAnyPopupOpen = this.isAnyPopupOpen(dropdown);
+            // Only close the dropdown if the popup isn't open
+            //
+            if (!isAnyPopupOpen) {
+              dropdown.style.display = 'none';
+              button.classList.remove('active');
+            }
+          });
+      }
     });
+  }
+
+  isAnyPopupOpen(dropdown) {
+    /*
+    method: MainToolbar::isAnyPopupOpen
+
+    args:
+    dropdown (HTMLElement): The dropdown element to check for open popups.
+
+    return:
+    Boolean: True if any popup within the dropdown is open, false otherwise.
+
+    description:
+    This method checks whether any popup elements within the specified dropdown are
+    currently open. It iterates over a predefined list of popup selectors and checks
+    their `isPopupOpen` property.
+    */
+
+    // Define a list of all potential popup query selectors
+    const PopupSelectors = [
+      'toolbar-popup-button',
+      'about-popup',
+      'report-popup',
+      'data-popup',
+      'add-class-popup',
+    ];
+
+    // Define a list of nested dropdown selectors
+    const nestedDropdownSelectors = [
+      'toolbar-dropdown-settings',  // This can be expanded with more dropdown types
+      'data-button',
+    ];
+
+    // Define a list of nested popup selectors
+    const NestedPopupSelectors = [
+      'toolbar-popup-button',
+      'data-popup',  // Include any other nested popup types as needed
+    ];
+
+    // First, check the popups in the current dropdown
+    const openPopups = dropdown.querySelectorAll(PopupSelectors.join(','));
+
+    // If any of the popups inside the dropdown are open, return true
+    if (Array.from(openPopups).some(popup => popup.isPopupOpen)) {
+      return true;
+    }
+
+    // Check if there are any nested dropdowns inside the current dropdown
+    const nestedDropdowns = dropdown.querySelectorAll(nestedDropdownSelectors.join(','));
+
+    // If there are nested dropdowns, check each one for open popups
+    for (let nestedDropdown of nestedDropdowns) {
+      // For each nested dropdown, check for popups in its shadow DOM
+      const nestedPopups = nestedDropdown.shadowRoot.querySelectorAll(NestedPopupSelectors.join(','));
+
+      // If any nested popups are open, return true
+      if (Array.from(nestedPopups).some(popup => popup.isPopupOpen)) {
+        return true;
+      }
+    }
+
+    return false; // No popups are open in the dropdown or its nested dropdowns
+
   }
 
   updateClassList(labels) {
