@@ -69,7 +69,7 @@ class Toolbar_Button extends HTMLElement {
           // Clear process log case
           //
           case 'Clear Process Log':
-            this.processLog.clearAll();
+            this.processLog.clear();
           // For any other label, do nothing (default case)
           //
           default:
