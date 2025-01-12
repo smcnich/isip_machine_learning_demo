@@ -1408,7 +1408,7 @@ class Alg:
 
         # calculate accuracy and error score
         #
-        acc = accuracy_score(r_labels, h_labels)
+        acc = accuracy_score(r_labels, h_labels)   
         err = ALG_SCL_PCT * (float(1.0) - acc)
         sens = None
         spec = None
@@ -1445,10 +1445,11 @@ class Alg:
             else:
                 average='binary'
 
-            sens = sensitivity_score(r_labels, h_labels, average=average)
+            sens = sensitivity_score(r_labels, h_labels, average=average)   
             spec = specificity_score(r_labels, h_labels, average=average)
-            prec = precision_score(r_labels, h_labels, average=average)
-            f1 = f1_score(r_labels, h_labels, average=average)
+            prec = precision_score(r_labels, h_labels, average=average, 
+                                     zero_division=0)
+            f1 = f1_score(r_labels, h_labels, average=average, zero_division=0)
 
         return None if isPrint else conf_matrix, sens, spec, prec, acc, err, f1
 

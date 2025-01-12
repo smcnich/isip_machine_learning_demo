@@ -171,9 +171,9 @@ class ProcessLog extends HTMLElement {
     //
     // end of method
 
-    clearAll() {
+    clear() {
         /*
-        method: Toolbar_Button::clearAll
+        method: Toolbar_Button::clear
         
         args:
          None

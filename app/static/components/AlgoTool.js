@@ -606,6 +606,58 @@ class AlgoTool extends HTMLElement {
   //
   // end of method
 
+  set_train_progress(percentage) {
+    /*
+    method: AlgoTool::set_train_progress
+
+    args:
+     percentage (Number): The percentage of the evaluation progress bar
+                          as a whole number between 0 and 100
+
+    return:
+     None
+
+    description:
+     this method sets the progress of the train progress bar. 
+     the percentage is a whole number between 0 and 100.
+    */
+    
+
+    // get the train progress bar
+    //
+    const pb = this.shadowRoot.getElementById('trainProgressBar');
+
+    // set the progress of the train progress bar
+    //
+    pb.setProgress(percentage);
+  }
+
+  set_eval_progress(percentage) {
+    /*
+    method: AlgoTool::set_eval_progress
+
+    args:
+     percentage (Number): The percentage of the evaluation progress bar
+                          as a whole number between 0 and 100
+
+    return:
+     None
+
+    description:
+     this method sets the progress of the eval progress bar. 
+     the percentage is a whole number between 0 and 100.
+    */
+    
+
+    // get the train progress bar
+    //
+    const pb = this.shadowRoot.getElementById('evalProgressBar');
+
+    // set the progress of the train progress bar
+    //
+    pb.setProgress(percentage);
+  }
+
   change_train_state(state) {
     /*
     method: AlgoTool::change_train_state

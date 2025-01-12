@@ -160,8 +160,6 @@ def train(model:mlt.Alg, data:mltd.MLToolsData):
 #
 # end of function
 
-# TODO: create the wrapper to predict the labels of data from a given model.
-#       make sure to include error checking. see nedc_ml_tools.py line 1547
 def predict(model:mlt.Alg, data:mltd.MLToolsData):
     '''
     function: predict
@@ -230,8 +228,14 @@ def score(model:mlt.Alg, data:mltd.MLToolsData, hyp_labels:list):
     '''
 
     # get the number of classes from the data
+    # the number of classes is always the greatest amount of
+    # labels in the hyp or ref data. this is done to ensure
+    # that there are no issues when scoring
     #
-    num_classes = data.num_of_classes
+    if (data.num_of_classes > len(set(hyp_labels))): 
+        num_classes = data.num_of_classes
+    else:
+        num_classes = len(set(hyp_labels))
 
     # convert the hypothesis labels to a numpy array of ints
     #
@@ -359,17 +363,12 @@ def generate_decision_surface(data:mltd.MLToolsData, model:mlt.Alg):
     # if there are strings in the z array, convert them to numbers
     # as the contour plot in Plotly.js will not work with strings
     #
-    if np.any(np.char.isnumeric(z.astype(str)) == False):
-        
-        # flip the dictionary as MLToolsData uses the value as the original
-        # label
-        #
-        mapping_labels = {v: k for k, v in data.mapping_label.items()}
+    if np.issubdtype(z.dtype, np.integer):
 
         # vectorize the lambda function to convert the labels to numbers
         # based on the reversed mapping labels
         #
-        z = np.vectorize(lambda val: mapping_labels[val])(z)
+        z = np.vectorize(lambda val: data.mapping_label[val])(z)
 
     # return the x, y, and z values of the decision surface. 
     # x and y should be a 1D array, so get a row from the xx array and

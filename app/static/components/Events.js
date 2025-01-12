@@ -21,6 +21,14 @@ const processLog = document.getElementById('process-log');
 const algoTool = document.getElementById('algo-tool');
 const mainToolbar = document.getElementById('main-toolbar');
 
+// get the plotly default colors as an array
+//
+const defaultColors = Plotly.d3.scale.category10().range()
+
+// create a variable to store the text file
+//
+let textFile;
+
 
 // Listen for the 'train' event emitted from AlgoTool Component
 //
@@ -99,9 +107,20 @@ EventBus.addEventListener('train', (event) => {
     //
     .then((data) => {
 
+        // set the label mappings in the label manager
+        //
+        labelManager.setMappings(data.mapping_label);
+
+        // change the z values to numerics based on the mapping
+        // labels
+        //
+        data.decision_surface.z = 
+            labelManager.mapLabels(data.decision_surface.z);
+
         // plot the decision surface on the training plot
         //
-        trainPlot.decision_surface(data.decision_surface);
+        trainPlot.decision_surface(data.decision_surface, 
+                                   labelManager.getLabels());
 
         // write the metrics to the process log
         //
@@ -170,7 +189,7 @@ EventBus.addEventListener('eval', (event) => {
 
     // plot the decision surface on the eval plot
     //
-    evalPlot.decision_surface(dsData);
+    evalPlot.decision_surface(dsData, labelManager.getLabels());
 
     // get the data from the eval plot
     //
@@ -222,7 +241,7 @@ EventBus.addEventListener('eval', (event) => {
         
         // log the time taken to train the model
         //
-        console.log(`Train Time: ${end - start} ms`)
+        console.log(`Evaluation Time: ${end - start} ms`)
 
         // continue the application
         //
@@ -397,10 +416,6 @@ EventBus.addEventListener('dataGen', (event) => {
         //
         .then((data) => {
 
-            // plot the response data on the plot
-            //
-            plot.plot(data);
-
             // get the unique labels from the data
             //
             const uniqLabels = Array.from(new Set(data.labels));
@@ -412,7 +427,7 @@ EventBus.addEventListener('dataGen', (event) => {
                     
                 // add the class to the label manager
                 //
-                label = new Label(uniqLabels[i], data.colors[i]);
+                label = new Label(uniqLabels[i], defaultColors[i]);
 
                 // try to add the class to the manager
                 // if it already exists, it is ok
@@ -421,6 +436,10 @@ EventBus.addEventListener('dataGen', (event) => {
                     processLog.writePlain(`Added class: ${uniqLabels[i]}`);
                 }
             }
+
+            // plot the response data on the plot
+            //
+            plot.plot(data, labelManager.getColorMappings());
 
             // update the class list in the main toolbar
             //
@@ -530,6 +549,288 @@ EventBus.addEventListener('deleteClass', (event) => {
 //
 // end of event listener
 
+EventBus.addEventListener('loadData', (event) => {
+    /*
+    eventListener: loadData
+
+    dispatcher: ToolbarComponents::Toolbar_OpenFileButton
+
+    args:
+     events.detail.get('file') (File Object): the file and its data to load
+     events.detail.get('plotID') (String): the ID of the plot that the data is 
+                                           being loaded for
+
+    description:
+     this event listener is triggered when the user selects a data
+     file to load. the data file is read and plotted on the plot
+     specified by the plotID
+    */
+
+    // get the file and plotID from the event
+    //
+    const file = event.detail.get('file');
+    const plotID = event.detail.get('plotID');
+
+    try {
+
+        if (file) {
+
+            // suspend the application as loading
+            //
+            EventBus.dispatchEvent(new CustomEvent('suspend'));
+
+            // get the current time for benchmarking purposes
+            //
+            const start = Date.now();
+
+            // create a filereader and its onload event
+            //
+            const reader = new FileReader();
+            reader.onload = (e) => {
+            
+                // get the text from the file
+                //
+                const text = e.target.result;
+
+                // get the colors from the file
+                //
+                const colors = (text.match(/# colors:\s*\[(.*?)\]/) || [])[1]?.split(',').map(color => color.trim()) || null;
+
+                // Extract the limits from the comment
+                //
+                const commentLine = text.split('\n').find(line => line.startsWith('# limits:'));
+                const limits = commentLine ? commentLine.split(':')[1].trim().slice(1, -1).split(',').map(Number) : [];
+
+                // Assign to xaxis and yaxis
+                //
+                const xaxis = limits.slice(0, 2);
+                const yaxis = limits.slice(2);
+
+                // split the text into rows, filter out comments, and split the rows into columns
+                //
+                const rows = text.split("\n")
+                            .filter(row => !row.trim().startsWith("#"))             
+                            .map(row => row.split(","));
+
+                // Iterate over the rows and group data by labels
+                //
+                let x = [];
+                let y = [];
+                let labels = [];
+                rows.forEach(row => {
+
+                    // make sure the row is not empty
+                    //
+                    if (row[0] != '') {
+                
+                        // get the label, x value, and y value from the row
+                        //
+                        labels.push(row[0]);
+                        x.push(parseFloat(row[1]));
+                        y.push(parseFloat(row[2]));
+                    }
+                });
+
+                // get the plot that the data is being loaded for
+                //
+                let plot;
+                if (plotID == 'train') { plot = trainPlot; }
+                else if (plotID == 'eval') { plot = evalPlot; }
+
+                // save the data to be plotted
+                //
+                const data = {
+                    'labels': labels,
+                    'x': x,
+                    'y': y
+                };
+
+                // get the unique labels from the data
+                //
+                const uniqLabels = Array.from(new Set(data.labels));
+
+                // loop through the unique labels and add them to the label manager
+                //
+                let label;
+                for (let i = 0; i < uniqLabels.length; i++) {
+                        
+                    // add the class to the label manager
+                    //
+                    label = new Label(uniqLabels[i], colors[i]);
+
+                    // try to add the class to the manager
+                    // if it already exists, it is ok
+                    //
+                    if (labelManager.addLabel(label)) {
+                        processLog.writePlain(`Added class: ${uniqLabels[i]}`);
+                    }
+                }
+
+                // plot the response data on the plot
+                //
+                plot.plot(data, labelManager.getColorMappings());
+
+                // update the class list in the main toolbar
+                //
+                mainToolbar.updateClassList(labelManager.getLabels());
+
+                // continue the application
+                //
+                EventBus.dispatchEvent(new CustomEvent('continue')); 
+
+                // capture the time for benchmarking purposes
+                //
+                const end = Date.now();
+
+                // log the time taken to load the data
+                //
+                console.log(`Load Data Time: ${end - start} ms`)
+            };
+            
+            // Read the file as text, this will trigger the onload event
+            //
+            reader.readAsText(file);
+
+            // reset the file input
+            //
+            event.target.value = '';
+        }
+    }
+
+    // catch any error
+    //
+    catch (err) {      
+        processLog.writePlain('Unable to load data file.');
+        EventBus.dispatchEvent(new CustomEvent('continue'));
+    }
+});
+
+EventBus.addEventListener('saveData', (event) => {
+    /*
+    eventListener: saveData
+
+    dispatcher: ToolbarComponents::Toolbar_SaveFileButton
+
+    args:
+     event.detail.plotID (String): the ID of the plot that the data is being 
+                                   saved for
+
+    description:
+     this event listener is triggered when the user clicks one of the save
+     data buttons. the event listener saves the data from the chosen plot
+    */
+
+    try {
+
+        // get the correct plot to save
+        //
+        let plot;
+        const plotID = event.detail.plotID;
+        if (plotID == 'train') { plot = trainPlot; }
+        else if (plotID == 'eval') { plot = evalPlot; }
+
+        // get the unique labels from the plot data
+        //
+        const plotData = plot.getData();
+        const uniqLabels = Array.from(new Set(plotData.labels));
+
+        // if the plotData is empty, nothing can be saved
+        //
+        if (!plotData) {        
+            processLog.writePlain(`No ${plotID} data to save.`);
+            return;
+        }
+
+        // suspend the application as loading
+        //
+        EventBus.dispatchEvent(new CustomEvent('suspend'));
+
+        // get the bounds of the plot and save them as limits
+        //
+        const bounds = plot.getBounds();
+        let limits = [...bounds.x, ...bounds.y];
+        limits = limits.map((limit) => limit.toFixed(1));
+
+        let text = `# filename: /Downloads/imld_${plotID}.csv\n` +
+                   `# classes: [${uniqLabels}]\n` +
+                   `# colors: [${labelManager.getColors()}]\n` +
+                   `# limits: [${limits}]\n` +
+                   `#\n`;
+
+        // write the csv row for each sample
+        //
+        let x, y, label;
+        for (let i = 0; i < plotData.labels.length; i++) {
+            label = plotData.labels[i];
+            x = plotData.x[i].toFixed(6);
+            y = plotData.y[i].toFixed(6);
+            
+            text += `${label}, ${x}, ${y}\n`;
+        }
+
+        /*
+        raw browser JavaScript cannot write files to the user's computer
+        due to security restrictions. additional libraries would need to
+        be used. below is a roundabout way to save
+        files to the users computer using a Blob object and a dummy link.
+        unfortunately, due to the restrictions the user will not be able
+        to choose the file name and where to save the file. the file will
+        be saved to the default download location set by the browser. the
+        below is taken from the following stackoverflow post:
+
+        https://stackoverflow.com/questions/2048026/open-file-dialog-box-in-javascript
+        */
+
+        // If we are replacing a previously generated file we need to
+        // manually revoke the object URL to avoid memory leaks.
+        //
+        if (textFile !== null) {
+            window.URL.revokeObjectURL(textFile);
+          }
+
+        // create a Blob object from the text that will be stored at
+        // the link
+        //
+        const blob = new Blob([text], {type: 'text/csv'});
+
+        // create a download URL for the blob (csv file)
+        //
+        textFile = window.URL.createObjectURL(blob);
+
+        // create a link element and add a download attribute
+        // connect the href to the download URL
+        // append the link to the document body
+        // this link is never displayed on the page.
+        // it acts as a dummy link that starts a download
+        //
+        const link = document.createElement('a');
+        link.setAttribute('download', `imld_${plotID}.csv`);
+        link.href = textFile;
+        document.body.appendChild(link);
+
+        // wait for the link to be added to the document
+        // then simulate a click event on the link
+        // the dummy link created above will start the download
+        // when a click event is dispatched
+        //
+        window.requestAnimationFrame(function () {
+          link.dispatchEvent(new MouseEvent('click'));
+          document.body.removeChild(link);
+        }); 
+
+        // continue the application
+        //  
+        EventBus.dispatchEvent(new CustomEvent('continue'));
+    }
+
+    // catch any errors
+    //
+    catch (err) {
+        processLog.writePlain('Unable to save data file.');
+        EventBus.dispatchEvent(new CustomEvent('continue'));
+    }
+});
+
 EventBus.addEventListener('stateChange', () => {
     /*
     eventListener: stateChange
@@ -572,6 +873,38 @@ EventBus.addEventListener('stateChange', () => {
 });
 //
 // end of event listener
+
+EventBus.addEventListener('clearAll', () => {
+    /*
+    eventListener: clearAll
+
+    dispatcher: ToolbarComponents::Toolbar_Button
+
+    args:
+     None
+
+    description:
+     clears all information from the application, resulting in a 
+     clean slate.
+    */
+
+    // clear the necessary components
+    //
+    evalPlot.plot_empty();
+    trainPlot.plot_empty();
+    processLog.clear();
+
+    // clear the label manager and update the class list
+    // on the main toolbar
+    //
+    labelManager.clear();
+    mainToolbar.updateClassList(labelManager.getLabels());
+
+    // reset the progress bars
+    //
+    algoTool.set_train_progress(0);
+    algoTool.set_eval_progress(0);
+});
 
 EventBus.addEventListener('suspend', () => {
     /*

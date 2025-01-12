@@ -2,6 +2,11 @@ export class Label {
     constructor(labelName, color) {
         this.name = labelName;
         this.color = color;
+        this.mapping = null;
+    }
+
+    setMapping(mapping) {
+        this.mapping = mapping;
     }
 
     changeColor(color) {
@@ -12,10 +17,52 @@ export class Label {
 export class LabelManager {
     constructor() {
         this.labels = [];
+        this.mappings = {};
     }
 
     getLabels() {
         return this.labels;
+    }
+
+    getMappings() {
+        return this.mappings;
+    }
+
+    getColors() {
+        const colors = [];
+        
+        this.labels.forEach((label) => {
+            colors.push(label.color);
+        });
+
+        return colors;
+    }
+
+    getColorMappings() {
+
+        const colorMappings = {};
+        
+        this.labels.forEach((label) => {
+            colorMappings[label.name.toLowerCase()] = label.color;
+        });
+
+        return colorMappings;
+    }
+
+    setMappings(mappings) {
+
+        // convert the keys of the mappings object to lowercase
+        // and save it
+        //
+        this.mappings = Object.fromEntries(
+            Object.entries(mappings).map(([key, value]) => [key.toLowerCase(), value])
+        );
+
+        // set the mapping for each label
+        //
+        this.labels.forEach((label) => {
+            label.setMapping(this.mappings[label.name.toLowerCase()]);  
+        });
     }
 
     addLabel(labelObj) {
@@ -25,13 +72,16 @@ export class LabelManager {
         const labelName = labelObj.name.toLowerCase();
 
         // check if the class name already exists
-        // return true of it does
         //
-        this.labels.forEach((label) => {
-            if (label.className === labelName) {
-                return false;
-            }
+        const labelExists = this.labels.some((label) => {
+            return label.name.toLowerCase() === labelName;
         });
+
+        // if the label exists then return false
+        //
+        if (labelExists) {
+            return false;
+        }
 
         // add the class to the list of classes
         //
@@ -43,6 +93,47 @@ export class LabelManager {
     }
     //
     // remove a class from the list of classes
+
+    mapLabels(labels, mappings=this.mappings) {
+        /*
+        method: Plot::mapLabels
+
+        args:
+         labels (Array): the list of classes to map, can be arbitrary dimension
+         mappings (Object): the mapping of classes to colors. keys are the 
+                            class names, values are the numeric mappings
+
+        returns:
+         Array: the mapped classes in the same dimension as the input
+
+        desciption:
+         maps the classes to their numeric mappings. this is mainly used when
+         converting z data in preparation for plotting a decision surface
+        */
+
+        // for each object in the labels array
+        //
+        return labels.map(item => {
+
+            // if current item is an array
+            //
+            if (Array.isArray(item)) {
+
+                // recursively map nested arrays
+                //
+                return this.mapLabels(item);
+            } 
+            
+            // else, return the mapped value
+            //
+            else {
+                return mappings[item.toLowerCase()];
+            }
+          });
+          // this will create a new array with the mapped values
+    }
+    //
+    // end of method
 
     remove_label(labelName) {
         /*
@@ -86,4 +177,23 @@ export class LabelManager {
     }
     //
     // end of method
+
+    clear() {       
+        /*
+        method: Plot::clear
+
+        args:
+        None
+
+        returns:
+        None
+
+        description:
+         clears the list of classes
+        */
+
+        // clear the list of classes
+        //
+        this.labels = [];
+    }
 }

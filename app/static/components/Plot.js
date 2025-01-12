@@ -312,7 +312,7 @@ class Plot extends HTMLElement {
   //
   // end of method
 
-  createTraces(data) {
+  createTraces(data, colorMappings) {
 
     // make the all the data labels are the same
     //
@@ -322,106 +322,6 @@ class Plot extends HTMLElement {
           
           return null;
     }
-
-    // set the default colors for the plot based on Plotly.js default
-    // colors
-    //
-    let defaultColors = null;
-
-    // old default colors
-    //
-
-    if (data.colors == null) {
-
-      // Create a mapping for unique labels to colors
-      //
-      let colorMapping = {};
-      let colorArray = [];
-      let colorIndex = 0;
-
-      // get default color values from plotly
-      //
-      const category10 = Plotly.d3.scale.category10();
-
-      // create array format of default colors
-      //
-      for (let i = 0; i < 10; i++) {
-        colorArray.push(category10(i));
-      }
-
-      // Assign a unique color to each label
-      //
-      data.labels.forEach((label) => {
-          if (!(label in colorMapping)) {
-              colorMapping[label] = colorArray[colorIndex % colorArray.length];
-              colorIndex++;
-          }
-      });
-
-      // Define the defaultColors function to return the color for a label
-      //
-      defaultColors = (label) => colorMapping[label];
-
-      // set plot colors value
-      //
-      this.data.colors = colorArray.slice(0, Object.keys(colorMapping).length);
-
-    } 
-    
-    else {
-
-      // create a mapping for unique labels to colors
-      //
-      let colorMapping = {};
-      let colorIndex = 0;
-
-      // create color array and filter out empty strings
-      //
-      let colorArray = data.colors;
-      
-      // Filter out empty strings
-      //
-      if (Array.isArray(colorArray)) {
-        colorArray = colorArray.filter(color => color !== '');
-      }
-
-      // get the number of unique labels
-      //
-      let numUniqueLabels = new Set(data.labels).size;
-
-      // if not enough colors assigned (equal or less than unique labels),
-      // use the default colors instead
-      //
-      if (colorArray.length < numUniqueLabels) {
-
-        // get default color values from plotly
-        //
-        const category10 = Plotly.d3.scale.category10();
-
-        // create array format of default colors
-        //
-        for (let i = 0; i < numUniqueLabels; i++) {
-          colorArray.push(category10(i));
-        }
-      }
-
-      // assign a unique color to each label
-      //
-      data.labels.forEach((label) => {
-        if (!(label in colorMapping)) {
-          colorMapping[label] = colorArray[colorIndex % colorArray.length];
-          colorIndex++;
-        }
-      })
-
-      // set the default colors to the header colors
-      //
-      defaultColors = (label) => colorMapping[label];
-
-      // set plot colors value
-      //
-      this.data.colors = this.data.colors.slice(0, Object.keys(colorMapping).length);
-    }
     
     // iterate over each value in the data and create a trace for each label
     //
@@ -430,7 +330,7 @@ class Plot extends HTMLElement {
       
       // get the label of the index
       //
-      let label = data.labels[i]
+      let label = data.labels[i].toLowerCase();
 
       // if the label is not a already created
       //
@@ -444,7 +344,7 @@ class Plot extends HTMLElement {
           name: label,
           marker: { 
             size: 2, 
-            color: defaultColors(label)
+            color: colorMappings[label.toLowerCase()]
           },
           hoverinfo: 'none'
         }
@@ -498,7 +398,7 @@ class Plot extends HTMLElement {
     Plotly.newPlot(plotDiv, this.plotData, this.layout, this.config);
   }
 
-  plot(data) {
+  plot(data, colorMappings) {
     /*
     method: Plot::plot
 
@@ -529,11 +429,12 @@ class Plot extends HTMLElement {
 
     // Prepare plot data by creating a trace for each label
     //
-    this.plotData = this.createTraces(this.data);
+    this.plotData = this.createTraces(this.data, colorMappings);
 
     // check if the layout data is null, if so, use the default layout values
     //
     if (this.data.layout != null) {
+
       // get the axis values from the data
       //
       const xaxis = this.data.layout.xaxis;
@@ -591,15 +492,24 @@ class Plot extends HTMLElement {
     EventBus.dispatchEvent(new CustomEvent('stateChange'));
   }
 
-  decision_surface(data) {
+  decision_surface(data, labels) {
     /*
     method: Plot::decision_surface
 
     args:
-    None
+     data (Object): an object containing the decision surface data in the 
+                    following format:
+
+                      {
+                        z: [[0, 0, 0], [0, 0, 1], [1, 1, 1]],
+                        x: [0, 1, 2],
+                        y: [0, 1, 2]
+                      }
+     labels (Array): an array of Label objects that contain the name and color
+                     of each label in the label manager
 
     return:
-    None
+     None
 
     description:
      This method creates a decision surface plot using a contour plot given Z data.
@@ -612,59 +522,50 @@ class Plot extends HTMLElement {
     // Get the plot div element
     //
     const plotDiv = this.querySelector('#plot');
-
-    // Retrieve colors from scatter plots
+      
+    // get all of the unique labels in the data
     //
-    let colorScale = []
+    let uniqLabels = Array.from(new Set(data.z.flat()));
 
-    // if the plot has data points, use the colors from the data points
-    // to create a decision surface
+    // create a color scale for the contour plot
+    // iterate over each label in the label manager
+    // if the label is in the data, add its color
+    // to the scale
     //
-    if (this.plotData.length > 0) {
-      for (let i = 0; i < this.plotData.length; i++) {
-
-        // Get the color of the marker and convert it to RGBA to make it transparent
-        // then add to the custom color scale
-        //
-        let color = hexToRGBA(this.plotData[i].marker.color, 0.2);
-        colorScale.push(color);
+    let colorScale = [];
+    labels.forEach((label) => {
+      if (uniqLabels.includes(label.mapping)) {
+          colorScale.push(applyAlpha(label.color, 0.2));
       }
-    }
+    });
 
-    // if the plot does not have data points, use default colors to 
-    // create the decision surface
-    //
-    else {
-      
-      // get all of the unique labels in the data
-      //
-      const uniqLabels = new Set(data.z.flat());
-      
-      // get plotly default colors
-      //
-      const category10 = Plotly.d3.scale.category10();
-      
-      // iterate over each unique label and create a color for it
-      //
-      for (let i = 0; i < uniqLabels.size; i++) {
-        
-        // Get a default color and convert it to RGBA to make it transparent
-        // then add to the custom color scale
-        //
-        let color = hexToRGBA(category10(i), 0.2);
-        colorScale.push(color);
-      }
-    }
-
-    // Ensure colorScale has at least two colors
+    // ensure colorScale has at least two colors
+    // duplicate the single color to create a gradient
     //
     if (colorScale.length === 1) {
-      colorScale.push(colorScale[0]); // Duplicate the single color to create a gradient
+      colorScale.push(colorScale[0]); 
     }
+
+    // recreate the color scale to be in the format of:
+    //  [[0, <color>], [0.25, <color], ..., [1, <color>]]
+    // normalize the index of each color in the scale 
+    // to be between 0 and 1 as this is required by plotly
+    //
+    // i am not entirely sure how this works as the normalized
+    // colors do not match up to the colors and mappings of the
+    // label manager. but it does work
+    //
+    colorScale = colorScale.map((color, index) => {
+      return [index / (colorScale.length - 1), color]
+    });
 
     // Data for the contour plot
     //
     const contourData = {
+
+      // convert the z values to numerics based on the
+      // mapping
+      //
       z: data.z,
       x: data.x,
       y: data.y,
@@ -678,7 +579,7 @@ class Plot extends HTMLElement {
       name: 'Decision Surface',
       showscale: false,
       hoverinfo: 'none',
-      colorscale: colorScale.map((color, index) => [index / (colorScale.length - 1), color]),
+      colorscale: colorScale,
       showlegend: true
     };
 
@@ -729,6 +630,26 @@ class Plot extends HTMLElement {
   }
 
   traces_to_data(traces=null) {
+    /*
+    method: Plot::traces_to_data
+
+    args:
+     traces (Array): an array of traces to convert to data. 
+                     if null, use the current plot data [default = null]
+
+    return:
+     Object: an object containing the data from the plot with 
+             the following format:
+              {
+                labels: ['label1', 'label1', 'label2', ...],
+                x: [1, 2, 3, 4, 5, 6, ...],
+                y: [1, 2, 3, 4, 5, 6, ...]
+              }
+    
+    description: 
+     this method converts the plot data to a raw data object
+     that can be used to save the data to a file or send it to the backend.
+    */
 
     // if no traces are provided, use the current plot data
     //
@@ -768,6 +689,8 @@ class Plot extends HTMLElement {
     //
     return this.data;
   }
+  //
+  // end of method
 
   delete_class(label) {
     /*
@@ -805,30 +728,106 @@ class Plot extends HTMLElement {
 //
 // end of class
 
-function hexToRGBA(hex, alpha) {
-  // Ensure the input hex starts with #
-  if (!hex.startsWith("#")) {
-      throw new Error("Invalid hex color format. It must start with #.");
-  }
+function applyAlpha(hex, alpha) {
+  /*
+  function: applyAlpha
 
-  // Clamp alpha between 0 and 1
-  alpha = Math.min(1, Math.max(0, alpha));
+  args:
+   hex (String): the hex color code to apply the alpha to
+    alpha (Number): the alpha value to apply to the hex color code
+                    must be between 0 and 1 (0 = transparent, 1 = opaque)
 
-  // Expand shorthand hex (e.g., #RGB to #RRGGBB)
-  if (hex.length === 4) {
+  return:
+   String: the hex color code with the alpha value applied
+
+  description:
+   this function takes a hex color code and an alpha value and returns the 
+   hex color code with the alpha value applied.
+  */
+
+  try {
+
+    // Ensure the input HEX is valid
+    //
+    if (!/^#([0-9A-F]{3}|[0-9A-F]{6})$/i.test(hex)) {
+      throw new TypeError("Invalid HEX color code");
+    }
+
+    // Expand shorthand HEX code (#RGB -> #RRGGBB)
+    //
+    if (hex.length === 4) {
       hex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+    }
+
+    // Ensure alpha is between 0 and 1
+    //
+    if (alpha < 0 || alpha > 1) {
+      throw new Error("Alpha value must be between 0 and 1");
+    }
+
+    // Convert alpha to a two-digit HEX value
+    //
+    const alphaHex = Math.round(alpha * 255).toString(16).padStart(2, "0");
+
+    // Return the HEX color with the alpha channel appended
+    //
+    return `${hex}${alphaHex}`;
   }
 
-  // Convert hex to RGB
-  const num = parseInt(hex.slice(1), 16);
-  const r = (num >> 16) & 255;
-  const g = (num >> 8) & 255;
-  const b = num & 255;
-
-  // Return RGBA string
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  // catch a type error if the hex color code is not valid
+  // most likely a color name was passed in
+  // so convert the color name to a hex color code
+  //
+  catch (TypeError) {
+    return applyAlpha(colorNameToHex(hex), alpha);
+  }
 }
 
-// Register the custom element
+function colorNameToHex(colorName) {
+  /*
+  function: colorNameToHex
+
+  args:
+   colorName (String): the name of the color to convert to a hex color code
+
+  return:
+   String: the hex color code of the color name
+
+  description:
+   this function takes a color name and returns the hex color code of the 
+   color name. uses HTML and CSS exploit to convert the color name to a 
+   hex color code.
+  */
+
+  // create a temporary element
+  //
+  const tempElement = document.createElement('div');
+  tempElement.style.color = colorName;
+  document.body.appendChild(tempElement);
+
+  // get the computed color value
+  //
+  const computedColor = getComputedStyle(tempElement).color;
+
+  // remove the temporary element
+  //
+  document.body.removeChild(tempElement);
+
+  // convert RGB to Hex
+  //
+  const rgb = computedColor.match(/\d+/g);
+  if (rgb.length === 3) {
+      const r = parseInt(rgb[0]).toString(16).padStart(2, '0');
+      const g = parseInt(rgb[1]).toString(16).padStart(2, '0');
+      const b = parseInt(rgb[2]).toString(16).padStart(2, '0');
+      return `#${r}${g}${b}`;
+  }
+
+  // return null if the conversion fails
+  //
+  return null;
+}
+
+// register the custom element
 //
 customElements.define('plot-card', Plot); 

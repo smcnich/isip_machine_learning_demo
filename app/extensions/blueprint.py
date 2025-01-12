@@ -253,6 +253,10 @@ def train():
                 'y': y.tolist(), 
                 'z': z.tolist()
             },
+            # flip the mapping label to it is {label name : numeric value} as 
+            # opposed to {numeric value : label name} because that is easier
+            # to work with on the front end
+            'mapping_label': {value: key for key, value in data.mapping_label.items()},
             'metrics': metrics
         }
 

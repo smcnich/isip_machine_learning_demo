@@ -59,12 +59,13 @@ class Toolbar_Button extends HTMLElement {
         // Check the label to determine the action
         //
         switch (label) {
+
           // Clear all case
           //
           case 'Clear All':
-            this.clearAll();
-            this.processLog.clearAll();
+            EventBus.dispatchEvent(new CustomEvent('clearAll'));
             break;
+
           // Clear process log case
           //
           case 'Clear Process Log':
@@ -76,36 +77,6 @@ class Toolbar_Button extends HTMLElement {
         }
       });
     }
-
-    // Method to clear data from multiple plots
-    //
-    clearAll() {
-      // Dispatch a custom event to clear the 'eval' plot
-      //
-      window.dispatchEvent(new CustomEvent('clearPlot', {
-        detail: {
-          type: 'all', // Indicate that it's a "clear all" action
-          plotId: 'eval' // Specify the plot to clear ('eval' plot)
-        }
-      }));
-
-      // Dispatch a custom event to clear the 'train' plot
-      //
-      window.dispatchEvent(new CustomEvent('clearPlot', {
-        detail: {
-          type: 'all', // Indicate that it's a "clear all" action
-          plotId: 'train' // Specify the plot to clear ('train' plot)
-        }
-      }));
-
-      // NEED TO FIX: CANNOT EMIT FROM FRONTEND YET
-      try {
-        this.socket.emit('progressbar', {'trainProgress': 0, 'evalProgress': 0})
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
 }
 
 class Toolbar_CheckboxButton extends HTMLElement {
@@ -518,6 +489,7 @@ class Toolbar_OpenFileButton extends HTMLElement {
   // Method to add a click listener to the toolbar button
   //
   addClickListener() {
+
     // Get the buttom element from the shadow DOM
     //
     const button = this.shadowRoot.querySelector('.toolbar-openfile-button');
@@ -529,32 +501,68 @@ class Toolbar_OpenFileButton extends HTMLElement {
     // Add an event listener to handle the button click event
     //
     button.addEventListener('click', () => {
-      // Check the label to determine the action
-      //
-      switch (label) {
 
-        case 'Load Train Data':
-        case 'Load Eval Data':
-          this.plotId = this.getAttribute('plotId');
-          this.fileInput.click();
-          break;
-        case 'Load Parameters':
-          this.fileInput.click();
-          break;
-        case 'Load Model':
-          this.fileInput.click();
-        default:
-          break;
-      }
+      this.fileInput.click(); // Trigger the file input click
+
+      // // Check the label to determine the action
+      // //
+      // switch (label) {
+
+      //   case 'Load Train Data':
+      //     this.type = 'data';
+      //     this.plotID = 'train';
+      //     this.fileInput.click();
+      //     break;
+        
+      //   case 'Load Eval Data':
+      //     this.type = 'data';
+      //     this.plotID = 'eval';
+      //     this.fileInput.click();
+      //     break;
+
+      //   case 'Load Parameters':
+      //     this.type = 'params';
+      //     this.plotID = null;
+      //     this.fileInput.click();
+      //     break;
+
+      //   case 'Load Model':
+      //     this.type = 'model';
+      //     this.plotID = null;
+      //     this.fileInput.click();
+      //     break;
+          
+      //   default:
+      //     break;
+      //}
     });
 
     // Add the file input change listener and pass the label explicitly
     //
     this.fileInput.addEventListener('change', (event) => {
 
-      if (label == 'Load Train Data' || label == 'Load Eval Data') {
-        this.handleFileSelect(event); // Pass label to handleFileSelect
+      if (label == 'Load Train Data') {
+
+        const formData = new FormData();
+        formData.append('file', event.target.files[0]);
+        formData.append('plotID', 'train');
+
+        EventBus.dispatchEvent(new CustomEvent('loadData', {
+          detail: formData
+        }));
       }
+
+      else if (label == 'Load Eval Data') {
+
+        const formData = new FormData();
+        formData.append('file', event.target.files[0]);
+        formData.append('plotID', 'eval');
+
+        EventBus.dispatchEvent(new CustomEvent('loadData', {
+          detail: formData
+        }));
+      }
+
       else if (label == 'Load Parameters') {
         this.handleParamFileSelect(event);
       }
@@ -575,77 +583,6 @@ class Toolbar_OpenFileButton extends HTMLElement {
       }
     });
 
-  }
-
-  handleModelFileSelect(event) {
-
-    // if the file is valid
-    //
-    if (file) {
-
-      try {
-        // create a new form
-        //
-        const model = new FormData();
-
-        // add the model and userID to the form
-        //
-        model.append('model', file);
-        model.append('userID', userID);
-
-        // create the url for fetch
-        //
-        const url = `${baseURL}api/load_model`;
-
-        // create the request for fetch
-        //
-        const request = {
-          method: 'POST',
-          body: model
-        };
-
-        // fetch the url and request to backend
-        //
-        fetch(url, request)
-
-        // check the response of the fetch
-        //
-        .then(response => {
-          if (response.ok) {
-
-            console.log('Model uploaded successfully');
-
-            window.dispatchEvent(new CustomEvent('loadModel', {
-              detail: {
-                flag: true
-              }
-            }));
-
-            window.dispatchEvent (new CustomEvent('plotChange', {
-              detail: {
-                plotId: 'train',
-                status: true
-              }
-            }));
-
-            window.dispatchEvent (new CustomEvent('plotChange', {
-              detail: {
-                plotId: 'eval',
-                status: true
-              }
-            }));           
-          }
-        }) 
-
-      } catch (error) {
-        console.log('Error uploading model:', error);
-      }
-
-      // reset the file input
-      //
-      event.target.value = '';
-
-    }
   }
 
   handleParamFileSelect(event) {
@@ -720,114 +657,6 @@ class Toolbar_OpenFileButton extends HTMLElement {
       event.target.value = '';
     }
   }  
-
-  handleFileSelect(event) {
-    /*
-    method: Toolbar_OpenFileButton::handleFileSelect
-    
-    args:
-     event: the event listener event
-    
-     returns:
-     None
-    
-     description:
-     This method is called when a file is selected. It reads the file and
-     dispatches a custom event with the loaded file data.
-    */
-
-    // Get the selected file
-    //
-    const file = event.target.files[0];
-    
-    // if the file is valid
-    //
-    if (file) {
-    
-      // create a filereader object
-      //
-      const reader = new FileReader();
-    
-      const start = Date.now()
-
-      // when the reader is called (i.e. when the file is read)
-      //
-      reader.onload = (e) => {
-    
-        // get the text from the file
-        //
-        const text = e.target.result;
-
-        // get the colors from the file
-        //
-        const colors = (text.match(/# colors:\s*\[(.*?)\]/) || [])[1]?.split(',').map(color => color.trim()) || null;
-
-        // Extract the limits from the comment
-        //
-        const commentLine = text.split('\n').find(line => line.startsWith('# limits:'));
-        const limits = commentLine ? commentLine.split(':')[1].trim().slice(1, -1).split(',').map(Number) : [];
-
-        // Assign to xaxis and yaxis
-        //
-        const xaxis = limits.slice(0, 2);
-        const yaxis = limits.slice(2);
-
-        // split the text into rows, filter out comments, and split the rows into columns
-        //
-        const rows = text.split("\n")
-                     .filter(row => !row.trim().startsWith("#"))             
-                     .map(row => row.split(","));
-    
-        // Iterate over the rows and group data by labels
-        //
-        let x = [];
-        let y = [];
-        let labels = [];
-        rows.forEach(row => {
-
-          // make sure the row is not empty
-          //
-          if (row[0] != '') {
-    
-            // get the label, x value, and y value from the row
-            //
-            labels.push(row[0]);
-            x.push(parseFloat(row[1]));
-            y.push(parseFloat(row[2]));
-          }
-        });
-    
-        // Dispatch a custom event with the loaded file data
-        // the Plot.js component will be listening for this event.
-        // When the event is dispatched, the Plot.js component will plot the data.
-        //
-        window.dispatchEvent(new CustomEvent('fileLoaded', {
-          detail: {
-            plotId: this.plotId,
-            data: {
-              labels: labels,
-              x: x,
-              y: y,
-              colors: colors,
-              start: start,
-              layout: {
-                xaxis: xaxis,
-                yaxis: yaxis
-              }
-            },
-          }
-        }));
-      };
-    
-      // Read the file as text, this will trigger the onload event
-      //
-      reader.readAsText(file);
-
-      // reset the file input
-      //
-      event.target.value = '';
-    }
-  }
 }
 
 class Toolbar_SaveFileButton extends HTMLElement {
@@ -873,6 +702,7 @@ class Toolbar_SaveFileButton extends HTMLElement {
     // Method to add a click listener to the toolbar button
     //
     addClickListener() {
+
       // Get the button element from the shadow DOM
       //
       const button = this.shadowRoot.querySelector('.toolbar-openfile-button');
@@ -887,16 +717,31 @@ class Toolbar_SaveFileButton extends HTMLElement {
         // Check the label to determine the action
         //
         switch (label) {
+
           case 'Save Train As...':
-          case 'Save Eval As...':
-            this.plotId = this.getAttribute('plotId');
-            this.openSaveFileDialog(); // Call openSaveFileDialog on button click
+            EventBus.dispatchEvent(new CustomEvent('saveData', {
+              detail: {
+                'plotID': 'train'
+              }
+            }));
             break;
+
+          case 'Save Eval As...':
+            EventBus.dispatchEvent(new CustomEvent('saveData', {
+              detail: {
+                'plotID': 'eval'
+              }
+            }));
+            break;
+
           case 'Save Parameters As...':
             this.openSaveParamsDialog();
             break;
+
           case 'Save Model As...':
             this.openSaveModel();
+            break;
+
           default:
             break;
         }
@@ -972,107 +817,6 @@ class Toolbar_SaveFileButton extends HTMLElement {
         console.error('Error saving file:', err);
       }
 
-    }
-
-    async openSaveFileDialog() {
-      try {
-
-        // create an event to get the data from the Plot.js component
-        //
-        window.dispatchEvent(new CustomEvent('getData', {
-          detail: {
-            ref: this,
-            plotId: this.plotId,
-          }
-        }));
-
-        // get the xaxis and yaxis ranges
-        //
-        const xaxis = this.data.layout.xaxis;
-        const yaxis = this.data.layout.yaxis;
-
-        // combine the ranges into one array
-        //
-        const limits = [...xaxis, ...yaxis];
-
-        // write the csv headers
-        //
-        let x, y, label;
-        let uniqueLabels = Array.from(new Set(this.data.labels));
-        let text = `# filename: /Downloads/imld_${this.plotId}.csv\n` +
-                    `# classes: [${uniqueLabels}]\n` +
-                    `# colors: [${this.data.colors}]\n` +
-                    `# limits: [${limits}]\n` +
-                    `#\n`;
-
-        // write the csv row for each sample
-        //
-        for (let i = 0; i < this.data.labels.length; i++) {
-          label = this.data.labels[i];
-          x = this.data.x[i];
-          y = this.data.y[i];
-          
-          text += `${label}, ${x}, ${y}\n`;
-        }
-
-        /*
-        raw browser JavaScript cannot write files to the user's computer
-        due to security restrictions. additional libraries would need to
-        be used. below is a roundabout way to save
-        files to the users computer using a Blob object and a dummy link.
-        unfortunately, due to the restrictions the user will not be able
-        to choose the file name and where to save the file. the file will
-        be saved to the default download location set by the browser. the
-        below is taken from the following stackoverflow post:
-
-        https://stackoverflow.com/questions/2048026/open-file-dialog-box-in-javascript
-        */
-
-        // create an object that will hold the link to the CSV file
-        //
-        let textFile;
-
-        // create a Blob object from the text that will be stored at
-        // the link
-        //
-        let blob = new Blob([text], {type: 'text/csv'});
-
-        // If we are replacing a previously generated file we need to
-        // manually revoke the object URL to avoid memory leaks.
-        //
-        if (textFile !== null) {
-          window.URL.revokeObjectURL(textFile);
-        }
-
-        // create a download URL for the blob (csv file)
-        //
-        textFile = window.URL.createObjectURL(blob);
-
-        // create a link element and add a download attribute
-        // connect the href to the download URL
-        // append the link to the document body
-        // this link is never displayed on the page.
-        // it acts as a dummy link that starts a download
-        //
-        var link = document.createElement('a');
-        link.setAttribute('download', `imld_${this.plotId}.csv`);
-        link.href = textFile;
-        document.body.appendChild(link);
-
-        // wait for the link to be added to the document
-        // then simulate a click event on the link
-        // the dummy link created above will start the download
-        // when a click event is dispatched
-        //
-        window.requestAnimationFrame(function () {
-          var event = new MouseEvent('click');
-          link.dispatchEvent(event);
-          document.body.removeChild(link);
-        }); 
-      } 
-      catch (err) {
-        console.error('Error saving file:', err);
-      }
     }
 
     async openSaveModel() {
