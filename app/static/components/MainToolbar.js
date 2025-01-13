@@ -438,8 +438,8 @@ class MainToolbar extends HTMLElement {
           <div class="dropdown">
             <toolbar-dropdown-clear label="Clear Train" plotId="train"></toolbar-dropdown-clear>
             <toolbar-dropdown-clear label="Clear Eval" plotId="eval"></toolbar-dropdown-clear>
-            <toolbar-button label="Clear Process Log"></toolbar-button>
-            <toolbar-button label="Clear All"></toolbar-button>
+            <toolbar-button label="Clear Process Log" clear="processlog"></toolbar-button>
+            <toolbar-button label="Clear All" clear="all" plotId="all"></toolbar-button>
           </div>
         </div>
 

@@ -1042,11 +1042,32 @@ EventBus.addEventListener('clearPlot', (event) => {
     const plotID = event.detail.plotID;
     const type = event.detail.type;
 
+    console.log(plotID, type);
+
     // get the plot that is being cleared
     //
     let plot;
-    if (plotID == 'train') { plot = trainPlot; }
-    else if (plotID == 'eval') { plot = evalPlot; }
+    if (plotID === 'train') { plot = trainPlot; }
+    else if (plotID === 'eval') { plot = evalPlot; }
+    else if (plotID === 'all') {
+
+        // clear the necessary components
+        //
+        evalPlot.plot_empty();
+        trainPlot.plot_empty();
+        processLog.clear();
+
+        // clear the label manager and update the class list
+        // on the main toolbar
+        //
+        labelManager.clear();
+        mainToolbar.updateClassList(labelManager.getLabels());
+
+        // reset the progress bars
+        //
+        algoTool.set_train_progress(0);
+        algoTool.set_eval_progress(0);
+    }
 
     // clear the plot based on the type
     //
@@ -1064,42 +1085,16 @@ EventBus.addEventListener('clearPlot', (event) => {
             plot.clear_data();
             break;
 
+        case 'processlog': 
+            processLog.clear();
+            break;
+
         default:
             break;
     }
 
-});
+    EventBus.dispatchEvent(new CustomEvent('stateChange'));
 
-EventBus.addEventListener('clearAll', () => {
-    /*
-    eventListener: clearAll
-
-    dispatcher: ToolbarComponents::Toolbar_Button
-
-    args:
-     None
-
-    description:
-     clears all information from the application, resulting in a 
-     clean slate.
-    */
-
-    // clear the necessary components
-    //
-    evalPlot.plot_empty();
-    trainPlot.plot_empty();
-    processLog.clear();
-
-    // clear the label manager and update the class list
-    // on the main toolbar
-    //
-    labelManager.clear();
-    mainToolbar.updateClassList(labelManager.getLabels());
-
-    // reset the progress bars
-    //
-    algoTool.set_train_progress(0);
-    algoTool.set_eval_progress(0);
 });
 
 EventBus.addEventListener('suspend', () => {
