@@ -164,10 +164,10 @@ class Plot extends HTMLElement {
         },
         legend: {
           x: 0.5,
-          y: -0.2,
+          y: -0.3,
           xanchor: 'center',
           yanchor: 'bottom',
-          orientation: 'h'
+          orientation: 'h',
         },
         margin: { 
           t: 10,
@@ -181,25 +181,6 @@ class Plot extends HTMLElement {
 
       this.plot_empty();
     })
-
-    window.addEventListener('clearPlot', (event) => {
-    
-      // empty the plot when the clear buttons are selected
-      //
-      if ((event.detail.plotId == this.plotId) || (event.detail.plotId == null)) {
-        
-        // clear entire plot if select data or all
-        //
-        if ((event.detail.type == 'all') || event.detail.type == 'data'){
-          this.clear_plot()
-        }
-        // clear just decision surface if select results
-        if (event.detail.type == 'results'){
-          this.clear_decision_surface();
-        }
-      }
-    
-    });
 
     // Event listener for resizing the plot
     //
@@ -444,6 +425,38 @@ class Plot extends HTMLElement {
   }
   //
   // end of method
+
+  clear_data() {
+    /*
+    method: Plot::clear_data
+
+    args:
+     None
+
+    return:
+     None
+
+    description:
+     this method clears the data from the plot by removing all traces from the plot.
+     does not remove the decision surface
+    */
+
+    // Get the plot div element
+    //
+    const plotDiv = this.querySelector('#plot');
+
+    // remove the contour data from the plot data
+    //
+    this.plotData = this.plotData.filter(trace => trace.type !== 'scattergl');
+
+    // update the plot to remove the decision surface
+    //
+    Plotly.react(plotDiv, this.plotData, this.layout, this.config); 
+    
+    // dispatch an event to the algoTool to update the plot status
+    //
+    EventBus.dispatchEvent(new CustomEvent('stateChange'));
+  }
 
   clear_plot() {
     /*

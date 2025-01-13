@@ -1022,6 +1022,54 @@ EventBus.addEventListener('stateChange', () => {
 //
 // end of event listener
 
+EventBus.addEventListener('clearPlot', (event) => {
+    /*
+    eventListener: clearPlot
+
+    dispatcher: ToolbarComponents::Toolbar_DropdownClear
+
+    args:
+     event.detail.type: the type of clear to do (all, results, or data)
+     event.detail.plotID: the ID of the plot to clear
+
+    description:
+     this event listener is triggered when the user clicks one of the clear
+     buttons in the clear dropdown for a specific plot
+    */
+
+    // get the plotID from the event
+    //
+    const plotID = event.detail.plotID;
+    const type = event.detail.type;
+
+    // get the plot that is being cleared
+    //
+    let plot;
+    if (plotID == 'train') { plot = trainPlot; }
+    else if (plotID == 'eval') { plot = evalPlot; }
+
+    // clear the plot based on the type
+    //
+    switch (type) {
+
+        case 'all':
+            plot.plot_empty();
+            break;
+        
+        case 'results':
+            plot.clear_decision_surface();
+            break;
+
+        case 'data':
+            plot.clear_data();
+            break;
+
+        default:
+            break;
+    }
+
+});
+
 EventBus.addEventListener('clearAll', () => {
     /*
     eventListener: clearAll

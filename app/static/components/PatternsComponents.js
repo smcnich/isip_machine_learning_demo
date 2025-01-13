@@ -305,8 +305,6 @@ class DrawPointsCheckBox extends HTMLElement {
   
     handleDocumentClick(event) {
       const button = this.shadowRoot.querySelector('#checkboxButton');
-
-      console.log('component clicked')
       
       // Check if the clicked target is outside of the button
       if (this.isOpen && !button.contains(event.target)) {

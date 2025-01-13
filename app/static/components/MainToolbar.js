@@ -276,7 +276,6 @@ class MainToolbar extends HTMLElement {
     // get the draw points button
     //
     const drawPointBtn = this.shadowRoot.querySelector('draw-points-checkbox');
-    console.log(drawPointBtn)
     drawPointBtn.clearClassOptions();
 
     // get the add class button on the dropdown

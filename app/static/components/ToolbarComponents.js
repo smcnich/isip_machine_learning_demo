@@ -303,10 +303,10 @@ class Toolbar_DropdownClear extends HTMLElement {
           // is listening for. the plot component will clear the plot
           // based on the clear attribute.
           //
-          window.dispatchEvent(new CustomEvent('clearPlot', {
+          EventBus.dispatchEvent(new CustomEvent('clearPlot', {
             detail: {
               type: clear,
-              plotId: this.plotId
+              plotID: this.plotId
             }
           }));
         });
