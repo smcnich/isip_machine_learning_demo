@@ -24,6 +24,12 @@ export class LabelManager {
         return this.labels;
     }
 
+    getLabel(labelName) {
+        return this.labels.find((label) => {
+            return label.name.toLowerCase() === labelName.toLowerCase();
+        });
+    }
+
     getMappings() {
         return this.mappings;
     }

@@ -218,6 +218,7 @@ class MainToolbar extends HTMLElement {
     const nestedDropdownSelectors = [
       'toolbar-dropdown-settings',  // This can be expanded with more dropdown types
       'data-button',
+      'class-button'
     ];
 
     // Define a list of nested popup selectors
@@ -271,6 +272,12 @@ class MainToolbar extends HTMLElement {
     // get the class dropdown object
     //
     const classDropdown = this.shadowRoot.getElementById('class-dropdown');
+    
+    // get the draw points button
+    //
+    const drawPointBtn = this.shadowRoot.querySelector('draw-points-checkbox');
+    console.log(drawPointBtn)
+    drawPointBtn.clearClassOptions();
 
     // get the add class button on the dropdown
     // all class buttons are inserted before this button
@@ -299,6 +306,10 @@ class MainToolbar extends HTMLElement {
       // Insert the button as the first child of classDropdown
       //
       classDropdown.insertBefore(button, addClassBtn);
+
+      // add the class button to the draw points button
+      //
+      drawPointBtn.addClassOption(label.name);
     })
   }
 
@@ -463,7 +474,7 @@ class MainToolbar extends HTMLElement {
         <div class="menu">
           <button class="menubutton">Patterns</button>
           <div class="dropdown">
-            <toolbar-checkbox-button label="Draw Points"></toolbar-checkbox-button>
+            <draw-points-checkbox label="Draw Points"></draw-points-checkbox>
             <toolbar-checkbox-button label="Draw Gaussian"></toolbar-checkbox-button>
           </div>
         </div>

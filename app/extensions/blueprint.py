@@ -83,8 +83,8 @@ def get_data_params():
         mimetype='application/json'
     )
 
-@main.route('/api/get_model/', methods=['POST'])
-def get_model():
+@main.route('/api/save_model/', methods=['POST'])
+def save_model():
 
     # get the data from the request
     #
@@ -97,6 +97,8 @@ def get_model():
     # retrieve model with corresponding user id key
     #
     model = model_cache[userID]['model']
+
+    model.mapping_label = data['label_mappings']
 
     # Serialize the model using pickle and store it in a BytesIO stream
     #
@@ -140,6 +142,11 @@ def load_model():
     #
     data = imld.create_data(x, y, [])
 
+    # set the mapping label
+    # make sure to flip the mapping label so it is {numeric : name}
+    #
+    data.mapping_label = {value: key for key, value in model.mapping_label.items()}
+
     # get the x y and z values from the decision surface
     # x and y will be 1D and z will be 2D
     #
@@ -148,9 +155,12 @@ def load_model():
     # format the response
     #
     response = {
-        'x': x.tolist(), 
-        'y': y.tolist(), 
-        'z': z.tolist()
+        'decision_surface': {
+            'x': x.tolist(), 
+            'y': y.tolist(), 
+            'z': z.tolist()
+        },
+        'mapping_label': model.mapping_label
     }
 
     # return the jsonified response

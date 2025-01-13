@@ -182,20 +182,6 @@ class Plot extends HTMLElement {
       this.plot_empty();
     })
 
-    // Add event listener to plot data when a file is loaded
-    //
-    window.addEventListener('fileLoaded', (event) => {
-      if(event.detail.plotId == this.plotId) {
-        this.plot(event.detail.data);
-      } else {
-        return;
-      }
-
-      const end = Date.now()
-      const start = event.detail.data.start
-      console.log(`Load Time: ${end - start} ms`)
-    });
-
     window.addEventListener('clearPlot', (event) => {
     
       // empty the plot when the clear buttons are selected
@@ -723,6 +709,112 @@ class Plot extends HTMLElement {
   }
   //
   // end of method
+
+  enable_draw(type, label, numPoints=null, cov=null) {
+    /*
+    method: Plot::enable_draw
+
+    args:
+     type (String): the type of draw to enable. can be 'points' or 'gaussian'
+     className (String): the name of the class to draw
+     numPoints (Number): the number of points to draw. only used if type is 
+                        'random' or 'gaussian' [default = null]
+     cov (Array): the covariance matrix to use for the gaussian distribution. 
+                  only used if type is 'gaussian' [default = null]
+
+    return:
+     None
+
+    description:
+     this method enables drawing on the plot. it sets up the event listeners 
+     for drawing points on the plot.
+    */
+
+    // Get the plot div element
+    //
+    const plotDiv = this.querySelector('#plot');
+
+    // Helper function to get plot coordinates from mouse event
+    function getMousePoint(event) {
+      const bbox = plotDiv.getBoundingClientRect();
+      return {
+        x: event.clientX - bbox.left,
+        y: event.clientY - bbox.top
+      };
+    }
+
+    // Function to update the existing trace dynamically
+    function updateExistingTrace(idx) {
+      const update = {
+        x: [xCoords],
+        y: [yCoords]
+      };
+
+      // Update the trace at the specified index
+      //
+      Plotly.extendTraces(plotDiv, update, [idx]);
+    }
+
+
+    // try to find the index of the proper class trace
+    //
+    let traceIdx = this.plotData.forEach((trace, idx) => {
+      if (trace.name.toLowerCase() === label.name.toLowerCase()) {
+        return idx;
+      }
+    });
+
+    // if the trace does not exist, create a new trace
+    //
+    if (!traceIdx) {
+      this.plotData.push({
+        x: [],
+        y: [],
+        mode: 'markers',
+        type: 'scattergl',
+        name: label.name,
+        color: label.color,
+        marker: { size: 2 },
+        hoverinfo: 'none'
+      });
+
+      // Set the index to the last trace in the plot data
+      //
+      traceIdx = this.plotData.length - 1;
+    }
+
+
+
+    // Variables to track the drawing state and coordinates
+    let isDrawing = false;
+    let xCoords = [];
+    let yCoords = [];
+
+    // Mouse event handlers
+    plotDiv.onmousedown = (event) => {
+      isDrawing = true;
+      const mousePoint = getMousePoint(event);
+      xCoords.push(mousePoint.x);
+      yCoords.push(mousePoint.y);
+    };
+
+    plotDiv.onmousemove = (event) => {
+      if (isDrawing) {
+        const mousePoint = getMousePoint(event);
+        xCoords.push(mousePoint.x);
+        yCoords.push(mousePoint.y);
+        console.log(this.plotData);
+        updateExistingTrace(traceIdx);
+      }
+    };
+
+    plotDiv.onmouseup = () => {
+      isDrawing = false;
+      xCoords = [];
+      yCoords = [];
+    };
+
+  }
 
 }
 //

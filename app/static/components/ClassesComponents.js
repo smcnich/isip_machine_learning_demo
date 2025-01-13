@@ -82,7 +82,6 @@ class AddClassPopup extends HTMLElement {
         const colorInput = this.shadowRoot.getElementById('class-color');
         colorInput.value = colorPicker.color.hexString;
         colorPicker.on('color:change', (color) => {
-            console.log(color.hexString)
             colorInput.value = color.hexString;
         });
 
@@ -156,6 +155,8 @@ class AddClassPopup extends HTMLElement {
                     'color': formData.get('class-color')
                 }
             }))
+
+            this.closePopup();
         };
     }
     //

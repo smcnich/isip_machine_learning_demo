@@ -3,7 +3,7 @@
 //
 export const EventBus = new EventTarget();
 
-import { Label, LabelManager } from './ClassManager.js';
+import { Label, LabelManager } from './LabelManager.js';
 const labelManager = new LabelManager();
 
 // URL definitions
@@ -12,6 +12,7 @@ const TRAIN_URL = `${baseURL}api/train/`;
 const EVAL_URL = `${baseURL}api/eval/`;
 const LOADMODEL_URL = `${baseURL}api/load_model/`;
 const DATAGEN_URL = `${baseURL}api/data_gen/`;
+const SAVEMODEL_URL = `${baseURL}api/save_model`;
 
 // get the component instances from the HTML document
 //
@@ -249,6 +250,94 @@ EventBus.addEventListener('eval', (event) => {
     });
 });
 
+EventBus.addEventListener('saveModel', () => {
+
+
+    EventBus.dispatchEvent(new CustomEvent('suspend'));
+
+    try {        
+
+        // fetch for a response
+        //
+        fetch(SAVEMODEL_URL, {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+            'userID': userID,
+            'label_mappings': labelManager.getMappings()
+            })
+        })
+
+        // parse the response
+        //
+        .then((response) => {
+
+            // if the response is ok, return the json
+            //
+            if (response.ok) {
+                return response.blob();
+            }
+
+            // otherwise, throw an error
+            //
+            else {
+                EventBus.dispatchEvent(new CustomEvent('continue'));
+                processLog.writePlain('Data could not be evaluated due to a server error. Please try again.');
+                throw new Error('Network response was not ok.');
+            }
+
+        })
+
+            // if the response is ok, return the json
+            //
+        .then((blob) => {
+
+            // If we are replacing a previously generated file we need to
+            // manually revoke the object URL to avoid memory leaks.
+            //
+            if (textFile !== null) {
+                window.URL.revokeObjectURL(textFile);
+            }
+
+            // create a download URL for the blob (csv file)
+            //
+            textFile = window.URL.createObjectURL(blob);          
+
+            // create a link element and add a download attribute
+            // connect the href to the download URL
+            // append the link to the document body
+            // this link is never displayed on the page.
+            // it acts as a dummy link that starts a download
+            //
+            var link = document.createElement('a');
+            link.setAttribute('download', `model.pkl`);
+            link.href = textFile;
+            document.body.appendChild(link);
+
+            // wait for the link to be added to the document
+            // then simulate a click event on the link
+            // the dummy link created above will start the download
+            // when a click event is dispatched
+            //
+            window.requestAnimationFrame(function() {
+                var event = new MouseEvent('click');
+                link.dispatchEvent(event);
+                document.body.removeChild(link);
+            }); 
+
+            EventBus.dispatchEvent(new CustomEvent('continue'));
+        });
+        
+    }
+    catch (error) {
+        EventBus.dispatchEvent(new CustomEvent('continue'));
+        processLog.writePlain('Could not save model.');
+    }    
+
+});
+
 EventBus.addEventListener('loadModel', (event) => {
     /*
     eventListener: loadModel
@@ -328,7 +417,39 @@ EventBus.addEventListener('loadModel', (event) => {
             // if the response is ok, plot the decision surface
             //
             .then((data) => {
-                trainPlot.decision_surface(data);
+
+                Object.keys(data.mapping_label).forEach((label, idx) => {
+                
+                    // add the class to the label manager
+                    //
+                    const labelObj = new Label(label, defaultColors[idx]);
+
+                    // try to add the class to the manager
+                    // if it already exists, it is ok
+                    //
+                    if (labelManager.addLabel(labelObj)) {
+                        processLog.writePlain(`Added class: ${label}`);
+                    }
+                });
+
+                // set the label mappings in the label manager
+                //
+                labelManager.setMappings(data.mapping_label);
+
+                // change the z values to numerics based on the mapping
+                // labels
+                //
+                data.decision_surface.z = 
+                    labelManager.mapLabels(data.decision_surface.z);
+
+                // plot the decision surface on the training plot
+                //
+                trainPlot.decision_surface(data.decision_surface, 
+                                        labelManager.getLabels());
+
+                // update the class list in the main toolbar
+                //
+                mainToolbar.updateClassList(labelManager.getLabels());
 
                 // write to the process log
                 //
@@ -830,6 +951,33 @@ EventBus.addEventListener('saveData', (event) => {
         EventBus.dispatchEvent(new CustomEvent('continue'));
     }
 });
+
+EventBus.addEventListener('enableDraw', (event) => {
+    /*
+    eventListener: enableDraw
+
+    dispatcher: AlgoTool::render
+
+    args:
+     event.detail.type: the type of drawing to enable
+     event.detail.className: the class name of the drawing
+
+    description:
+     this event listener is triggered when the user clicks the draw
+     button in the main toolbar. the event listener enables drawing on
+     the train and eval plots
+    */
+
+    // get the type and class name from the event
+    //
+    const type = event.detail.type;
+    const className = event.detail.className;
+
+    const label = labelManager.getLabel(className);
+
+    trainPlot.enable_draw(type, label);
+    evalPlot.enable_draw(type, label);
+})
 
 EventBus.addEventListener('stateChange', () => {
     /*
