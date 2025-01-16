@@ -45,36 +45,30 @@ class Toolbar_Button extends HTMLElement {
     // Method to add a click listener to the toolbar button
     //
     addClickListener() {
+
       // Get the button element from the shadow DOM
       //
       const button = this.shadowRoot.querySelector('.toolbar-button');
       
       // Get the label attribute value for conditional logic
       //
-      const label = this.getAttribute('label');
+      const clear = this.getAttribute('clear');
+      const plotID = this.getAttribute('plotId');
 
       // Add an event listener to handle the button click event
       //
       button.addEventListener('click', () => {
-        // Check the label to determine the action
+
+        // send a custom event to the window which the plot component
+        // is listening for. the plot component will clear the plot
+        // based on the clear attribute.
         //
-        switch (label) {
-
-          // Clear all case
-          //
-          case 'Clear All':
-            EventBus.dispatchEvent(new CustomEvent('clearAll'));
-            break;
-
-          // Clear process log case
-          //
-          case 'Clear Process Log':
-            this.processLog.clear();
-          // For any other label, do nothing (default case)
-          //
-          default:
-            break;
-        }
+        EventBus.dispatchEvent(new CustomEvent('clearPlot', {
+          detail: {
+            'type': clear,
+            'plotID': plotID
+          }
+        }));
       });
     }
 }
@@ -166,12 +160,12 @@ class Toolbar_DropdownClear extends HTMLElement {
   
     connectedCallback() {
       this.render();
-      this.plotId = this.getAttribute('plotId');
       this.addHoverListeners();
     }
   
     render() {
       const label = this.getAttribute('label') || 'Button'; // Get the label from the attribute
+      const plotId = this.getAttribute('plotId');
   
       this.shadowRoot.innerHTML = `
         <style>
@@ -251,9 +245,9 @@ class Toolbar_DropdownClear extends HTMLElement {
         <div class="toolbar-item">
           <button class="toolbar-button">${label}</button>
           <div class="dropdown-menu" id="dropdown-menu">
-            <toolbar-button label="Clear Data" clear="data"></toolbar-button>
-            <toolbar-button label="Clear Results" clear="results"></toolbar-button>
-            <toolbar-button label="Clear All" clear="all"></toolbar-button>
+            <toolbar-button label="Clear Data" clear="data" plotId=${plotId}></toolbar-button>
+            <toolbar-button label="Clear Results" clear="results" plotId=${plotId}></toolbar-button>
+            <toolbar-button label="Clear All" clear="all" plotId=${plotId}></toolbar-button>
           </div>
         </div>
       `;
@@ -286,31 +280,6 @@ class Toolbar_DropdownClear extends HTMLElement {
         dropdownMenu.classList.remove('show'); // Hide when not hovering over dropdown
         button.classList.remove('active'); // Remove highlight when leaving dropdown
       });
-
-      // iterate over all of the buttons in the submenu (clear data, clear results, clear all)
-      //
-      for (let clearButton of dropdownMenu.querySelectorAll('toolbar-button')) {
-        
-        // add an event listener to each button
-        //
-        clearButton.addEventListener('click', () => {
-  
-          // get the clear attribute from the button
-          //
-          const clear = clearButton.getAttribute('clear');
-  
-          // send a custom event to the window which the plot component
-          // is listening for. the plot component will clear the plot
-          // based on the clear attribute.
-          //
-          EventBus.dispatchEvent(new CustomEvent('clearPlot', {
-            detail: {
-              type: clear,
-              plotID: this.plotId
-            }
-          }));
-        });
-      }
     }
 }
 
@@ -1002,5 +971,3 @@ customElements.define('toolbar-dropdown-settings', Toolbar_DropdownSettings);
 customElements.define('toolbar-openfile-button', Toolbar_OpenFileButton);
 customElements.define('toolbar-savefile-button', Toolbar_SaveFileButton);
 customElements.define('toolbar-popup-button', Toolbar_PopupButton);
-
-
