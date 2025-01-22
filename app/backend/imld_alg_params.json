@@ -82,66 +82,6 @@
         }
     },
 
-    "LDA": {
-        "name": "Linear Discriminant Analysis (LDA)",
-        "params": {
-            "prior": {
-                "name": "Prior",
-                "type": "select",
-                "options": ["ml", "map"],
-                "default": "ml"
-            },
-            "ctype": {
-                "name": "Covariance Type",
-                "type": "select",
-                "options": ["full", "diagonal"],
-                "default": "full"
-            },
-            "center": {
-                "name": "Center",
-                "type": "select",
-                "options": ["none", "tied", "untied"],
-                "default": "none" 
-            },
-            "scale": {
-                "name": "Scale",
-                "type": "select",
-                "options": ["none", "biased", "unbiased", "empirical"],
-                "default": "none" 
-            }
-        }
-    },
-
-    "QLDA": {
-        "name": "Quadratic Linear Discriminant Analysis (QLDA)",
-        "params": {
-            "prior": {
-                "name": "Prior",
-                "type": "select",
-                "options": ["ml", "map"],
-                "default": "ml"
-            },
-            "ctype": {
-                "name": "Covariance Type",
-                "type": "select",
-                "options": ["full", "diagonal"],
-                "default": "full"
-            },
-            "center": {
-                "name": "Center",
-                "type": "select",
-                "options": ["none", "tied", "untied"],
-                "default": "none" 
-            },
-            "scale": {
-                "name": "Scale",
-                "type": "select",
-                "options": ["none", "biased", "unbiased", "empirical"],
-                "default": "none" 
-            }
-        }
-    },
-
     "NB": {
         "name": "Naive Bayes (NB)",
         "params": {
@@ -192,60 +132,6 @@
                 "type": "int",
                 "range": [0, "inf"],
                 "default": 0
-            }
-        }
-    },
-
-    "SVM": {
-        "name": "Support Vector Machines (SVM)",
-        "params": {
-            "c": {
-                "name": "Regularization Parameter (c)",
-                "type": "float",
-                "range": [0, 10000],
-                "default": 1.0
-            },
-            "gamma": {
-                "name": "Gamma",
-                "type": "float",
-                "range": [0, 10000],
-                "default": 0.1
-            },
-            "kernel": {
-                "name": "Kernel",
-                "type": "select",
-                "options": ["linear", "poly", "rbf", "sigmoid, precomputed"],
-                "default": "rbf"
-            }
-        }
-    },
-
-    "KMEANS" : {
-        "name": "K-Means (KMEANS)",
-        "params": {
-            "n_cluster": {
-                "name": "Number of Clusters",
-                "type": "int",
-                "range": [1, "inf"],
-                "default": 8
-            },
-            "n_init": {
-                "name": "Number of Initializations",
-                "type": "int",
-                "range": [1, "inf"],
-                "default": 3
-            },
-            "random_state": {
-                "name": "Random State",
-                "type": "int",
-                "range": [0, "inf"],
-                "default": 0
-            },
-            "max_iter": {
-                "name": "Maximum Iterations",
-                "type": "int",
-                "range": [1, "inf"],
-                "default": 100
             }
         }
     },

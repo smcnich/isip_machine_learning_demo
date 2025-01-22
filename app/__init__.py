@@ -5,7 +5,6 @@ from .extensions.blueprint import main
 from .extensions.socketio import socketio
 from .extensions.scheduler import scheduler
 
-
 class IMLD():
     def __init__(self):
 

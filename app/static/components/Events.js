@@ -12,7 +12,7 @@ const TRAIN_URL = `${baseURL}api/train/`;
 const EVAL_URL = `${baseURL}api/eval/`;
 const LOADMODEL_URL = `${baseURL}api/load_model/`;
 const DATAGEN_URL = `${baseURL}api/data_gen/`;
-const SAVEMODEL_URL = `${baseURL}api/save_model`;
+const SAVEMODEL_URL = `${baseURL}api/save_model/`;
 
 // get the component instances from the HTML document
 //
@@ -314,6 +314,7 @@ EventBus.addEventListener('saveModel', () => {
             // otherwise, throw an error
             //
             else {
+                console.log(response)
                 EventBus.dispatchEvent(new CustomEvent('continue'));
                 processLog.writePlain('Data could not be evaluated due to a server error. Please try again.');
                 throw new Error('Network response was not ok.');
@@ -1204,6 +1205,8 @@ EventBus.addEventListener('clearPlot', (event) => {
     //
     const plotID = event.detail.plotID;
     const type = event.detail.type;
+
+    console.log(plotID, type);
 
     // get the plot that is being cleared
     //
