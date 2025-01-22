@@ -145,17 +145,29 @@ class AddClassPopup extends HTMLElement {
         const form = this.shadowRoot.querySelector('form');
         form.onsubmit = (event) => {
 
+            // prevent form submission
+            //
             event.preventDefault();
             
+            // create a FormData object from the form
+            //
             const formData = new FormData(form);
 
+            // dispatch a custom event with form data
+            //
             EventBus.dispatchEvent(new CustomEvent('addClass', {
                 detail: {
                     'name': formData.get('class-name'),
                     'color': formData.get('class-color')
                 }
-            }))
+            }));
 
+            // reset the form after submission
+            //
+            form.reset();
+
+            // close the popup after submission
+            //
             this.closePopup();
         };
     }
@@ -262,10 +274,11 @@ class AddClassPopup extends HTMLElement {
             display: block;
           }
 
-          .content {
+          form {
             display: flex;
             flex-direction: column;
-            margin: 0.5em;
+            align-items: center;
+            margin: 0.5em, 0, 0.5em, 0;
           }
 
           .container {
@@ -282,6 +295,24 @@ class AddClassPopup extends HTMLElement {
             font-family: 'Inter', sans-serif;
             font-size: 1em;
             font-weight: 600;
+          }
+
+          input {
+            padding: 0.2vw;
+            border: 1px solid #ccc;
+            border-radius: 0.4vw;
+            font-size: 0.8em;
+            width: 35%;
+            background-color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8em;
+          }
+
+          div.button-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 0.5em 0 0.5em 0;
           }
 
           button.submit-class { 
@@ -320,20 +351,20 @@ class AddClassPopup extends HTMLElement {
         <div class="popup" id="popup">
             <button class="close-btn" id="close-btn">X</button>
             <h2>${this.label}</h2>
-            <div class="content">
-                <form>
-                    <div class="container">
-                        <label for="class-name">Class Name:</label>
-                        <input type="text" id="class-name" name="class-name" required>
-                    </div>
-                    <div class="container">
-                        <label for="class-color">Color:</label>
-                        <div id="color-select"></div>
-                        <input type="hidden" id="class-color" name="class-color" required>
-                    </div>
-                    <button type="submit" class="submit-class">Add Class</button>
-                </form>
-           </div>
+            <form>
+              <div class="container">
+                  <label for="class-name">Class Name:</label>
+                  <input type="text" id="class-name" name="class-name" autocomplete="off" required>
+              </div>
+              <div class="container">
+                  <label for="class-color">Color:</label>
+                  <div id="color-select"></div>
+                  <input type="hidden" id="class-color" name="class-color" required>
+              </div>
+              <div class="button-container">
+                <button type="submit" class="submit-class">Add Class</button>
+              </div>
+            </form>
         </div>
       `;
     }
@@ -398,6 +429,119 @@ class AddClassPopup extends HTMLElement {
   }
   //
   // end of class
+
+  class DrawCheckBox extends HTMLElement {
+    constructor() {
+      super();
+      this.attachShadow({ mode: 'open' });
+      this.checked = false; // Initial state of the checkbox
+      this.isOpen = false; // Track if the button is open
+    }
+  
+    connectedCallback() {
+
+        // Render the initial state
+        //
+        this.render();
+
+        // Add global click listener
+        //
+        document.addEventListener('click', this.handleDocumentClick.bind(this));
+    }
+  
+    disconnectedCallback() {
+      document.removeEventListener('click', this.handleDocumentClick.bind(this)); // Clean up the listener
+    }
+  
+    render() {
+      const label = this.getAttribute('label'); // Get the label from the attribute
+      const type = this.getAttribute('type') || 'points'; // Get the type from the attribute
+      
+      this.shadowRoot.innerHTML = `
+        <style>
+          .toolbar-checkbox-button {
+            background-color: white;
+            color: black;
+            font-family: 'Inter', sans-serif;
+            font-weight: 100;
+            font-size: 1em;
+            padding: 5px 0; /* Remove left padding, keep top/bottom padding */
+            border: none;
+            cursor: pointer;
+            min-width: 220px;
+            white-space: nowrap;
+            text-align: left;
+            display: flex; /* Use flexbox for alignment */
+            align-items: center; /* Center align items vertically */
+          }
+  
+          .toolbar-checkbox-button:hover {
+            background-color: #c9c9c9;
+          }
+  
+          input[type="checkbox"] {
+            margin-right: 7px; /* Space between checkbox and label */
+            margin-left: 10px;
+          }
+        </style>
+  
+        <button class="toolbar-checkbox-button" id="checkboxButton">
+          <input type="checkbox" id="checkbox" ?checked="${this.checked}"/>
+          Draw ${type.charAt(0).toUpperCase() + type.slice(1)}
+        </button>
+      `;
+  
+        // Add click event listener to toggle checkbox and button state
+        const button = this.shadowRoot.querySelector('#checkboxButton');
+        const checkbox = this.shadowRoot.querySelector('#checkbox');
+    
+        button.onclick = (event) => {
+
+          // Prevent event from bubbling up
+          //
+          event.stopPropagation(); 
+
+          if (this.checked) {
+            this.checked = false;
+            checkbox.checked = false;
+            this.isOpen = false;
+
+            EventBus.dispatchEvent(new CustomEvent('disableDraw'));
+          }
+
+          else {
+            this.checked = true;
+            checkbox.checked = true;
+            this.isOpen = true;
+
+            EventBus.dispatchEvent(new CustomEvent('enableDraw', {
+              detail: {
+                  'type': type,
+                  'className': label
+              }
+            }));
+          }
+        };
+    }
+
+    disable() {
+      this.checked = false;
+      this.isOpen = false;
+      this.shadowRoot.querySelector('#checkbox').checked = false;
+    }
+  
+    handleDocumentClick(event) {
+      const button = this.shadowRoot.querySelector('#checkboxButton');
+      
+      // Check if the clicked target is outside of the button
+      if (this.isOpen && !button.contains(event.target)) {
+        this.isOpen = false; // Close the button
+        // Optionally, reset checkbox state if needed
+        // this.checked = false; 
+        // this.shadowRoot.querySelector('#checkbox').checked = this.checked; // Update checkbox state
+      }
+    }
+}
 
 class DeleteClassButton extends HTMLElement {
     constructor() {
@@ -634,8 +778,9 @@ render() {
     <div class="toolbar-item">
         <button class="toolbar-button">${label}</button>
         <div class="dropdown-menu" id="dropdown-menu">
-            <h1 class="header">Class Options</h1>
-            <delete-class-button label="${label}"></delete-class-button>
+          <h1 class="header">Class Options</h1>
+          <delete-class-button label="${label}"></delete-class-button>
+          <draw-checkbox label="${label}" type="points"></draw-checkbox>
         </div>
     </div>
     `;
@@ -691,3 +836,4 @@ addHoverListeners() {
 customElements.define('add-class-popup', AddClassPopup);
 customElements.define('delete-class-button', DeleteClassButton)
 customElements.define('class-button', LabelButton)
+customElements.define('draw-checkbox', DrawCheckBox);

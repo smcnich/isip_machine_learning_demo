@@ -292,7 +292,8 @@ def load_alg_params(pfile:str) -> dict:
     #
     return params
 
-def generate_decision_surface(data:mltd.MLToolsData, model:mlt.Alg):
+def generate_decision_surface(data:mltd.MLToolsData, model:mlt.Alg, *,
+                              xrange:list=None, yrange:list=None):
     '''
     function: generate_decision_surface
 
@@ -317,10 +318,14 @@ def generate_decision_surface(data:mltd.MLToolsData, model:mlt.Alg):
     #
     X = data.data
 
-    # get the min and max values of the data. pad the mins and maxes by 1
+    # get the x and y bounds of the data. if the x and y ranges are given,
+    # use them. otherwise, get the min and max of the x and y values
     #
-    x_min, x_max = floor(X[:, 0].min() - 1), ceil(X[:, 0].max() + 1)
-    y_min, y_max = floor(X[:, 1].min() - 1), ceil(X[:, 1].max() + 1)
+    if (xrange): x_min, x_max = xrange
+    else: x_min, x_max = floor(X[:, 0].min()), ceil(X[:, 0].max())
+
+    if (yrange): y_min, y_max = yrange
+    else: y_min, y_max = floor(X[:, 1].min()), ceil(X[:, 1].max())
 
     # create a meshgrid of the data. use this meshgrid to predict the labels
     # at each point in the grid. this will allow us to plot the decision surface

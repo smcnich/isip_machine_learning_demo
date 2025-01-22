@@ -971,5 +971,3 @@ customElements.define('toolbar-dropdown-settings', Toolbar_DropdownSettings);
 customElements.define('toolbar-openfile-button', Toolbar_OpenFileButton);
 customElements.define('toolbar-savefile-button', Toolbar_SaveFileButton);
 customElements.define('toolbar-popup-button', Toolbar_PopupButton);
-
-

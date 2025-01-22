@@ -303,6 +303,33 @@ class MainToolbar extends HTMLElement {
     })
   }
 
+  getClassDropdowns() {
+    /*
+    method: MainToolbar::getClassDropdowns
+
+    args:
+     None
+
+    return:
+     Array: an array of class dropdown elements
+
+    description:
+     this method returns all class dropdown elements in the toolbar
+    */
+
+    // get the class dropdown object
+    //
+    const classDropdown = this.shadowRoot.getElementById('class-dropdown');
+
+    // get all class buttons in the dropdown
+    //
+    const classButtons = classDropdown.querySelectorAll('class-button')
+
+    return classButtons;
+  }
+  //
+  // end of method
+
   render() {
     /*
     method: ToolbarBtn::render

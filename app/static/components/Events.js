@@ -30,6 +30,35 @@ const defaultColors = Plotly.d3.scale.category10().range()
 //
 let textFile;
 
+// create a status for drawing
+//
+let canDraw = false;
+
+// create an Object to store the plot bounds
+//
+const bounds = {
+    'x': [-1, 1],
+    'y': [-1, 1]
+};
+
+function calcRange(x, y) {
+
+    // calculate the max value of the x and y data
+    //
+    const maxVal = Math.max(
+    ...[Math.floor(Math.min(...x)), Math.ceil(Math.max(...x))].map(Math.abs),
+    ...[Math.floor(Math.min(...y)), Math.ceil(Math.max(...y))].map(Math.abs)
+    )
+    
+    // return the range ensuring a square canvas
+    //
+    return {
+        'x': [-maxVal, maxVal], 
+        'y': [-maxVal, maxVal]
+    };
+};
+//
+// end of function
 
 // Listen for the 'train' event emitted from AlgoTool Component
 //
@@ -81,7 +110,9 @@ EventBus.addEventListener('train', (event) => {
             'userID': userID,
             'algo': algo,
             'params': params,
-            'plotData': plotData
+            'plotData': plotData,
+            'xrange': bounds.x,
+            'yrange': bounds.y
         })
     })
 
@@ -395,6 +426,8 @@ EventBus.addEventListener('loadModel', (event) => {
             request_body.append('userID', userID);
             request_body.append('x', JSON.stringify(x));
             request_body.append('y', JSON.stringify(y));
+            request_body.append('xrange', JSON.stringify(bounds.x));
+            request_body.append('yrange', JSON.stringify(bounds.y));
 
             // send the data to the server and get the response
             //
@@ -580,7 +613,47 @@ EventBus.addEventListener('dataGen', (event) => {
         processLog.writePlain('Data could not be generated due to a server error. Please try again.');
         EventBus.dispatchEvent(new CustomEvent('continue'));
     }
-})
+});
+
+EventBus.addEventListener('setBounds', (event) => {
+    /*
+    eventListener: setBounds
+
+    dispatcher: Plot
+    */
+
+    const force = event.detail.force || false;
+
+    const x = event.detail.x;
+    const y = event.detail.y;
+
+    if (force) {
+        bounds.x = x;
+        bounds.y = y;
+    }
+
+    else {
+
+        if (x[0] < bounds.x[0]) {
+            bounds.x[0] = x[0];
+        }
+
+        if (x[1] > bounds.x[1]) {
+            bounds.x[1] = x[1];
+        }
+
+        if (y[0] < bounds.y[0]) {
+            bounds.y[0] = y[0];
+        }
+
+        if (y[1] > bounds.y[1]) {
+            bounds.y[1] = y[1];
+        }
+    }
+
+    trainPlot.setBounds(bounds.x, bounds.y);
+    evalPlot.setBounds(bounds.x, bounds.y);
+});
 
 EventBus.addEventListener('addClass', (event) => {
     /*
@@ -598,12 +671,30 @@ EventBus.addEventListener('addClass', (event) => {
      class to the class list in the class manager
     */
 
+    // get the name and color from the event
+    //
     const name = event.detail.name;
     const color = event.detail.color;
 
     // add the class to the label manager
     //
     const label = new Label(name, color);
+
+    // if the color already exists, make it a random color
+    //
+    let changedColor = false;
+    if (labelManager.getColors().includes(label.color)) {
+        
+        // get a list of colors that excludes the current color
+        //
+        let colors = defaultColors.filter(color => color !== label.color);
+        
+        // set the label color to a random color
+        //
+        label.color = colors[Math.floor(Math.random() * colors.length)];
+
+        changedColor = true;
+    };
 
     // try to add the class to the manager
     // if it already exists, let the user know
@@ -613,6 +704,9 @@ EventBus.addEventListener('addClass', (event) => {
     }
     else {    
         processLog.writePlain(`Added class: ${name}`);
+        if (changedColor) {
+            processLog.writePlain(`Note: ${name} color was given a default color because the given color is already in use.`);
+        }
     }
 
     // update the class list in the main toolbar
@@ -667,6 +761,11 @@ EventBus.addEventListener('deleteClass', (event) => {
     // update the class list in the main toolbar
     //
     mainToolbar.updateClassList(labelManager.getLabels());
+
+    // disable drawing on the train and eval plots
+    // if they are possibly enabled
+    //
+    EventBus.dispatchEvent(new CustomEvent('disableDraw'));
 });
 //
 // end of event listener
@@ -952,6 +1051,8 @@ EventBus.addEventListener('saveData', (event) => {
         EventBus.dispatchEvent(new CustomEvent('continue'));
     }
 });
+//
+// end of event listener
 
 EventBus.addEventListener('enableDraw', (event) => {
     /*
@@ -974,11 +1075,73 @@ EventBus.addEventListener('enableDraw', (event) => {
     const type = event.detail.type;
     const className = event.detail.className;
 
+    // if drawing is already enabled
+    //
+    if (canDraw) {
+      
+        // disable drawing
+        //
+        dispatchEvent(new CustomEvent('disableDraw'));
+        
+        // get all the classdropdowns and iterate
+        //
+        mainToolbar.getClassDropdowns().forEach((dropdown) => {
+          
+            // get the checkdown box for the class button
+            //
+            let checkbox = dropdown.shadowRoot.querySelector('draw-checkbox'); 
+            
+            // if that checkbox is not the one that was just clicked,
+            // uncheck it
+            //
+            if (checkbox.getAttribute('label') !== className) {
+                checkbox.disable();
+            }
+        });
+    };
+
+    // set the draw status
+    //
+    canDraw = true;
+
+    // get the label from the label manager
+    //
     const label = labelManager.getLabel(className);
 
-    trainPlot.enable_draw(type, label);
-    evalPlot.enable_draw(type, label);
+    // enable drawing on the train and eval plots
+    //
+    trainPlot.enableDraw(type, label);
+    evalPlot.enableDraw(type, label);
 })
+//
+// end of event listener
+
+EventBus.addEventListener('disableDraw', () => {
+    /*
+    eventListener: disableDraw
+
+    dispatcher: AlgoTool::render, Events.js
+
+    args:
+     None
+
+    description:
+     this event listener is triggered when the user unchecks a class draw
+     button or the user clicks the draw button when drawing is already enabled
+     this event listener disables drawing on the train and eval plots
+    */
+
+    // set the draw status
+    //
+    canDraw = false;
+
+    // disable drawing on the train and eval plots
+    //
+    trainPlot.disableDraw();
+    evalPlot.disableDraw();
+})
+//
+// end of event listener
 
 EventBus.addEventListener('stateChange', () => {
     /*
@@ -1068,30 +1231,34 @@ EventBus.addEventListener('clearPlot', (event) => {
         //
         algoTool.set_train_progress(0);
         algoTool.set_eval_progress(0);
+
+        EventBus.dispatchEvent(new CustomEvent('disableDraw'));
     }
 
     // clear the plot based on the type
     //
-    switch (type) {
+    if (plotID !== 'all') {
+        switch (type) {
 
-        case 'all':
-            plot.plot_empty();
-            break;
-        
-        case 'results':
-            plot.clear_decision_surface();
-            break;
+            case 'all':
+                plot.plot_empty();
+                break;
+            
+            case 'results':
+                plot.clear_decision_surface();
+                break;
 
-        case 'data':
-            plot.clear_data();
-            break;
+            case 'data':
+                plot.clear_data();
+                break;
 
-        case 'processlog': 
-            processLog.clear();
-            break;
+            case 'processlog': 
+                processLog.clear();
+                break;
 
-        default:
-            break;
+            default:
+                break;
+        }
     }
 
     EventBus.dispatchEvent(new CustomEvent('stateChange'));
@@ -1152,5 +1319,8 @@ EventBus.addEventListener('continue', () => {
 // before being triggered
 //
 document.addEventListener('DOMContentLoaded', () => {
+
+    trainPlot.initPlot();
+    evalPlot.initPlot();
 
 });
