@@ -119,6 +119,8 @@ def load_model():
     user_ID = request.form.get('userID')
     x = json.loads(request.form.get('x'))
     y = json.loads(request.form.get('y'))
+    xrange = json.loads(request.form.get('xrange'))
+    yrange = json.loads(request.form.get('yrange'))
 
     # read the model file
     #
@@ -150,7 +152,8 @@ def load_model():
     # get the x y and z values from the decision surface
     # x and y will be 1D and z will be 2D
     #
-    x, y, z = imld.generate_decision_surface(data, model)
+    x, y, z = imld.generate_decision_surface(data, model, xrange=xrange,
+                                             yrange=yrange)
 
     # format the response
     #
@@ -232,6 +235,9 @@ def train():
     x = data['plotData']['x']
     y = data['plotData']['y']
     labels = data['plotData']['labels']
+    xrange = data['xrange']
+    yrange = data['yrange']
+
 
     try:
 
@@ -252,7 +258,8 @@ def train():
         # get the x y and z values from the decision surface
         # x and y will be 1D and z will be 2D
         #
-        x, y, z = imld.generate_decision_surface(data, model)
+        x, y, z = imld.generate_decision_surface(data, model, xrange=xrange,
+                                                 yrange=yrange)
         callback('trainProgressBar', {'trainProgress': 80})
 
         # format the response

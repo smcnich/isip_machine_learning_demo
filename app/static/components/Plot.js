@@ -96,6 +96,8 @@ class Plot extends HTMLElement {
     //
     this.render();
 
+    this.plotDiv = this.querySelector('#plot');
+
     // get the plotId from the attribute to determine what data the specific instance plots
     //
     this.plotId = this.getAttribute('plotId');
@@ -105,83 +107,6 @@ class Plot extends HTMLElement {
     this.plotData = [];
     this.data = null;
 
-    window.addEventListener('getData', (event) => {
-
-      // if the plotId is not the same as this plotId, return nothing
-      //
-      const plotId = event.detail.plotId;
-      if (plotId != this.plotId) {
-        return;
-      }
-
-      // get the event sender so the data can be sent back to the correct component
-      //
-      const sender = event.detail.ref;
-
-      // get the axis of the layout to send
-      //
-      this.data.layout = {
-        xaxis: this.layout.xaxis.range,
-        yaxis: this.layout.yaxis.range
-      };
-
-      // save the data to the sender, to it can be saved to a
-      // csv
-      //
-      sender.data = this.data;
-    });
-
-    // Add event listener to create an empty plot when the website loads
-    //
-    window.addEventListener('DOMContentLoaded', () => {
-
-      // Set configuration data for Plotly
-      //
-      this.config = {
-        displayLogo: false,
-        modeBarButtonsToRemove: ['zoom2d', 'select2d', 'lasso2d', 'toggleSpikelines', 
-                                'hoverClosestCartesian', 'hoverCompareCartesian',
-                                'autoScale2d'],
-        responsive: true,
-        showLink: false,
-        cursor: 'pointer'
-      };
-
-      // Set layout data for Plotly
-      //
-      this.layout = {
-        autosize: true,
-        dragmode: false,
-        xaxis: {
-          range: [-1, 1],
-          zeroline: false,
-          showline: true,
-        },
-        yaxis: {
-          range: [-1, 1],
-          zeroline: false,
-          showline: true,
-        },
-        legend: {
-          x: 0.5,
-          y: -0.3,
-          xanchor: 'center',
-          yanchor: 'bottom',
-          orientation: 'h',
-        },
-        margin: { 
-          t: 10,
-          b: 10,
-          l: 40,
-          r: 10
-        },
-        width: this.parentElement.clientWidth - 50,
-        height: this.parentElement.clientHeight - 50
-      };
-
-      this.plot_empty();
-    })
-
     // Event listener for resizing the plot
     //
     window.addEventListener('resize', () => {
@@ -189,12 +114,19 @@ class Plot extends HTMLElement {
         width: this.parentElement.clientWidth - 50,
         height: this.parentElement.clientHeight - 50
       };
-      Plotly.relayout(this.querySelector('#plot'), update);
+      Plotly.relayout(this.plotDiv, update);
     });
 
   }
   //
   // end of method
+
+  setBounds(x, y) {
+    Plotly.relayout(this.plotDiv, {
+      'xaxis.range': x,
+      'yaxis.range': y
+    });
+  }
 
   getBounds() {
     /*
@@ -239,6 +171,60 @@ class Plot extends HTMLElement {
   }
   //
   // end of method
+  
+  updateData() {
+    this.data = this.traces_to_data();
+  }
+
+  initPlot() {
+
+    // Set configuration data for Plotly
+    //
+    this.config = {
+      displayLogo: false,
+      modeBarButtonsToRemove: ['zoom2d', 'select2d', 'lasso2d', 'zoomIn2d',
+                               'zoomOut2d', 'toggleSpikelines', 'pan2d',
+                               'hoverClosestCartesian', 'autoScale2d',
+                               'hoverCompareCartesian'],
+      responsive: true,
+      showLink: false,
+      cursor: 'pointer'
+    };
+
+    // Set layout data for Plotly
+    //
+    this.layout = {
+      autosize: true,
+      dragmode: false,
+      xaxis: {
+        zeroline: false,
+        showline: true,
+        range: [-1, 1],
+      },
+      yaxis: {
+        zeroline: false,
+        showline: true,
+        range: [-1, 1]
+      },
+      legend: {
+        x: 0.5,
+        y: -0.3,
+        xanchor: 'center',
+        yanchor: 'bottom',
+        orientation: 'h',
+      },
+      margin: { 
+        t: 10,
+        b: 10,
+        l: 40,
+        r: 10
+      },
+      width: this.parentElement.clientWidth - 50,
+      height: this.parentElement.clientHeight - 50
+    };
+
+    this.plot_empty();
+  }
 
   getDecisionSurface() {
     /*
@@ -297,7 +283,7 @@ class Plot extends HTMLElement {
       
       // get the label of the index
       //
-      let label = data.labels[i].toLowerCase();
+      let label = data.labels[i];
 
       // if the label is not a already created
       //
@@ -348,6 +334,8 @@ class Plot extends HTMLElement {
     this.data = null;
     this.plotData = [];
 
+    // set the layout for the empty plot
+    //
     const layout = this.layout;
     layout.margin = { 
       t: 10,
@@ -356,13 +344,9 @@ class Plot extends HTMLElement {
       r: 10
     }
 
-    // Get the plot div element
-    //
-    const plotDiv = this.querySelector('#plot');
-
     // Create the empty plot
     //
-    Plotly.newPlot(plotDiv, this.plotData, this.layout, this.config);
+    Plotly.newPlot(this.plotDiv, this.plotData, this.layout, this.config);
   }
 
   plot(data, colorMappings) {
@@ -723,7 +707,7 @@ class Plot extends HTMLElement {
   //
   // end of method
 
-  enable_draw(type, label, numPoints=null, cov=null) {
+  enableDraw(type, label, numPoints=null, cov=null) {
     /*
     method: Plot::enable_draw
 
@@ -743,51 +727,66 @@ class Plot extends HTMLElement {
      for drawing points on the plot.
     */
 
-    // Get the plot div element
+    // get the bounding rectangle of the plot div
+    // this specifically needs to be the rect element that belongs to the
+    // 'nsewdrag' class. otherwise, the points will be in the wrong place
     //
-    const plotDiv = this.querySelector('#plot');
+    const rect = this.plotDiv.querySelector('.nsewdrag').getBoundingClientRect();
+    const xaxis = this.plotDiv._fullLayout.xaxis;
+    const yaxis = this.plotDiv._fullLayout.yaxis;
 
-    // Helper function to get plot coordinates from mouse event
+    // helper function to get plot coordinates from mouse event
+    //
     function getMousePoint(event) {
-      const bbox = plotDiv.getBoundingClientRect();
       return {
-        x: event.clientX - bbox.left,
-        y: event.clientY - bbox.top
+        x: xaxis.p2d(event.clientX - rect.left),
+        y: yaxis.p2d(event.clientY - rect.top)
       };
     }
+    //
+    // end of helper function
 
-    // Function to update the existing trace dynamically
-    function updateExistingTrace(idx) {
-      const update = {
-        x: [xCoords],
-        y: [yCoords]
-      };
+    // function to update the existing trace dynamically
+    //
+    function drawPoint(plotDiv, xPoint, yPoint, idx, type) {
+
+      let update;
+
+      if (type === 'points') {
+        update = {
+          x: [[xPoint]],
+          y: [[yPoint]]
+        };
+      }
 
       // Update the trace at the specified index
       //
       Plotly.extendTraces(plotDiv, update, [idx]);
     }
+    //
+    // end of helper function
 
 
     // try to find the index of the proper class trace
     //
-    let traceIdx = this.plotData.forEach((trace, idx) => {
-      if (trace.name.toLowerCase() === label.name.toLowerCase()) {
-        return idx;
-      }
+    let traceIdx = this.plotData.findIndex((trace) => {
+      return trace.name.toLowerCase() === label.name.toLowerCase();
     });
 
     // if the trace does not exist, create a new trace
+    // if the trace could not be found, it will be -1
     //
-    if (!traceIdx) {
+    if (traceIdx === -1) {
       this.plotData.push({
         x: [],
         y: [],
         mode: 'markers',
         type: 'scattergl',
         name: label.name,
-        color: label.color,
-        marker: { size: 2 },
+        marker: { 
+          size: 2,
+          color: label.color
+        },
         hoverinfo: 'none'
       });
 
@@ -796,39 +795,94 @@ class Plot extends HTMLElement {
       traceIdx = this.plotData.length - 1;
     }
 
-
-
-    // Variables to track the drawing state and coordinates
+    // variable to track the drawing state
+    //
     let isDrawing = false;
-    let xCoords = [];
-    let yCoords = [];
 
-    // Mouse event handlers
-    plotDiv.onmousedown = (event) => {
+    // when the mouse is clicked
+    //
+    this.plotDiv.onpointerdown = (event) => {
+      
+      // set the drawing state to true
+      //
       isDrawing = true;
+
+      // capture the pointer so we continue receiving events even if the mouse 
+      // leaves plotDiv
+      //
+      this.plotDiv.setPointerCapture(event.pointerId);
+
+      // get the mouse point
+      //
       const mousePoint = getMousePoint(event);
-      xCoords.push(mousePoint.x);
-      yCoords.push(mousePoint.y);
+
+      // draw the point
+      //
+      drawPoint(this.plotDiv, mousePoint.x, mousePoint.y, traceIdx, type);
     };
 
-    plotDiv.onmousemove = (event) => {
+    // when the mouse is moved
+    //
+    this.plotDiv.onpointermove = (event) => {
+      
+      // if the mouse is down
+      //
       if (isDrawing) {
+
+        // get the mouse point
+        //
         const mousePoint = getMousePoint(event);
-        xCoords.push(mousePoint.x);
-        yCoords.push(mousePoint.y);
-        console.log(this.plotData);
-        updateExistingTrace(traceIdx);
+
+        // draw the point
+        //
+        drawPoint(this.plotDiv, mousePoint.x, mousePoint.y, traceIdx, type);
       }
     };
 
-    plotDiv.onmouseup = () => {
+    // when the mouse is released
+    //
+    this.plotDiv.onpointerup = (event) => {
+      
+      // set the drawing state to false
+      //
       isDrawing = false;
-      xCoords = [];
-      yCoords = [];
+
+      // release the pointer capture
+      //
+      this.plotDiv.releasePointerCapture(event.pointerId);
+
+      // update the data in the component
+      //
+      this.updateData();
+
+      // dispatch an event to the algoTool to update the plot status
+      //
+      EventBus.dispatchEvent(new CustomEvent('stateChange'));
     };
-
   }
+  //
+  // end of method
 
+  disableDraw() {
+    /*
+    method: Plot::disableDraw
+
+    args:
+    None
+
+    return:
+    None
+
+    description:
+    disable the drawing functionality of the plot
+    */
+
+    this.plotDiv.onpointerdown = null;
+    this.plotDiv.onpointermove = null;
+    this.plotDiv.onpointerup = null;
+  }
+  //
+  // end of method
 }
 //
 // end of class

@@ -272,11 +272,6 @@ class MainToolbar extends HTMLElement {
     // get the class dropdown object
     //
     const classDropdown = this.shadowRoot.getElementById('class-dropdown');
-    
-    // get the draw points button
-    //
-    const drawPointBtn = this.shadowRoot.querySelector('draw-points-checkbox');
-    drawPointBtn.clearClassOptions();
 
     // get the add class button on the dropdown
     // all class buttons are inserted before this button
@@ -305,12 +300,35 @@ class MainToolbar extends HTMLElement {
       // Insert the button as the first child of classDropdown
       //
       classDropdown.insertBefore(button, addClassBtn);
-
-      // add the class button to the draw points button
-      //
-      drawPointBtn.addClassOption(label.name);
     })
   }
+
+  getClassDropdowns() {
+    /*
+    method: MainToolbar::getClassDropdowns
+
+    args:
+     None
+
+    return:
+     Array: an array of class dropdown elements
+
+    description:
+     this method returns all class dropdown elements in the toolbar
+    */
+
+    // get the class dropdown object
+    //
+    const classDropdown = this.shadowRoot.getElementById('class-dropdown');
+
+    // get all class buttons in the dropdown
+    //
+    const classButtons = classDropdown.querySelectorAll('class-button')
+
+    return classButtons;
+  }
+  //
+  // end of method
 
   render() {
     /*
