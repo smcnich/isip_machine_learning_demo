@@ -1075,14 +1075,16 @@ EventBus.addEventListener('enableDraw', (event) => {
           
             // get the checkdown box for the class button
             //
-            let checkbox = dropdown.shadowRoot.querySelector('draw-checkbox'); 
-            
-            // if that checkbox is not the one that was just clicked,
-            // uncheck it
-            //
-            if (checkbox.getAttribute('label') !== className) {
-                checkbox.disable();
-            }
+            dropdown.shadowRoot.querySelectorAll('draw-checkbox').forEach((checkbox) => {
+
+                // if that checkbox is not the one that was just clicked,
+                // uncheck it
+                //
+                if ((checkbox.getAttribute('label') !== className) ||
+                    (checkbox.getAttribute('type') !== type)) {
+                    checkbox.disable();
+                }
+            }); 
         });
     };
 
