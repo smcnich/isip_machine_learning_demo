@@ -375,10 +375,7 @@ class Toolbar_DropdownSettings extends HTMLElement {
         <div class="toolbar-item">
           <button class="toolbar-button">${label}</button>
           <div class="dropdown-menu" id="dropdown-menu">
-            <toolbar-popup-button label="Set Ranges"></toolbar-popup-button>
             <toolbar-set-gaussian label="Set Gaussian"></toolbar-set-gaussian>
-            <toolbar-popup-button label="Set Color"></toolbar-popup-button>
-            <toolbar-checkbox-button label="Normalize Data"></toolbar-checkbox-button>
           </div>
         </div>
       `;
