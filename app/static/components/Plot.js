@@ -707,7 +707,7 @@ class Plot extends HTMLElement {
   //
   // end of method
 
-  enableDraw(type, label, numPoints=null, cov=null) {
+  enableDraw(type, label, numPoints=15, cov=[[0.025, 0], [0, 0.025]]) {
     /*
     method: Plot::enable_draw
 
@@ -756,6 +756,15 @@ class Plot extends HTMLElement {
         update = {
           x: [[xPoint]],
           y: [[yPoint]]
+        };
+      }
+
+      if (type === 'gaussian') {
+        const mean = [xPoint, yPoint];
+        const points = generateMultivariateNormal(mean, cov, numPoints);
+        update = {
+          x: [points.x],
+          y: [points.y]
         };
       }
 
@@ -986,6 +995,101 @@ function colorNameToHex(colorName) {
   //
   return null;
 }
+
+function generateStandardNormalPair() {
+  /*
+  function: generateStandardNormalPair
+
+  args:
+   None
+
+  return:
+   Array: an array containing two standard normal random variables
+
+  description:
+   this function generates two standard normal random variables 
+   using the Box-Muller transform. these random variables are used to 
+   generate multivariate normal random variables.
+  */
+
+  // generate two standard uniform random variables
+  //
+  const u1 = Math.random();
+  const u2 = Math.random();
+
+  // apply the Box-Muller transform
+  // z0 = sqrt(-2 * ln(u1)) * cos(2 * pi * u2)
+  // z1 = sqrt(-2 * ln(u1)) * sin(2 * pi * u2)
+  //
+  const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+  const z1 = Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2);
+
+  // return the two standard normal random variables
+  //
+  return [z0, z1];
+}
+//
+// end of function
+
+function generateMultivariateNormal(mean, cov, numPoints) {
+  /*
+  function: generateMultivariateNormal
+
+  args:
+   mean (Array): an array containing the mean of the distribution 
+                 (x and y coords)
+   cov (Array): an array containing the covariance matrix of the distribution
+                ex: [[varX, covXY], [covXY, varY]]
+   numPoints (Number): the number of points to generate
+
+  return:
+   Object: an object containing the x and y coordinates of the generated points
+           ex: {
+             x: [x1, x2, x3, ...],
+             y: [y1, y2, y3, ...]
+           }
+
+  description:
+   this function generates multivariate normal random variables using the 
+   Box-Muller transform. it takes in the mean and covariance matrix of the 
+   distribution and the number of points to generate.
+  */
+
+  // create empty arrays to store the generated points
+  //
+  const x = [], y = [];
+
+  // get the mean and covariance values
+  //
+  const [meanX, meanY] = mean;
+  const [varX, covXY, , varY] = [cov[0][0], cov[0][1], cov[1][0], cov[1][1]]; 
+  
+  // generate the specified number of points
+  //
+  for (let i = 0; i < numPoints; i++) {
+
+    // generate a pair of standard normal random variables
+    //
+    const [z0, z1] = generateStandardNormalPair();
+
+    // transform the standard normal variables to the desired distribution
+    // using the Cholesky decomposition
+    // x = meanX + stdX * z0
+    // y = meanY + stdY * (rho * z0 + sqrt(1 - rho^2) * z1)
+    // where rho = covXY / (stdX * stdY)
+    // and stdX = sqrt(varX), stdY = sqrt(varY)
+    // 
+    x.push(meanX + Math.sqrt(varX) * z0);
+    y.push(meanY + Math.sqrt(varY) * (covXY / varX * z0 + 
+           Math.sqrt(1 - (covXY * covXY) / (varX * varY)) * z1));
+  }
+
+  // return the generated points
+  //
+  return {'x': x, 'y': y};
+}
+//
+// end of function
 
 // register the custom element
 //

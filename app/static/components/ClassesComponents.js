@@ -781,6 +781,7 @@ render() {
           <h1 class="header">Class Options</h1>
           <delete-class-button label="${label}"></delete-class-button>
           <draw-checkbox label="${label}" type="points"></draw-checkbox>
+          <draw-checkbox label="${label}" type="gaussian"></draw-checkbox>
         </div>
     </div>
     `;
