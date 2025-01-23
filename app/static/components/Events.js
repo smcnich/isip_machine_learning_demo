@@ -41,24 +41,10 @@ const bounds = {
     'y': [-1, 1]
 };
 
-function calcRange(x, y) {
-
-    // calculate the max value of the x and y data
-    //
-    const maxVal = Math.max(
-    ...[Math.floor(Math.min(...x)), Math.ceil(Math.max(...x))].map(Math.abs),
-    ...[Math.floor(Math.min(...y)), Math.ceil(Math.max(...y))].map(Math.abs)
-    )
-    
-    // return the range ensuring a square canvas
-    //
-    return {
-        'x': [-maxVal, maxVal], 
-        'y': [-maxVal, maxVal]
-    };
-};
-//
-// end of function
+const gaussParams = {
+    'numPoints': 15,
+    'cov': [[0.025, 0], [0, 0.025]]
+}
 
 // Listen for the 'train' event emitted from AlgoTool Component
 //
@@ -1109,8 +1095,8 @@ EventBus.addEventListener('enableDraw', (event) => {
 
     // enable drawing on the train and eval plots
     //
-    trainPlot.enableDraw(type, label);
-    evalPlot.enableDraw(type, label);
+    trainPlot.enableDraw(type, label, gaussParams.numPoints, gaussParams.cov);
+    evalPlot.enableDraw(type, label, gaussParams.numPoints, gaussParams.cov);
 })
 //
 // end of event listener
@@ -1310,7 +1296,30 @@ EventBus.addEventListener('continue', () => {
     // change the body class to ''
     //
     body.className = '';
-})
+});
+
+EventBus.addEventListener('setGaussianParams', (event) => {
+    /*
+    eventListener: setGaussianParams
+
+    dispatcher: ToolbarComponents::Toolbar_SetGaussian
+
+    args:
+     event.detail.numPoints (Number): the number of points in the gaussian
+     event.detail.cov (Array): the covariance of the gaussian
+
+    description:
+     set the gaussian draw parameters for when the user manually sets them. the
+     parameters will be called when the user draws gaussian
+    */
+
+    // set the gaussian parameters
+    //
+    gaussParams.numPoints = event.detail.numPoints;
+    gaussParams.cov = event.detail.cov;
+});
+//
+// end of event listener
 
 // Event listeners that depend on the website being loaded
 // before being triggered
