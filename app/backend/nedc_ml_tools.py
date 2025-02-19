@@ -3,9 +3,10 @@
 # file: $NEDC_NFC/class/python/nedc_ml_tools/nedc_ml_tools.py
 #
 # revision history:
+# 20250107 (SP): added TRANSFORMER class
 # 20240821 (DB): fixed an interface issue with scoring
 # 20240120 (SM): added/fixed confusion matrix and accuracy scores
-# 20240105 (PM): added new MLToolsData class and Euclidean Alg
+# 20240105 (PM): added new MLToolData class and Euclidean Alg
 # 20230623 (AB): code refactored to new comment style
 # 20230515 (PM): reviewed and refactored
 # 20230316 (JP): reviewed again
@@ -35,13 +36,13 @@
 from collections import defaultdict
 import datetime as dt
 import numpy as np
+import pandas as pd
 import pickle
 import os
 import sys
-
+import copy
 from imblearn.metrics import sensitivity_score, specificity_score
 from sklearn.naive_bayes import GaussianNB
-
 from sklearn.metrics import (silhouette_score,
                             classification_report,
                             precision_score,
@@ -55,20 +56,22 @@ from sklearn.neural_network import MLPClassifier, BernoulliRBM
 from sklearn.metrics import f1_score
 from sklearn.neural_network import BernoulliRBM
 from sklearn.pipeline import Pipeline
+from sklearn import linear_model
+import torch
 
 # import required NEDC modules
 #
 import nedc_debug_tools as ndt
 import nedc_file_tools as nft
 import nedc_cov_tools as nct
-import nedc_ml_tools_data as mltd
+import nedc_trans_tools as ntt
 
 #---------------------------- Example -----------------------------------------
 # alg = Alg()
 # alg.set(LDA_NAME)
 # alg.load_parameters("params_00.txt")
 #
-# data = MLToolsData("data.csv")
+# data = MLToolData("data.csv")
 #
 # score, model = alg.train(data)
 # labels, post = alg.predict(data)
@@ -122,6 +125,7 @@ ALG_FMT_WLB = "%10s"
 ALG_FMT_WCL = "%6d"
 ALG_FMT_WPC = "%6.2f"
 ALG_FMT_WST = "%6d (%6.2f%%)"
+ALG_FMT_DEC = ".4f"
 
 #------------------------------------------------------------------------------
 # Alg = PCA: define dictionary keys for parameters
@@ -135,11 +139,11 @@ PCA_NAME = "PCA"
 #  defaultdict(<class 'dict'>, {
 #   'name': 'PCA',
 #   'params': {
-#     'name': 'PCA',
-#     'prior': 'ml',
-#     'ctype': 'full',
-#    'center': 'None',
-#     'scale': 'biased'
+#                'name': 'PCA',
+#               'prior': 'ml',
+#               'ctype': 'full',
+#              'center': 'None',
+#               'scale': 'biased'
 #   }
 #  })
 #
@@ -160,9 +164,9 @@ PCA_PRM_KEY_COMP ='n_components'
 #  defaultdict(<class 'dict'>, {
 #   'name': 'PCA',
 #   'model': {
-#         'prior': numpy array,
-#         'means': list,
-#    'covariance': matrix
+#               'prior': numpy array,
+#         '      means': list,
+#          'covariance': matrix
 #   }
 #  })
 #
@@ -192,12 +196,12 @@ QDA_NAME = "QDA"
 #
 #   defaultdict(<class 'dict'>, {
 #    'name': 'QDA',
-#     'params': {
-#       'name': 'QDA',
-#      'prior': 'ml',
-#      'ctype': 'full',
-#     'center': 'None',
-#      'scale': 'biased'
+#    'params': {
+#                'name': 'QDA',
+#               'prior': 'ml',
+#               'ctype': 'full',
+#              'center': 'None',
+#               'scale': 'biased'
 #    }
 #   })
 #
@@ -216,9 +220,9 @@ QDA_PRM_KEY_COMP ='n_components'
 #   defaultdict(<class 'dict'>, {
 #    'name': 'QDA',
 #    'model': {
-#          'prior': numpy array,
-#          'means': list,
-#    'covariance': matrix
+#               'prior': numpy array,
+#               'means': list,
+#          'covariance': matrix
 #   }
 #  })
 #
@@ -246,11 +250,11 @@ LDA_NAME = "LDA"
 #  defaultdict(<class 'dict'>, {
 #   'name': 'LDA',
 #   'params': {
-#      'name': 'LDA',
-#     'prior': 'ml',
-#     'ctype': 'full',
-#    'center': 'None',
-#     'scale': 'None'
+#                'name': 'LDA',
+#               'prior': 'ml',
+#               'ctype': 'full',
+#              'center': 'None',
+#               'scale': 'None'
 #    }
 #  })
 #
@@ -269,9 +273,9 @@ LDA_PRM_KEY_SCALE = nct.PRM_SCALE
 #   defaultdict(<class 'dict'>, {
 #   'name': 'LDA',
 #   'model': {
-#        'prior': numpy array,
-#        'means': list,
-#    'transform': matrix
+#               'prior': numpy array,
+#               'means': list,
+#           'transform': matrix
 #   }
 #  })
 #
@@ -297,11 +301,11 @@ QLDA_NAME = "QLDA"
 #  defaultdict(<class 'dict'>, {
 #   'name': 'QLDA',
 #   'params': {
-#      'name': 'QLDA',
-#     'prior': 'ml',
-#     'ctype': 'full',
-#    'center': 'None',
-#     'scale': 'None'
+#                'name': 'QLDA',
+#               'prior': 'ml',
+#               'ctype': 'full',
+#              'center': 'None',
+#               'scale': 'None'
 #   }
 #  })
 #
@@ -321,9 +325,9 @@ QLDA_PRM_KEY_SCALE = nct.PRM_SCALE
 #   defaultdict(<class 'dict'>, {
 #    'name': 'QLDA',
 #    'model': {
-#         'prior': numpy array,
-#         'means': list,
-#     'transform': matrix
+#               'prior': numpy array,
+#               'means': list,
+#           'transform': matrix
 #   }
 #  })
 #
@@ -349,10 +353,10 @@ NB_NAME = "NB"
 #  defaultdict(<class 'dict'>, {
 #   'name': 'NB',
 #   'params': {
-#      'name': 'NB',
-#     'prior': 'ml'
-#     'average': 'None'
-#      'multi_class': 'ovr'
+#                'name': 'NB',
+#               'prior': 'ml'
+#             'average': 'None'
+#         'multi_class': 'ovr'
 #    }
 #  })
 NB_PRM_KEY_NAME = ALG_PRM_KEY_NAME
@@ -384,8 +388,8 @@ EUCLIDEAN_NAME = "EUCLIDEAN"
 #  defaultdict(<class 'dict'>, {
 #   'name': 'EUCLIDEAN',
 #   'params': {
-#      'name': 'EUCLIDEAN',
-#   'weights': list
+#                'name': 'EUCLIDEAN',
+#             'weights': list
 #    }
 #  })
 EUCLIDEAN_PRM_KEY_NAME = ALG_PRM_KEY_NAME
@@ -397,7 +401,7 @@ EUCLIDEAN_PRM_KEY_WEIGHTS = ALG_PRM_KEY_WEIGHTS
 #   defaultdict(<class 'dict'>, {
 #    'name': 'EUCLIDEAN',
 #    'model' {
-#      'means': list,
+#                'means': list,
 #    }
 #  })
 #
@@ -422,8 +426,8 @@ KNN_NAME = "KNN"
 #  defaultdict(<class 'dict'>, {
 #   'name': 'KNN',
 #   'params': {
-#      'name': 'KNN',
-#     'neighbor': 1
+#                 'name': 'KNN',
+#             'neighbor': 1
 #    }
 #  })
 
@@ -455,10 +459,10 @@ RNF_NAME = "RNF"
 #  defaultdict(<class 'dict'>, {
 #   'name': 'RNF',
 #   'params': {
-#       'name': 'RNF',
-#'n_estimator': 1,
-#  'max_depth': 5,
-#  'criterion': 'gini'
+#                 'name': 'RNF',
+#          'n_estimator': 1,
+#            'max_depth': 5,
+#            'criterion': 'gini'
 #    }
 #  })
 
@@ -493,10 +497,10 @@ SVM_NAME = "SVM"
 #  defaultdict(<class 'dict'>, {
 #   'name': 'SVM ,
 #   'params': {
-#      'name': 'SVM',
-#         'C': 1,
-#     'gamma': 0.1,
-#    'kernel': 'linear'
+#                 'name': 'SVM',
+#                    'C': 1,
+#                'gamma': 0.1,
+#               'kernel': 'linear'
 #    }
 #  })
 
@@ -624,12 +628,12 @@ RBM_NAME = "RBM"
 #   'name': 'RBM"
 #   'params': {
 #               'name': 'RBM',
-#          'n_components': 2,
-#             'learning_rate': 3,
-#       'batch_size': 0,
-#           'n_iter': 100,
-#           'verbose': 0,
-#            'random_state:None
+#       'n_components': 2,
+#      'learning_rate': 3,
+#         'batch_size': 0,
+#             'n_iter': 100,
+#            'verbose': 0,
+#       'random_state': None
 #    }
 #  })
 
@@ -653,12 +657,606 @@ RBM_PRM_KEY_CLASSIF ="classifier"
 RBM_MDL_KEY_NAME = ALG_MDL_KEY_NAME
 RBM_MDL_KEY_MODEL = ALG_MDL_KEY_MODEL
 
+#------------------------------------------------------------------------------
+# Alg = TRANSFORMER: define dictionary keys for parameters
+#
+# define the algorithm name
+#
+TRANSFORMER_NAME = "TRANSFORMER"
+
+# the parameter block for TRANSFORMER looks like this:
+#
+#  defaultdict(<class 'dict'>, {
+#   'name': 'TRANSFORMER"
+#   'params': {
+#                name : TRANSFORMER
+#               epoch : 50
+#                  lr : 0.001
+#          batch_size : 32
+#          embed_size : 32
+#              nheads : 2
+#          num_layers : 2
+#             MLP_dim : 64
+#             dropout : 0.1
+#    }
+#  })
+
+TRANS_PRM_KEY_NAME = ALG_PRM_KEY_NAME
+TRANS_PRM_KEY_PARAM = ALG_PRM_KEY_PARAM
+TRANS_PRM_KEY_EPOCH = "epoch"
+TRANS_PRM_KEY_LR = "lr"
+TRANS_PRM_KEY_BSIZE = "batch_size"
+TRANS_PRM_KEY_EMBED_SIZE = "embed_size"
+TRANS_PRM_KEY_NHEADS = "nheads"
+TRANS_PRM_KEY_NLAYERS = "num_layers"
+TRANS_PRM_KEY_MLP_DIM = "MLP_dim"
+TRANS_PRM_KEY_DROPOUT = "dropout"
+
+
+# The model for TRANSFORMER contains:
+# {'name': 'TRANSFORMER', 'model':
+# defaultdict(None, {'name': 'TRANSFORMER, 'model': OrderedDict([
+#     ('input_embedding.weight', tensor([32, 2])),
+#     ('input_embedding.bias', tensor(32)),
+#     ('encoder.layers.0.self_attention_block.w_q.weight', tensor([32, 32])),
+#     ('encoder.layers.0.self_attention_block.w_q.bias', tensor(32)),
+#     ('encoder.layers.0.self_attention_block.w_k.weight', tensor([32, 32])),
+#     ('encoder.layers.0.self_attention_block.w_k.bias', tensor(32)),
+#     ...
+#     ('encoder.norm.alpha', tensor([0.9810])),
+#     ('encoder.norm.beta', tensor([0.9940])),
+#     ('classifier.weight', tensor([2, 32])),
+#     ('classifier.bias', tensor([ 0.0642, -0.1198]))
+# ])})
+TRANS_MDL_KEY_NAME = ALG_MDL_KEY_NAME
+TRANS_MDL_KEY_MODEL = ALG_MDL_KEY_MODEL
+
+#------------------------------------------------------------------------------
 
 # declare global debug and verbosity objects so we can use them
 # in both functions and classes
 #
 dbgl_g = ndt.Dbgl()
 vrbl_g = ndt.Vrbl()
+
+#------------------------------------------------------------------------------
+#
+# helper classes listed here
+#
+#------------------------------------------------------------------------------
+
+class MLToolData:
+    """
+    Dataclass for MLToolData
+    """
+    def __init__(self, dir_path = "", lndx = 0, nfeats = -1):
+        """
+        method: constructor
+
+        arguments:
+         dir_path: directory path to the file ("")
+         lndx: the label index (0)
+         nfeats: number of features (-1)
+
+        return:
+         none
+
+        description:
+         none
+
+        note:
+         for nfeats, -1 means that we choose all of the features.
+        """
+
+        # store the passable variables
+        #
+        self.dir_path = dir_path
+        self.lndx = lndx
+        self.nfeats = nfeats
+
+        # set up needed data structures
+        #
+        self.data = []
+        self.labels = []
+        self.num_of_classes = 0
+        self.mapping_label = {}
+
+        # call the load method
+        #
+        self.load()
+
+    #
+    # end of method
+
+    def __repr__(self) -> str:
+        """
+        method: __repr__
+
+        arguments: None
+
+        return: an evaluatable string
+
+        description:
+         this method creates and returns an fstring that
+         can be used to recreate an MLToolData object evaluated
+        """
+
+        # exit gracefully
+        #  return an evaluatable fstring
+        #
+        return (f"MLToolData({self.dir_path}, label index = {self.lndx}, "
+                f"# of features = {self.nfeats if self.nfeats != -1 else 'all'})")
+
+    #
+    # end of method
+
+    @classmethod
+    def from_imld(cls, imld_data):
+        """
+        method: from_imld
+
+        arguments:
+         imld_data: data that is generated by IMLD
+         cls: a MLToolData class instance
+
+        return:
+         a MLToolData object
+
+        description:
+         this method is a class method that creates a new MLToolData object
+         from IMLD's data structure
+        """
+
+        # re-instantiate and re-initalize
+        # new MLToolData object
+        #
+        self = cls.__new__(cls)
+        self.dir_path = ""
+        self.lndx = 0
+        self.nfeats = -1
+        self.num_of_classes = len(imld_data)
+
+        # create temporary data structures
+        # to be filled by imld_data
+        #
+        labels = []
+        data = []
+        mapping_label = {}
+
+        # converting the data into our new format
+        #
+        for i, lists in enumerate(imld_data):
+
+            # store imld data into temporary
+            # variables
+            #
+            mapping_label[i] = i
+            labels.extend([i] * len(lists))
+            for item in lists:
+                data.append(item)
+
+        # conver labels, data to numpy arrays
+        #
+        labels = np.asarray(labels)
+        data = np.asarray(data)
+
+        # reset class field members to
+        # the imld data
+        #
+        self.labels = labels
+        self.data = data
+        self.mapping_label = mapping_label
+
+        # exit gracefully
+        #  return class instance
+        #
+        return self
+
+    #
+    # end of method
+
+    @staticmethod
+    def is_excel(fname):
+        """
+        method: is_excel
+
+        arguments:
+        fname: filename of the data
+
+        return:
+        a boolean value indicating status
+
+        description:
+        this method checks if file is an excel spreadsheet.
+        """
+
+        # use Pandas to open and parse the file. if this errors,
+        # we assume it is a csv file.
+        #
+        try:
+            pd.read_excel(fname)
+        except ValueError:
+            return False
+
+        # exit gracefully
+        #
+        return True
+
+    #
+    # end of method
+
+    def map_label(self):# -> type[list[_T]] | ndarray | NDArray:
+        """
+        method: map_label
+
+        arguemnts: None
+
+        return:
+         labels: a label map
+
+        description:
+         this fetches the info from the labels
+         class field member and remaps label
+         data to the unique labels mapping
+        """
+
+        # find the unique lables
+        #
+        labels = np.array(self.labels)
+        unique_labels = np.unique(labels)
+
+        # fetch the lables field member data
+        #
+        labels = self.labels
+
+        # loop over all unique labels
+        #
+        for i in range(len(unique_labels)):
+
+            # loop over all label data
+            #
+            for j in range(len(labels)):
+
+                # if the label data is equal to
+                # a unique label remap label value
+                # to unique labels index
+                #
+                if labels[j] == unique_labels[i]:
+
+                    # remap label data
+                    #
+                    labels[j]=i
+
+        # exit gracefully
+        #  return remaped labels
+        #
+        return labels
+
+    #
+    # end of method
+
+    def load(self):
+        """
+        method: load_data
+
+        arguments: None
+
+        return: None
+
+        description:
+         this method reads data from either an excel sheet or csv file
+         and converts it to a dictionary representing the labels and the data.
+
+         Ex: MLToolData attributes:
+             labels: numpy.ndarray[0, 0, 0, 1, 1, 1, 1]
+             data  : [np.ndarray[01,02,03],
+                     [04,05,06],
+                     [07,08,09],
+                     [60,61,62],
+                     [70,71,72],
+                     [80,81,82],
+                     [90,91,92]]
+
+
+         The example data above has 2 classes and 3 features.The labels ordering
+         and data ordering are the same. The first three vectors are in class "0"
+         and the last four are in class "1".
+
+         for nfeats, it will use all the feature from the start to the specified
+         value Not counting the label column.
+
+         Ex: if nfeats = 3, then we assume column [0,1,2].
+
+         Ex: If we have [0,1,2,3,4,5] and lndx = 1, nFeatures = 3 then the column
+             features would be [0,2,3] since we exclude the column label.
+
+         if the data fails to be loaded, an error is generated and None is
+         returned.
+        """
+
+        # display an informational message
+        #
+        if dbgl_g == ndt.FULL:
+            print("%s (line: %s) %s: reading data" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__))
+
+        # attempt to read the excel or csv file
+        # with the labels and data
+        #
+        try:
+
+            # read excel file if excel
+            #
+            if self.is_excel(self.dir_path):
+                df = pd.read_excel(self.dir_path, header = None)
+
+            # read csv file if not excel file
+            #
+            else:
+                df = pd.read_csv(
+                    self.dir_path,
+                    header = None,
+                    engine = "c",
+                    comment = "#")
+
+        # catch the exception and pretend its only
+        # an unknow data file or data format issue
+        # permission errors dont exist
+        #
+        except Exception:
+
+            # print an informational statment and exit
+            #
+            raise("Error: %s (line: %s) %s: %s (%s)" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "unknown file or data format", self.dir_path))
+
+        # if the label label index we want
+        # is not in the bounds of the dataframe
+        # length print an error message and return none
+        #
+        if self.lndx >= df.shape[1]:
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Label index out of range"))
+            return None
+
+        # pop the label column of interest
+        #
+        label_column = df.pop(self.lndx)
+
+        # clear label map if there was one already
+        #
+        if not self.mapping_label:
+            self.mapping_label.clear()
+
+        # create a label map for readable label to an index.
+        #   Note: Since we are sorting, the mapping will not always be in order
+        #         if string because sorting uses string comparison
+        #
+        for ind, val in enumerate(sorted(label_column.unique())):
+
+            # if the label is a string, then we would use the
+            # string as the key
+            #
+            if isinstance(val, str):
+                self.mapping_label[ind] = val
+
+            # assume any label that is not a string to be a integer
+            #
+            else:
+                self.mapping_label[ind] = int(val)
+
+        # set nfeats to negative one (we select all features)
+        # if the number of feats is greator than the number of
+        # columns in the dataframe of if nfeats is less then -1
+        #
+        if self.nfeats >= df.shape[1] or self.nfeats < -1:
+            self.nfeats = -1
+
+        # if the number of feature is specified then we would need to reshape
+        # the data frame
+        #
+        if self.nfeats != -1:
+            df = df.iloc[:, : self.nfeats]
+
+        # append the label column at the beginning of the dataframe
+        # and rename its column
+        #
+        df = pd.concat([label_column, df], axis = 1)
+        df.columns = list(range(df.shape[1]))
+
+        # set the index of the table using the label column
+        #
+        df.set_index(df.keys()[0], inplace = True)
+
+        # set the data, labels and num_of_classes
+        #
+        self.data = df.values
+        self.labels = df.index.to_numpy()
+        self.num_of_classes = len(set(self.labels))
+
+    #
+    # end of method
+
+    def sort(self, inplace = False):
+        """
+        method: sort
+
+        arguments:
+         inplace: flag to sort the data inplace (False)
+
+        return:
+         If inplace = True -> returns None
+         If inplace = False -> returns the sorted data
+
+        description:
+        this method sorts the given data model.
+        """
+
+        # samples and labels
+        #
+        samples = self.data
+        labels = np.array(self.labels)
+
+        # np.unique() returns a set of unique values that
+        # is in order
+        #
+        uniq_labels = np.unique(labels)
+
+        # empty list to save sorted data snd labels
+        #
+        sorted_data = []
+        sorted_labels = []
+
+        # loop through the unique labels
+        #
+        for element in uniq_labels:
+
+            # empty list to save class labels and class data
+            #
+            class_data = []
+            class_labels = []
+
+            # loop through the len labels and compare labels with unique label
+            #
+            for i in range(len(labels)):
+                if labels[i] == element:
+                    class_data.append(samples[i])
+                    class_labels.append(labels[i])
+
+            # append sorted data to sorted lists
+            #
+            sorted_data.extend(class_data)
+            sorted_labels.extend(class_labels)
+
+        # convert sorted data/labels to numpy array
+        #
+        sorted_data = np.array(sorted_data)
+        sorted_labels = np.array(sorted_labels)
+
+        # if in place set the data/labels field members
+        # and reutrn nothing
+        #
+        if inplace:
+
+            # reset field members
+            #
+            self.data = sorted_data
+            self.labels = sorted_labels
+
+            # exit gracefully
+            #  return nothing
+            #
+            return None
+
+
+        # if no inplace return a new instance
+        # filled with the sorted data/labels
+        #
+        else:
+
+            # copy current instance and set field
+            # members appropriately
+            #
+            MLToolDataNew = copy.deepcopy(self)
+            MLToolDataNew.data = sorted_data
+            MLToolDataNew.labels = sorted_labels
+
+            # exit gracefully
+            #  return new MLToolData object with
+            #  the sorted data
+            #
+            return MLToolDataNew
+
+        #
+        # end of method
+
+    def write(self, oname, label):
+        """
+        method: write
+
+        argument:
+         oname: the output file name
+         label: the label to write
+
+        return: boolean indicating the status
+
+        description:
+         this method writes the data with new label to a file
+        """
+
+        # create a dataframe from the data
+        #
+        d = pd.DataFrame(self.data)
+
+        #  add the label to the first column of the file
+        #
+        try:
+            d.insert(0, column = "labels", value = label)
+
+        # if label insertion fails handle catch and handle expection
+        #
+        except ValueError:
+
+            # print error message
+            #
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Labels column already existed within the data"))
+
+            # exit ungracefully
+            #
+            return False
+
+        # output data frames to excel/csv files
+        #
+        if self.is_excel(self.dir_path):
+            d.to_excel(oname)
+        else:
+            d.to_csv(oname, index = False, header = False)
+
+        # exit gracefully
+        #  all data successfully writen to output file
+        #
+        return True
+
+    #
+    # end of method
+
+    def group_by_class(self):
+        """
+        method: group_by_class
+
+        argument:
+         none
+
+        return:
+         group data: the labels group data
+
+        description:
+         this method group the data by the label
+        """
+
+        # create a dictionary to store the data
+        #
+        group_data = defaultdict(list)
+
+        # loop through the labels and data and append the data to the
+        # corresponding label in the dictionary group_data
+        #
+        for label, data in zip(self.labels, self.data):
+            group_data[label].append(data)
+
+        # exit gracefully
+        #  return group data
+        #
+        return group_data
+
+    #
+    # end of method
+#
+# end of dataclass
 
 #------------------------------------------------------------------------------
 #
@@ -701,7 +1299,11 @@ class Alg:
         # set the class name
         #
         Alg.__CLASS_NAME__ = self.__class__.__name__
+
+        # set alg name to none
+        #
         self.alg_d = None
+
     #
     # end of method
 
@@ -735,15 +1337,26 @@ class Alg:
         #
         if alg_name in ALGS:
             self.alg_d = ALGS[alg_name]
+
+        # if the algorithm is not set print an error message and exit
+        #
         else:
+
+            # print informational error message
+            #
             print("Error: %s (line: %s) %s: %s (%s)" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__,
                    "unknown algorithm name", alg_name))
+
+            # exit ungracefully
+            #  algorithm setting failed
+            #
             return False
 
         # exit gracefully
         #
         return True
+
     #
     # end of method
 
@@ -770,6 +1383,9 @@ class Alg:
         # check that the argument is a valid dictionary
         #
         if not isinstance(parameters, (dict, defaultdict)):
+
+            # if not a valid dictionary print error message and exit
+            #
             raise TypeError(
             f"{__FILE__} (line: {ndt.__LINE__} {ndt.__NAME__}: ",
             "invalid parameter structure",
@@ -778,6 +1394,10 @@ class Alg:
         # check the algorithm name of the parameter file
         #
         if self.set(parameters[ALG_PRM_KEY_NAME]) is False:
+
+            # if the algorithm specified in the parameter file
+            # is not supprted print error message
+            #
             print("Error: %s (line: %s) %s: %s (%s)" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__,
                    "unsupported algorithm name", parameters[ALG_PRM_KEY_NAME]))
@@ -789,6 +1409,7 @@ class Alg:
         # exit gracefully
         #
         return True
+
     #
     # end of method
 
@@ -796,8 +1417,7 @@ class Alg:
         """
         method: get
 
-        arguments:
-         none
+        arguments: none
 
         return:
          the current algorithm setting by name
@@ -815,14 +1435,24 @@ class Alg:
         # check if an algorithm is set
         #
         if self.alg_d is None:
+
+            # print error message if the algorithm
+            # was not set
+            #
             print("Error: %s (line: %s) %s: %s" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__,
                    "no algorithm has been set"))
+
+            # exit ungracefully
+            #  algoritm is not set
+            #
             return None
 
         # exit gracefully
+        #  return algorithm type
         #
         return self.alg_d.__class__.__name__
+
     #
     # end of method
 
@@ -834,7 +1464,7 @@ class Alg:
          data: the data including labels
 
         return:
-         a list of labels in a list (needed by numpy)
+         labels: a list of labels in a list (needed by numpy)
 
         description:
          We use this method to convert the data to a flat list of labels for
@@ -846,8 +1476,10 @@ class Alg:
         labels = data.labels
 
         # exit gracefully
+        #  return ref label info for numpy
         #
         return labels
+
     #
     # end of method
 
@@ -870,8 +1502,10 @@ class Alg:
         labels = hyp_labels
 
         # exit gracefully
+        #  return the hyp_labels for numpy
         #
         return labels
+
     #
     # end of method
 
@@ -892,7 +1526,7 @@ class Alg:
          a dictionary containing the model
 
         description:
-         none
+         this method loads a compatible picked model
         """
 
         # unpickle the model file
@@ -933,9 +1567,11 @@ class Alg:
         #
         self.alg_d.model_d = model
 
-        # exit gracefully and return the model
+        # exit gracefully
+        #  return the model
         #
         return self.alg_d.model_d
+
     #
     # end of method
 
@@ -950,7 +1586,7 @@ class Alg:
          a dictionary containing the parameters
 
         description:
-         note that this method loads a specific algorithm parameter block.
+         this method loads a specific algorithm parameter block.
          the algorithm name must be set before it is called.
         """
 
@@ -974,7 +1610,7 @@ class Alg:
             print("Error: %s (line: %s) %s: %s" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__,
                    "invalid parameter file (version not specified or \
-                   invalid verison)"))
+                   invalid version)"))
             return None
 
         # attempt to load the parameters
@@ -992,8 +1628,10 @@ class Alg:
         self.alg_d.params_d[ALG_PRM_KEY_PARAM] = params
 
         # exit gracefully
+        #  return loaded parameters
         #
         return self.alg_d.params_d
+
     #
     # end of method
 
@@ -1038,6 +1676,7 @@ class Alg:
             return False
 
         # exit gracefully
+        #  model successfully saved
         #
         return True
     #
@@ -1054,7 +1693,7 @@ class Alg:
          a boolean value indicating status
 
         description:
-         this function writes the current self.alg.params_d to an
+         this method writes the current self.alg.params_d to an
          NEDC parameter file
         """
 
@@ -1105,8 +1744,10 @@ class Alg:
         fp.write("%s" % (nft.DELIM_BCLOSE + nft.DELIM_NEWLINE))
 
         # exit gracefully
+        #  parameters successfully written to parameter file
         #
         return True
+
     #
     # end of method
 
@@ -1117,7 +1758,7 @@ class Alg:
     #--------------------------------------------------------------------------
 
     def train(self,
-              data: mltd.MLToolsData,
+              data: MLToolData,
               *, # This means that after the "data" argument,
                  # you would need a keyword argument.
               write_train_labels = False,
@@ -1169,24 +1810,35 @@ class Alg:
             print("Error: %s (line: %s) %s: %s" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__,
                    "no algorithm has been set"))
+
+            # exit ungracefully
+            #  algorithm not set
+            #
             return None, None
 
-        if not isinstance(data, mltd.MLToolsData):
+        # check that the data variable is an MLToolData
+        # instance
+        #
+        if not isinstance(data, MLToolData):
             print("Error: %s (line: %s) %s: %s" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__,
-                   "data is not type of MLToolsData"))
+                   "data is not type of MLToolData"))
+
+            # exit ungracefully
+            #  incompatible object type
+            #
             return None, None
 
         # exit gracefully
+        #  return model and its score
         #
-        return self.alg_d.train(data,
-                                write_train_labels,
-                                fname_train_labels)
+        return self.alg_d.train(data, write_train_labels, fname_train_labels)
+
     #
     # end of method
 
     def predict(self,
-                data: mltd.MLToolsData,
+                data: MLToolData,
                 model = None):
         """
         method: predict
@@ -1201,7 +1853,7 @@ class Alg:
          for each class assignment
 
         description:
-         none
+         this is a wrapper method that calls the set algorithms predict method
         """
 
         # display an informational message
@@ -1216,17 +1868,29 @@ class Alg:
             print("Error: %s (line: %s) %s: %s" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__,
                    "no algorithm has been set"))
+
+            # exit ungracefully
+            #  algorithm not set
+            #
             return None, None
 
-        if not isinstance(data, mltd.MLToolsData):
+        # check if data variable is an MLToolData instance
+        #
+        if not isinstance(data, MLToolData):
             print("Error: %s (line: %s) %s: %s" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__,
-                   "data is not type of MLToolsData"))
+                   "data is not type of MLToolData"))
+
+            # exit ungracefully
+            #  incompatible object type
+            #
             return None, None
 
         # exit gracefully
+        #  reutn model prediction
         #
         return self.alg_d.predict(data, model)
+
     #
     # end of method
 
@@ -1263,9 +1927,11 @@ class Alg:
         #
         lbls = list(range(num_classes))
 
-        # get the confusion matrix
+        # exit gracefully
+        #  return confusion matrix
         #
         return sklearn_confusion_matrix(ref_labels, hyp_labels, labels = lbls)
+
     #
     # end of method
 
@@ -1282,10 +1948,10 @@ class Alg:
          a boolean value indicating status
 
         description:
-         none
+         prints the confusion matirx
         """
 
-        # get the number of rows and colums for the numeric data:
+        # get the number of rows and columns for the numeric data:
         #  we assume a square matrix in this case
         #
         nrows = len(cnf)
@@ -1294,7 +1960,13 @@ class Alg:
         # create the table headers
         #
         headers = ["Ref/Hyp:"]
+
+        # iterate over the confusion matrix rows
+        #
         for i in range(nrows):
+
+            # append mapping label to headers list
+            #
             if isinstance(mapping_label[i], int):
                 headers.append(ALG_FMT_LBL % mapping_label[i])
             else:
@@ -1303,18 +1975,28 @@ class Alg:
         # convert the confusion matrix to percentages
         #
         pct = np.empty_like(cnf, dtype = float)
+
+        # sum over the confusion matrix rows
+        #
         for i in range(nrows):
+
+            # sum the rows values
+            #
             sum = float(cnf[i].sum())
+
+            # convert (row, column) of confusion matrix to
+            # precentages
+            #
             for j in range(ncols):
                 pct[i][j] = float(cnf[i][j]) / sum
 
-        # get the width of each colum and compute the total width:
-        #  the width of the percentage column includes "()" and two spaces
+        # get the width of each column and compute the total width:
+        # the width of the percentage column includes "()" and two spaces
         #
         width_lab = int(float(ALG_FMT_WLB[1:-1]))
         width_cell = int(float(ALG_FMT_WCL[1:-1]))
         width_pct = int(float(ALG_FMT_WPC[1:-1]))
-        width_paren = 4
+        width_paren = int(4)
         total_width_cell = width_cell + width_pct + width_paren
         total_width_table = width_lab + \
             ncols * (width_cell + width_pct + width_paren)
@@ -1363,17 +2045,18 @@ class Alg:
             fp.write(nft.DELIM_NEWLINE)
 
         # exit gracefully
+        #  confusion matrix successfully printed
         #
         return True
+
     #
     # end of method
 
-    def score(self, num_classes, data:mltd.MLToolsData, hyp_labels, *,
+    def score(self, num_classes, data, hyp_labels, *,
               isPrint = False,
               fp = sys.stdout):
         """
         method: score
-
 
         arguments:
          num_classes: the number of classes
@@ -1399,6 +2082,8 @@ class Alg:
             print("%s (line: %s) %s: scoring the results" %
                 (__FILE__, ndt.__LINE__, ndt.__NAME__))
 
+        # get the reference and hypothesis field member data
+        #
         r_labels = self.get_ref_labels(data)
         h_labels = self.get_hyp_labels(hyp_labels)
 
@@ -1408,21 +2093,25 @@ class Alg:
 
         # calculate accuracy and error score
         #
-        acc = accuracy_score(r_labels, h_labels)   
+        acc = accuracy_score(r_labels, h_labels)
         err = ALG_SCL_PCT * (float(1.0) - acc)
         sens = None
         spec = None
         prec = None
         f1 = None
 
+        # print confusion matrix and return nothing if specified
+        #
         if isPrint:
 
+            # print the confusion matrix
+            #
             self.print_confusion_matrix(conf_matrix, data.mapping_label, fp = fp)
             fp.write(nft.DELIM_NEWLINE)
 
             # generate a master list of labels:
-            #  we have to do this because some of the labels might not appear
-            #  in the data
+            # we have to do this because some of the labels might not appear
+            # in the data
             #
             lbls = []
             for i in range(num_classes):
@@ -1438,20 +2127,30 @@ class Alg:
             # print out the error rate
             #
             print(ALG_FMT_ERR % ("error rate", err))
+
         else:
 
+            # set the averaging method accordingly
+            #
             if num_classes > 2:
                 average='macro'
             else:
                 average='binary'
 
-            sens = sensitivity_score(r_labels, h_labels, average=average)   
+            # calculate necessary scores
+            #
+            sens = sensitivity_score(r_labels, h_labels, average=average)
             spec = specificity_score(r_labels, h_labels, average=average)
-            prec = precision_score(r_labels, h_labels, average=average, 
-                                     zero_division=0)
-            f1 = f1_score(r_labels, h_labels, average=average, zero_division=0)
+            prec = precision_score(r_labels, h_labels, average=average)
+            f1 = f1_score(r_labels, h_labels, average=average)
 
+        # exit gracefully
+        #  operation successfully completed
+        #
         return None if isPrint else conf_matrix, sens, spec, prec, acc, err, f1
+
+    #
+    # end of method
 
     def print_score(self, num_classes, data, hyp_labels, fp = sys.stdout):
         """
@@ -1515,10 +2214,13 @@ class Alg:
         print(ALG_FMT_ERR % ("error rate", err))
 
         # exit gracefully
+        #  score successfully printed
         #
         return True
+
     #
     # end of method
+
 #
 # end of Alg
 
@@ -1582,7 +2284,7 @@ class PCA:
     #--------------------------------------------------------------------------
 
     def train(self,
-              data : mltd.MLToolsData,
+              data : MLToolData,
               write_train_labels: bool,
               fname_train_labels: str,
               ):
@@ -1591,7 +2293,7 @@ class PCA:
 
         arguments:
          data: a list of numpy float matrices of feature vectors
-         write_train_labels: a boolean to wehther write the train data
+         write_train_labels: a boolean to whether write the train data
          fname_train_labels: the filename of the train file
 
         return:
@@ -1615,17 +2317,34 @@ class PCA:
         #
         data = data.sort()
 
+        # fetch the unique labels
+        #
         uni_label = np.unique(data.labels)
-        new_data =[]
+
+        # create list to hold new data
+        #
+        new_data = []
+
+        # iterate over all unique labels
+        #
         for i in range(len(uni_label)):
 
-            class_data =[]
+            # create a temporary list to hold class data
+            #
+            class_data = []
 
+            # iterate over all labels stored in
+            # MLToolData instance
+            #
             for j in range(len(data.labels)):
 
+                # remap data
+                #
                 if uni_label[i]==data.labels[j]:
                     class_data.append(data.data[j])
 
+            # convert new data into numpy array
+            #
             new_data.append(np.array(class_data))
 
         # calculating number of classes
@@ -1663,7 +2382,7 @@ class PCA:
 
                 # appending the number of the samples in
                 # each element (class) to empty array
-
+                #
                 priors = np.append(priors, len(element))
 
             # final calculation of priors
@@ -1697,6 +2416,7 @@ class PCA:
             center= self.params_d[PCA_PRM_KEY_PARAM][PCA_PRM_KEY_CENTER],
             scale= self.params_d[PCA_PRM_KEY_PARAM][PCA_PRM_KEY_SCALE])
         cov = self.model_d[PCA_MDL_KEY_MODEL][PCA_MDL_KEY_COV]
+        print(cov)
 
         # number of components
         #
@@ -1720,6 +2440,8 @@ class PCA:
         #
         sorted_indexes = eigvals.argsort()[::-1]
 
+        # get eigenvalue and eigenvectors
+        #
         eigvals = eigvals[sorted_indexes[0:n_comp]]
         eigvecs = eigvecs[:,sorted_indexes[0:n_comp]]
         if any(eigvals < 0):
@@ -1775,7 +2497,7 @@ class PCA:
     # end of method
 
     def predict(self,
-                data: mltd.MLToolsData,
+                data: MLToolData,
                 model = None):
         """
         method: predict
@@ -1820,7 +2542,6 @@ class PCA:
 
         # get the number of dimensions
         #
-
         ndim = data.data.shape[1]
 
         # transform data to new environment
@@ -1846,13 +2567,11 @@ class PCA:
         posteriors = []
 
         for j in range(len(data.data)):
-            #print(data.data[j])
 
             # loop over number of classes
             #
             sample = data.data[j] @ t
             count =0
-            #post = np.zeros((1, num_classes))
             post =[]
             for k in range(num_classes):
 
@@ -1865,7 +2584,6 @@ class PCA:
 
                 # mean of class k
                 #
-                #m = model[PCA_MDL_KEY_MODEL][PCA_MDL_KEY_MEANS][k]
                 m = mt[k]
 
                 # posterior calculation for sample j
@@ -1876,8 +2594,6 @@ class PCA:
                 g2 = np.exp(-1/2 * g1)
                 g = g2 * scale * prior
                 count = count + g
-
-                #post[0,k] +=g
                 post.append(g)
 
             post = post/count
@@ -1959,7 +2675,7 @@ class QDA:
     #--------------------------------------------------------------------------
 
     def train(self,
-              data: mltd.MLToolsData,
+              data: MLToolData,
               write_train_labels: bool,
               fname_train_labels: str,
               ):
@@ -1968,7 +2684,7 @@ class QDA:
 
         arguments:
          data: a list of numpy float matrices of feature vectors
-         write_train_labels: a boolean to wehther write the train data
+         write_train_labels: a boolean to whether write the train data
          fname_train_labels: the filename of the train file
 
         return:
@@ -2092,9 +2808,9 @@ class QDA:
             #
             eigvals, eigvecs = np.linalg.eig(covar)
 
-            # sorted eigenvals and eigvecs and choose
-            # the first l-1 columns from eigenvals
-            # and eigenvecs
+            # sorted eigenvalues and eigvecs and choose
+            # the first l-1 columns from eigenvalues
+            # and eigenvectors
             #
             sorted_indexes = eigvals.argsort () [::-1]
             eigvals = eigvals[sorted_indexes[0:n_comp]]
@@ -2149,7 +2865,7 @@ class QDA:
     # end of method
 
     def predict(self,
-                data: mltd.MLToolsData,
+                data: MLToolData,
                 model = None):
         """
         method: predict
@@ -2194,7 +2910,6 @@ class QDA:
 
         # get the number of features
         #
-
         ndim = data.data.shape[1]
 
         # transform data and mean to new space
@@ -2210,7 +2925,7 @@ class QDA:
             m_new = mu[i] @ t[i]
             mt.append(m_new)
 
-        # precompute the scaling term
+        # pre-compute the scaling term
         #
         scale = np.power(2 * np.pi, -ndim / 2)
 
@@ -2223,14 +2938,15 @@ class QDA:
         #
         for j in range(len(data.data)):
 
+            # create temporary helper variables
+            #
             count = 0
-            #post = np.zeros((1, num_classes))
-            post =[]
-            #dist=[]
+            post = []
 
             # loop over number of classes
             #
             for k in range(num_classes):
+
                 sample = data.data[j] @ t[k]
 
                 # manually compute the log likelihood
@@ -2242,22 +2958,16 @@ class QDA:
 
                 # mean of class k
                 #
-                #m = model[QDA_MDL_KEY_MODEL][QDA_MDL_KEY_MEANS][k]
                 m = mt[k]
 
                 # posterior calculation for sample j
                 #
                 # @ : short-hand notation for matrix multiplication
                 #
-
                 g1 = (sample - m).T @ (sample-m)
-                #g1 = (sample - m).T @ inv_cov @ (sample-m)
                 g2 = np.exp(-1/2 * g1)
                 g = g2 * scale * prior
-                #dist.append(g2*prior)
-                #g =
                 count = count + g
-                #post[0,k] += g
                 post.append(g)
 
             post = post/count
@@ -2265,7 +2975,6 @@ class QDA:
             # choose the class label with the highest posterior
             #
             labels.append(np.argmax(post))
-            #labels.append(np.argmin(np.array(dist))
 
             # save the posteriors
             #
@@ -2331,7 +3040,7 @@ class LDA:
     #--------------------------------------------------------------------------
 
     def train(self,
-              data: mltd.MLToolsData,
+              data: MLToolData,
               write_train_labels: bool,
               fname_train_labels: str,
               ):
@@ -2340,7 +3049,7 @@ class LDA:
 
         arguments:
          data: a list of numpy float matrices of feature vectors
-         write_train_labels: a boolean to wehther write the train data
+         write_train_labels: a boolean to whether write the train data
          fname_train_labels: the filename of the train file
 
         return:
@@ -2431,6 +3140,7 @@ class LDA:
         means = []
         for elem in new_data:
             means.append(np.mean(elem, axis = 0))
+
         self.model_d[LDA_MDL_KEY_MODEL][LDA_MDL_KEY_MEANS] = means
 
         # calculate the global mean
@@ -2481,18 +3191,8 @@ class LDA:
         # calculation of sw^-1*sb
         #
         j = sw_in.dot(sb)
-        try:
-            j_inv = np.linalg.inv(j)
-        except np.linalg.LinAlgError:
 
-            print("Error: %s (line: %s) %s: %s" %
-                  (__FILE__, ndt.__LINE__, ndt.__NAME__,
-                   "singular matrix"))
-            self.model_d[LDA_MDL_KEY_MODEL].clear()
-
-            return None, None
-
-        # number of the eigenvectorss need to be chosen
+        # number of the eigenvectors need to be chosen
         # it is equal to the num_class minus 1
         #
         l = (len(new_data))-1
@@ -2501,9 +3201,9 @@ class LDA:
         #
         eigvals, eigvecs = np.linalg.eig(j)
 
-        # sorted eigenvals and eigvecs and choose
-        # the first l-1 columns from eigenvals
-        # and eigenvecs
+        # sorted eigenvalues and eigvecs and choose
+        # the first l-1 columns from eigenvalues
+        # and eigenvectors
         #
         sorted_indexes = eigvals.argsort()[::-1]
         eigvals = eigvals[sorted_indexes[0:l]]
@@ -2560,7 +3260,7 @@ class LDA:
     # end of method
 
     def predict(self,
-                data: mltd.MLToolsData,
+                data: MLToolData,
                 model = None):
         """
         method: predict
@@ -2605,7 +3305,6 @@ class LDA:
 
         # get the number of classes and number of features
         #
-
         ndim = data.data.shape[1]
 
         # transform data to new environment
@@ -2649,7 +3348,6 @@ class LDA:
 
                 # mean of class k
                 #
-                #m = model[LDA_MDL_KEY_MODEL][LDA_MDL_KEY_MEANS][k]
                 m = mt[k]
 
                 # posterior calculation for sample j
@@ -2732,7 +3430,7 @@ class QLDA:
     #--------------------------------------------------------------------------
 
     def train(self,
-              data: mltd.MLToolsData,
+              data: MLToolData,
               write_train_labels: bool,
               fname_train_labels: str,
               ):
@@ -2741,7 +3439,7 @@ class QLDA:
 
         arguments:
          data: a list of numpy float matrices of feature vectors
-         write_train_labels: a boolean to wehther write the train data
+         write_train_labels: a boolean to whether write the train data
          fname_train_labels: the filename of the train file
 
         return:
@@ -2868,8 +3566,8 @@ class QLDA:
             #
             sw = priors[i] * nct.compute(d, \
             ctype = self.params_d[QLDA_PRM_KEY_PARAM][QLDA_PRM_KEY_CTYPE],
-            center= self.params_d[QLDA_PRM_KEY_PARAM][QLDA_PRM_KEY_CENTER],
-            scale= self.params_d[QLDA_PRM_KEY_PARAM][QLDA_PRM_KEY_SCALE])
+            center = self.params_d[QLDA_PRM_KEY_PARAM][QLDA_PRM_KEY_CENTER],
+            scale = self.params_d[QLDA_PRM_KEY_PARAM][QLDA_PRM_KEY_SCALE])
 
             # check singularity
             #
@@ -2888,24 +3586,14 @@ class QLDA:
             #
             j = sw_in.dot(sb)
 
-            try:
-                j_inv = np.linalg.inv(j)
-            except np.linalg.LinAlgError:
-                print("Error: %s (line: %s) %s: %s" %
-                      (__FILE__, ndt.__LINE__, ndt.__NAME__,
-                       "singular matrix"))
-                self.model_d[LDA_MDL_KEY_MODEL].clear()
-
-                return None, None
-
             # eigen vector and eigen value decomposition
             # for each class
             #
             eigvals, eigvecs = np.linalg.eig(j)
 
-            # sorted eigenvals and eigvecs and choose
-            # the first l-1 columns from eigenvals
-            # and eigenvecs
+            # sorted eigenvalues and eigvecs and choose
+            # the first l-1 columns from eigenvalues
+            # and eigenvectors
             #
             sorted_indexes = eigvals.argsort () [::-1]
             eigvals = eigvals[sorted_indexes[0:l]]
@@ -2946,6 +3634,7 @@ class QLDA:
                 sum += np.linalg.norm(transf*(v - means[i]))
 
             # weight by the prior
+            #
             gsum += self.model_d[QLDA_MDL_KEY_MODEL][QLDA_MDL_KEY_PRIOR][i] * \
                 sum
         score = gsum / float(npts)
@@ -2953,11 +3642,12 @@ class QLDA:
         # exit gracefully
         #
         return self.model_d, score
+
     #
     # end of method
 
     def predict(self,
-                data: mltd.MLToolsData,
+                data: MLToolData,
                 model = None):
         """
         method: predict
@@ -3021,7 +3711,7 @@ class QLDA:
 
 
 
-        # precompute the scaling term
+        # pre-compute the scaling term
         #
         scale = np.power(2 * np.pi, -ndim / 2)
 
@@ -3053,7 +3743,6 @@ class QLDA:
 
                 # mean of class k
                 #
-                #m = model[QLDA_MDL_KEY_MODEL][QLDA_MDL_KEY_MEANS][k]
                 m = mt[k]
 
                 # posterior calculation for sample j
@@ -3076,15 +3765,15 @@ class QLDA:
 
             # save the posteriors
             #
-
             posteriors.append(post)
 
         # exit gracefully
         #
-        #print('labels',labels)
         return labels, posteriors
+
     #
     # end of method
+
 #
 # end of QLDA
 
@@ -3139,7 +3828,7 @@ class NB:
     #--------------------------------------------------------------------------
 
     def train(self,
-              data: mltd.MLToolsData,
+              data: MLToolData,
               write_train_labels: bool,
               fname_train_labels: str,
               ):
@@ -3148,7 +3837,7 @@ class NB:
 
         arguments:
          data: a list of numpy float matrices of feature vectors
-         write_train_labels: a boolean to wehther write the train data
+         write_train_labels: a boolean to whether write the train data
          fname_train_labels: the filename of the train file
 
         return:
@@ -3168,7 +3857,6 @@ class NB:
         # calculate number of classes
         #
         data = data.sort()
-        #print(data)
         uni_label = np.unique(data.labels)
         new_data =[]
         for i in range(len(uni_label)):
@@ -3177,7 +3865,7 @@ class NB:
                 if uni_label[i]==data.labels[j]:
                     class_data.append(data.data[j])
             new_data.append(np.array(class_data))
-        #print(new_data)
+
         num_classes = len(new_data)
 
         # calculate number of data points
@@ -3257,7 +3945,7 @@ class NB:
     # end of method
 
     def predict(self,
-                data: mltd.MLToolsData,
+                data: MLToolData,
                 model = None):
         """
         method: predict
@@ -3354,7 +4042,7 @@ class EUCLIDEAN:
             the weighted euclidean distance
 
         description:
-            this function returns the weighted euclidean distance
+            this method returns the weighted euclidean distance
         """
         q = p2 - p1
         return np.sqrt((w*q*q).sum())
@@ -3368,7 +4056,7 @@ class EUCLIDEAN:
     #--------------------------------------------------------------------------
 
     def train(self,
-              data: mltd.MLToolsData,
+              data: MLToolData,
               write_train_labels: bool,
               fname_train_labels: str,
               ):
@@ -3377,7 +4065,7 @@ class EUCLIDEAN:
 
         arguments:
          data: a list of numpy float matrices of feature vectors
-         write_train_labels: a boolean to wehther write the train data
+         write_train_labels: a boolean to whether write the train data
          fname_train_labels: the filename of the train file
 
         return:
@@ -3387,6 +4075,7 @@ class EUCLIDEAN:
         description:
          none
         """
+
         # display an informational message
         #
         if dbgl_g == ndt.FULL:
@@ -3433,7 +4122,7 @@ class EUCLIDEAN:
     # end of method
 
     def predict(self,
-                data: mltd.MLToolsData,
+                data: MLToolData,
                 model = None):
 
         # display an informational message
@@ -3460,8 +4149,6 @@ class EUCLIDEAN:
                 (__FILE__, ndt.__LINE__, ndt.__NAME__,
                 "model parameter is empty"))
             return None, None
-
-        #data = data.sort()
 
         means = self.model_d[EUCLIDEAN_MDL_KEY_MODEL][EUCLIDEAN_MDL_KEY_MEANS]
         weights = self.params_d[EUCLIDEAN_PRM_KEY_PARAM][EUCLIDEAN_PRM_KEY_WEIGHTS]
@@ -3539,7 +4226,7 @@ class KNN:
     #--------------------------------------------------------------------------
 
     def train(self,
-              data: mltd.MLToolsData,
+              data: MLToolData,
               write_train_labels: bool,
               fname_train_labels: str,
               ):
@@ -3548,7 +4235,7 @@ class KNN:
 
         arguments:
          data: a list of numpy float matrices of feature vectors
-         write_train_labels: a boolean to wehther write the train data
+         write_train_labels: a boolean to whether write the train data
          fname_train_labels: the filename of the train file
 
         return:
@@ -3598,7 +4285,7 @@ class KNN:
     # end of method
 
     def predict(self,
-                data: mltd.MLToolsData,
+                data: MLToolData,
                 model = None):
         """
         method: predict
@@ -3688,7 +4375,7 @@ class RNF:
     #--------------------------------------------------------------------------
 
     def train(self,
-              data: mltd.MLToolsData,
+              data: MLToolData,
               write_train_labels: bool,
               fname_train_labels: str,
               ):
@@ -3697,7 +4384,7 @@ class RNF:
 
         arguments:
          data: a list of numpy float matrices of feature vectors
-         write_train_labels: a boolean to wehther write the train data
+         write_train_labels: a boolean to whether write the train data
          fname_train_labels: the filename of the train file
 
         return:
@@ -3724,15 +4411,23 @@ class RNF:
 
         # fit the model
         #
-        n_estimators = int(self.params_d[RNF_PRM_KEY_PARAM][RNF_PRM_KEY_ESTIMATOR])
-        max_depth = int(self.params_d[RNF_PRM_KEY_PARAM][RNF_PRM_KEY_MAXDEPTH])
-        criterion = self.params_d[RNF_PRM_KEY_PARAM][RNF_PRM_KEY_CRITERION]
-        random_state = int(self.params_d[RNF_PRM_KEY_PARAM][RNF_PRM_KEY_RANDOM])
+        n_estimators = \
+            int(self.params_d[RNF_PRM_KEY_PARAM][RNF_PRM_KEY_ESTIMATOR])
 
-        self.model_d[RNF_MDL_KEY_MODEL] = RandomForestClassifier(n_estimators = n_estimators,
-                                              max_depth = max_depth,
-                                              criterion = criterion,
-                                              random_state= random_state).fit(samples, labels)
+        max_depth = \
+            int(self.params_d[RNF_PRM_KEY_PARAM][RNF_PRM_KEY_MAXDEPTH])
+
+        criterion = \
+            self.params_d[RNF_PRM_KEY_PARAM][RNF_PRM_KEY_CRITERION]
+
+        random_state = \
+            int(self.params_d[RNF_PRM_KEY_PARAM][RNF_PRM_KEY_RANDOM])
+
+        self.model_d[RNF_MDL_KEY_MODEL] = \
+            RandomForestClassifier(n_estimators = n_estimators,
+                                   max_depth = max_depth,
+                                   criterion = criterion,
+                                   random_state= random_state).fit(samples, labels)
 
         # prediction
         #
@@ -3747,7 +4442,6 @@ class RNF:
         if write_train_labels:
             data.write(oname = fname_train_labels, label = ypred)
 
-
         # exit gracefully
         #
         return self.model_d, score
@@ -3755,7 +4449,7 @@ class RNF:
     # end of method
 
     def predict(self,
-                data: mltd.MLToolsData,
+                data: MLToolData,
                 model = None):
         """
         method: predict
@@ -3849,7 +4543,7 @@ class SVM:
     #--------------------------------------------------------------------------
 
     def train(self,
-              data: mltd.MLToolsData,
+              data: MLToolData,
               write_train_labels: bool,
               fname_train_labels: str,
               ):
@@ -3858,7 +4552,7 @@ class SVM:
 
         arguments:
          data: a list of numpy float matrices of feature vectors
-         write_train_labels: a boolean to wehther write the train data
+         write_train_labels: a boolean to whether write the train data
          fname_train_labels: the filename of the train file
 
         return:
@@ -3912,7 +4606,7 @@ class SVM:
     # end of method
 
     def predict(self,
-                data: mltd.MLToolsData,
+                data: MLToolData,
                 model = None):
         """
         method: predict
@@ -4006,7 +4700,7 @@ class KMEANS:
     #--------------------------------------------------------------------------
 
     def train(self,
-              data: mltd.MLToolsData,
+              data: MLToolData,
               write_train_labels: bool,
               fname_train_labels: str,
               ):
@@ -4015,7 +4709,7 @@ class KMEANS:
 
         arguments:
          data: a list of numpy float matrices of feature vectors
-         write_train_labels: a boolean to wehther write the train data
+         write_train_labels: a boolean to whether write the train data
          fname_train_labels: the filename of the train file
 
         return:
@@ -4062,7 +4756,7 @@ class KMEANS:
     # end of method
 
     def predict(self,
-                data: mltd.MLToolsData,
+                data: MLToolData,
                 model = None):
         """
         method: predict
@@ -4146,7 +4840,6 @@ class MLP:
 
         # initialize variables for the parameter block and model
         #
-        #self.prior = np.empty((0,0))
         self.params_d = defaultdict(dict)
         self.model_d = defaultdict()
 
@@ -4169,7 +4862,7 @@ class MLP:
     #--------------------------------------------------------------------------
 
     def train(self,
-              data: mltd.MLToolsData,
+              data: MLToolData,
               write_train_labels: bool,
               fname_train_labels: str,
               ):
@@ -4178,7 +4871,7 @@ class MLP:
 
         arguments:
          data: a list of numpy float matrices of feature vectors
-         write_train_labels: a boolean to wehther write the train data
+         write_train_labels: a boolean to whether write the train data
          fname_train_labels: the filename of the train file
 
         return:
@@ -4218,18 +4911,19 @@ class MLP:
         r_state = int(self.params_d[MLP_PRM_KEY_PARAM][MLP_PRM_KEY_RANDOM])
         m_iter = int(self.params_d[MLP_PRM_KEY_PARAM][MLP_PRM_KEY_MITER])
 
-        self.model_d[MLP_MDL_KEY_MODEL] = MLPClassifier(hidden_layer_sizes = (h_s,),
-                                     activation = act,
-                                     solver = sol,
-                                     batch_size = b_s,
-                                     learning_rate = lr,
-                                     learning_rate_init = lr_init,
-                                     shuffle = sh,
-                                     random_state = r_state,
-                                     momentum = m,
-                                     early_stopping = e_stop,
-                                     validation_fraction=val,
-                                     max_iter=m_iter).fit(samples, labels)
+        self.model_d[MLP_MDL_KEY_MODEL] = \
+            MLPClassifier(hidden_layer_sizes = (h_s,),
+                          activation = act,
+                          solver = sol,
+                          batch_size = b_s,
+                          learning_rate = lr,
+                          learning_rate_init = lr_init,
+                          shuffle = sh,
+                          random_state = r_state,
+                          momentum = m,
+                          early_stopping = e_stop,
+                          validation_fraction=val,
+                          max_iter=m_iter).fit(samples, labels)
 
         # prediction
         #
@@ -4242,14 +4936,14 @@ class MLP:
         if write_train_labels:
             data.write(oname = fname_train_labels, label = ypred)
 
-        # exit graecefully
+        # exit gracefully
         #
         return self.model_d, score
     #
     # end of method
 
     def predict(self,
-                data: mltd.MLToolsData,
+                data: MLToolData,
                 model = None):
         """
         method: predict
@@ -4343,7 +5037,7 @@ class RBM:
     #--------------------------------------------------------------------------
 
     def train(self,
-              data: mltd.MLToolsData,
+              data: MLToolData,
               write_train_labels: bool,
               fname_train_labels: str,
               ):
@@ -4352,7 +5046,7 @@ class RBM:
 
         arguments:
          data: a list of numpy float matrices of feature vectors
-         write_train_labels: a boolean to wehther write the train data
+         write_train_labels: a boolean to whether write the train data
          fname_train_labels: the filename of the train file
 
         return:
@@ -4385,16 +5079,16 @@ class RBM:
         lr = float(self.params_d[RBM_PRM_KEY_PARAM][RBM_PRM_KEY_LR])
         b_size = int(self.params_d[RBM_PRM_KEY_PARAM][RBM_PRM_KEY_BSIZE])
         verbose = bool(self.params_d[RBM_PRM_KEY_PARAM][RBM_PRM_KEY_VERBOSE])
-        #logistic = linear_model.LogisticRegression(solver="newton-cg", tol=1)
         classifier = str(self.params_d[RBM_PRM_KEY_PARAM][RBM_PRM_KEY_CLASSIF])
         rbm= BernoulliRBM(n_components=n_comp, learning_rate=lr,
                           batch_size=b_size, n_iter=n_iter,
                           verbose=verbose, random_state=random_state)
 
-        #if classifier not in ALGS:
-            #return None
-
-        self.model_d[RBM_MDL_KEY_MODEL]= Pipeline(steps=[('rbm', rbm), ('classifier', ALGS[classifier].model_d[ALG_MDL_KEY_MODEL])]).fit(samples, labels)
+        self.model_d[RBM_MDL_KEY_MODEL] = \
+            Pipeline(steps = [
+                ('rbm', rbm),
+                ('classifier', ALGS[classifier].model_d[ALG_MDL_KEY_MODEL])
+            ]).fit(samples, labels)
 
         # prediction
         #
@@ -4416,7 +5110,7 @@ class RBM:
     # end of method
 
     def predict(self,
-                data: mltd.MLToolsData,
+                data: MLToolData,
                 model = None):
         """
         method: predict
@@ -4454,10 +5148,377 @@ class RBM:
         return p_labels, posteriors
     #
     # end of method
+#
+# end of RBM
+
 
 #------------------------------------------------------------------------------
 
+class TRANSFORMER:
+    """
+    Class: TRANSFORMER
 
+    description:
+     This is a class that implements TRANSFORMER
+    """
+    def __init__(self):
+        """
+        method: constructor
+
+        arguments:
+         none
+
+        return:
+         none
+
+        description:
+         this is the default constructor for the class.
+        """
+
+        # set the class name
+        #
+        TRANSFORMER.__CLASS_NAME__ = self.__class__.__name__
+
+        # initialize variables for the parameter block and model
+        #
+        self.params_d = defaultdict(dict)
+        self.model_d = defaultdict()
+
+        # initialize a parameter dictionary
+        #
+        self.params_d[TRANS_PRM_KEY_NAME] = self.__class__.__name__
+        self.params_d[TRANS_PRM_KEY_PARAM] = defaultdict(dict)
+
+        # set the model
+        #
+        self.model_d[TRANS_MDL_KEY_NAME] = self.__class__.__name__
+
+    #
+    # end of method
+
+    #--------------------------------------------------------------------------
+    #
+    # computational methods: train/predict
+    #
+    #--------------------------------------------------------------------------
+
+    def train(self,
+              data: MLToolData,
+              write_train_labels: bool,
+              fname_train_labels: str,
+              ):
+
+        """
+        method: train
+        arguments:
+        data: a list of numpy float matrices of feature vectors
+        write_train_labels: a boolean to whether write the train data
+        fname_train_labels: the filename of the train file
+
+        return:
+         model: a PyTorch state_dict containing the model
+         error: training error rate
+
+        description:
+         none
+        """
+
+        # display an informational message
+        #
+        if dbgl_g == ndt.FULL:
+            print("%s (line: %s) %s: training a model" %
+                  (__FILE__, ndt.__LINE__, ndt.__NAME__))
+
+        # get the samples
+        #
+        samples =  np.array(data.data)
+
+        # getting the labels
+        #
+        labels = data.labels
+
+        # get the parameters
+        #
+        self.lr = float(self.params_d[TRANS_PRM_KEY_PARAM]
+                                     [TRANS_PRM_KEY_LR])
+        self.batch_size = int(self.params_d[TRANS_PRM_KEY_PARAM]
+                                           [TRANS_PRM_KEY_BSIZE])
+        self.embed_size = int(self.params_d[TRANS_PRM_KEY_PARAM]
+                                           [TRANS_PRM_KEY_EMBED_SIZE])
+        self.nheads = int(self.params_d[TRANS_PRM_KEY_PARAM]
+                                       [TRANS_PRM_KEY_NHEADS])
+        self.num_layers = int(self.params_d[TRANS_PRM_KEY_PARAM]
+                                           [TRANS_PRM_KEY_NLAYERS])
+        self.MLP_dim = int(self.params_d[TRANS_PRM_KEY_PARAM]
+                                        [TRANS_PRM_KEY_MLP_DIM])
+        self.dropout = float(self.params_d[TRANS_PRM_KEY_PARAM]
+                                          [TRANS_PRM_KEY_DROPOUT])
+
+
+        # create the model
+        #
+        self.model_d[TRANS_MDL_KEY_MODEL] = ntt.NEDCTransformer(
+            input_dim=samples.shape[1], num_classes=len(np.unique(labels)),
+            d_model=self.embed_size, nhead=self.nheads,
+            num_layers=self.num_layers,dim_feedforward=self.MLP_dim,
+            dropout=self.dropout)
+
+        # get the epochs
+        #
+        self.epochs = int(self.params_d[TRANS_PRM_KEY_PARAM]
+                          [TRANS_PRM_KEY_EPOCH])
+
+        # initialize the accuracies
+        #
+        accuracies = []
+
+
+        # get the corss entropy loss function and ADAM optimizer
+        #
+        criterion = self.model_d[TRANS_MDL_KEY_MODEL]\
+        .get_cross_entropy_loss_function()
+        optimizer = self.model_d[TRANS_MDL_KEY_MODEL]\
+        .get_adam_optimizer(lr=self.lr)
+
+
+        # train the model
+        #
+        for epoch in range(self.epochs):
+
+            # set the model to train mode
+            #
+            self.model_d[TRANS_MDL_KEY_MODEL].train()
+
+            # move the model to the default device
+            #
+            self.model_d[TRANS_MDL_KEY_MODEL] = \
+                self.model_d[TRANS_MDL_KEY_MODEL] \
+                    .to_device(self.model_d[TRANS_MDL_KEY_MODEL])
+
+            # initialize the correct and total
+            #
+            train_correct = 0
+            train_total = 0
+
+            # get random indices for batches
+            #
+            rnd_indices = np.arange(len(samples))
+            np.random.shuffle(rnd_indices)
+
+            # initialize the training loss list
+            #
+            train_losses = []
+
+            # iterate over the batches
+            #
+            for batch_start in range(0, len(samples), self.batch_size):
+
+                # get the current batch
+                #
+                batch_indices = rnd_indices[batch_start:
+                                    batch_start + self.batch_size]
+                current_samples = samples[batch_indices]
+                current_labels = labels[batch_indices]
+
+                # zero the gradients
+                #
+                optimizer.zero_grad()
+
+                # get output from the model's forward pass
+                #
+                output = self.model_d[TRANS_MDL_KEY_MODEL](current_samples)
+
+                # calculate the loss
+                #
+                loss = criterion(output,
+                                 self.model_d[TRANS_MDL_KEY_MODEL]\
+                                 .to_tensor(current_labels))
+
+                # append the loss to the list
+                #
+                train_losses.append(loss.item())
+
+                # run backward propagation algorithm
+                #
+                loss.backward()
+
+                # update the weights
+                #
+                optimizer.step()
+
+                # detach the output and convert it to numpy array
+                #
+                output = output.cpu().detach().numpy()
+
+                # get the predicted labels
+                #
+                predicted = np.argmax(output, 1)
+
+                # calculate the accuracy
+                #
+                train_total += len(current_labels)
+                train_correct += np.sum(predicted == current_labels)
+
+            # print the epoch and training loss
+            #
+            print(f"Epoch: {epoch + 1}/{self.epochs}, "
+                  f"Training Loss: {np.mean(train_losses):{ALG_FMT_DEC}}")
+
+            # calculate the accuracy for one batch
+            #
+            batch_accuracy =  train_correct / train_total
+
+            # append the accuracy to the list
+            #
+            accuracies.append(batch_accuracy)
+
+        # get the average of training accuracies
+        #
+        accuracy = np.mean(accuracies)
+
+        # calculate the error rate
+        #
+        error_rate = 1 - accuracy
+        print(f"Training error rate:  {error_rate:{ALG_FMT_DEC}}")
+
+        # convert the model to state_dict, so that it can be saved by using
+        # Alg.save_model()
+        #
+        state_dict = self.model_d[
+            TRANS_MDL_KEY_MODEL].state_dict()
+
+        # assign the model to the model_d['model']
+        #
+        self.model_d[TRANS_MDL_KEY_MODEL] = state_dict
+
+        # get the predicted labels
+        #
+        ypred, _ = self.predict(data=data)
+
+        # if write_train_labels is True, write the labels to the file
+        #
+        if write_train_labels:
+            data.write(oname = fname_train_labels, label = ypred)
+
+        # exit gracefully
+        #
+        return self.model_d, error_rate
+    #
+    # end of method
+
+    def predict(self,
+                data: MLToolData,
+                model = None):
+        """
+        method: predict
+
+        arguments:
+         data: a numpy float matrix of feature vectors (each row is a vector)
+         model: an algorithm model (None = use the internal model)
+
+        return:
+         labels: a list of predicted labels
+
+        description:
+         none
+        """
+
+        # display an informational message
+        #
+        if dbgl_g == ndt.FULL:
+            print("%s (line: %s) %s: entering predict" %
+                  (__FILE__, ndt.__LINE__, ndt.__NAME__))
+        # get the samples
+        #
+        samples = np.array(data.data)
+
+        # get the parameters
+        #
+        self.lr = float(self.params_d[TRANS_PRM_KEY_PARAM]
+                                     [TRANS_PRM_KEY_LR])
+        self.batch_size = int(self.params_d[TRANS_PRM_KEY_PARAM]
+                                           [TRANS_PRM_KEY_BSIZE])
+        self.embed_size = int(self.params_d[TRANS_PRM_KEY_PARAM]
+                                           [TRANS_PRM_KEY_EMBED_SIZE])
+        self.nheads = int(self.params_d[TRANS_PRM_KEY_PARAM]
+                                        [TRANS_PRM_KEY_NHEADS])
+        self.num_layers = int(self.params_d[TRANS_PRM_KEY_PARAM]
+                                           [TRANS_PRM_KEY_NLAYERS])
+        self.MLP_dim = int(self.params_d[TRANS_PRM_KEY_PARAM]
+                                        [TRANS_PRM_KEY_MLP_DIM])
+        self.dropout = float(self.params_d[TRANS_PRM_KEY_PARAM]
+                                          [TRANS_PRM_KEY_DROPOUT])
+
+        # create the model
+        #
+        trans_model = ntt.NEDCTransformer(input_dim=samples.shape[1],
+                                          num_classes=data.num_of_classes,
+                                          d_model=self.embed_size,
+                                          nhead=self.nheads,
+                                          num_layers=self.num_layers,
+                                          dim_feedforward=self.MLP_dim,
+                                          dropout=self.dropout)
+        # move the model to the default device
+        # CPU/GPU based on their availability
+        #
+        trans_model = trans_model.to_device(trans_model)
+
+        # load the model's weights
+        #
+        trans_model.load_state_dict(self.model_d[TRANS_MDL_KEY_MODEL])
+
+        # create an empty list to store the predicted labels
+        #
+        p_labels = []
+
+        # set the model to evaluation mode
+        #
+        trans_model.eval()
+
+        # torch.no_grad() is used to disable the gradient calculation
+        # because we are only predicting the labels
+        #
+        with torch.no_grad():
+            # iterate over the batches
+            #
+            for batch in range(0, len(samples), self.batch_size):
+
+                # get the current batch
+                #
+                current_samples = samples[batch:batch+self.batch_size]
+
+                # get the output from the model
+                #
+                output = trans_model(current_samples)
+
+                # detach the output and convert it to numpy array
+                #
+                output = output.cpu().detach().numpy()
+
+                # get the predicted labels
+                #
+                predicted = np.argmax(output, 1)
+
+                # append the predicted labels to the list, using extend
+                # method because predicted is a list, so we need to
+                # extend it to p_labels
+                #
+                p_labels.extend(predicted)
+
+        # posterior do not apply to TRANSFORMER
+        #
+        posteriors = None
+
+        # exit gracefully
+        #
+        return p_labels, posteriors
+    #
+    # end of method
+
+#
+# end of TRANSFORMER
+
+#------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
 #
@@ -4470,9 +5531,10 @@ class RBM:
 ALGS = {PCA_NAME: PCA(), LDA_NAME:LDA(), QDA_NAME:QDA(),
         QLDA_NAME: QLDA(), NB_NAME:NB(), KNN_NAME:KNN(),
         RNF_NAME:RNF(), SVM_NAME:SVM(), KMEANS_NAME:KMEANS(),
-        MLP_NAME:MLP(), EUCLIDEAN_NAME: EUCLIDEAN(), RBM_NAME:RBM()}
+        MLP_NAME:MLP(), EUCLIDEAN_NAME: EUCLIDEAN(), RBM_NAME:RBM(),
+        TRANSFORMER_NAME:TRANSFORMER()}
 #
 # end of file
 
-
+#------------------------------------------------------------------------------
 
