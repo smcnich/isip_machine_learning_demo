@@ -115,9 +115,10 @@ EventBus.addEventListener('train', (event) => {
         // otherwise, throw an error
         //
         else {
-            EventBus.dispatchEvent(new CustomEvent('continue'));
-            processLog.writePlain('Model could not be trained due to a server error. Please try again.');
-            throw new Error('Network response was not ok.');
+            return response.json().then((errorData) => {
+                EventBus.dispatchEvent(new CustomEvent('continue'));
+                processLog.writePlain(errorData);
+            });
         }
     })
 
@@ -239,9 +240,10 @@ EventBus.addEventListener('eval', (event) => {
         // otherwise, throw an error
         //
         else {
-            EventBus.dispatchEvent(new CustomEvent('continue'));
-            processLog.writePlain('Data could not be evaluated due to a server error. Please try again.');
-            throw new Error('Network response was not ok.');
+            return response.json().then((errorData) => {
+                EventBus.dispatchEvent(new CustomEvent('continue'));
+                processLog.writePlain(errorData);
+            });
         }
     })
 
@@ -300,9 +302,10 @@ EventBus.addEventListener('saveModel', () => {
             // otherwise, throw an error
             //
             else {
-                EventBus.dispatchEvent(new CustomEvent('continue'));
-                processLog.writePlain('Data could not be evaluated due to a server error. Please try again.');
-                throw new Error('Network response was not ok.');
+                return response.json().then((errorData) => {
+                    EventBus.dispatchEvent(new CustomEvent('continue'));
+                    processLog.writePlain(errorData);
+                });
             }
 
         })
@@ -428,8 +431,10 @@ EventBus.addEventListener('loadModel', (event) => {
                     return response.json();
                 } 
                 else {
-                    processLog.writePlain('Model could not be loaded due to a server error. Please try again.');
-                    throw new Error('Network response was not ok.');
+                    return response.json().then((errorData) => {
+                        EventBus.dispatchEvent(new CustomEvent('continue'));
+                        processLog.writePlain(errorData);
+                    });
                 }
             })
 
@@ -595,8 +600,10 @@ EventBus.addEventListener('dataGen', (event) => {
     // catch any errors and continue the application
     //
     catch {
-        processLog.writePlain('Data could not be generated due to a server error. Please try again.');
-        EventBus.dispatchEvent(new CustomEvent('continue'));
+        return response.json().then((errorData) => {
+            EventBus.dispatchEvent(new CustomEvent('continue'));
+            processLog.writePlain(errorData);
+        });
     }
 });
 

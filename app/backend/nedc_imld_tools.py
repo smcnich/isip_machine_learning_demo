@@ -1,9 +1,58 @@
+from io import StringIO
+from contextlib import redirect_stdout
 import numpy as np
 from math import floor, ceil
 
 import nedc_ml_tools as mlt
 import nedc_ml_tools_data as mltd
 from nedc_file_tools import load_parameters
+
+def check_return(func, *args, **kwargs):
+    '''
+    function: check_return
+
+    args:
+     func (function): the function to call
+     *args (list)   : the arguments to pass to the function
+     **kwargs (dict): the keyword arguments to pass to the function
+
+    return:
+     res (any): the result of the function call
+
+    decription:
+     this wrapper function is used to check the return value of a function.
+     this is primarily used with ML Tools, since ML Tools does not return
+     an exception. ML Tools simply returns None and prints to the console.
+     this function will grab the out of the function. if it is None, then
+     this will use a std.out redirect to capture the output of the function.
+     then, an exception will be raised with that message as the body. if the
+     return value is valid, return the return value of the function. should
+     only really be used when calling ML Tools functions,
+     i.e. model.predict(), model.train(), model.score()
+    '''
+
+    # create a string buffer to capture the std output of the function
+    #
+    capture = StringIO()
+
+    # call the function and capture its std output
+    #
+    with redirect_stdout(capture):
+        res = func(*args, **kwargs)
+
+    # if the return value is invalid, raise an exception with the std output
+    # reformat the std output, such as removing line number and other
+    # unnecessary information. simply take the root cause of the error
+    # i.e. "Singluar matrix is none"
+    #
+    if res == (None, None):
+        raise Exception(capture.getvalue().split(':')[-1].strip().capitalize())
+
+    # exit gracefully
+    #
+    return res
+#
+# end of function
 
 def create_model(alg_name:str, params=None) -> mlt.Alg:
     '''
@@ -93,7 +142,7 @@ def generate_data(dist_name:str, params:dict):
 
     # create a ML Tools data object using the class method
     #
-    X, y = mltd.MLToolsData.generate_data(dist_name, params)
+    X, y = check_return(mltd.MLToolsData.generate_data, dist_name, params)
 
     # get the labels from the data
     #
@@ -148,7 +197,7 @@ def train(model:mlt.Alg, data:mltd.MLToolsData):
 
     # train the model
     #
-    model.train(data)
+    check_return(model.train, data)
 
     # get the performance metrics of the model on the test data
     #
@@ -186,7 +235,7 @@ def predict(model:mlt.Alg, data:mltd.MLToolsData):
 
     # predict the labels of the data
     #
-    hyp_labels, _ = model.predict(data)
+    hyp_labels, _ = check_return(model.predict, data)
 
     # get the performance metrics of the model
     #
@@ -247,7 +296,8 @@ def score(model:mlt.Alg, data:mltd.MLToolsData, hyp_labels:list):
 
     # score the model
     #
-    conf_matrix, sens, spec, prec, acc, err, f1 = model.score(num_classes, data, hyp_labels)
+    conf_matrix, sens, spec, prec, acc, err, f1 = \
+        check_return(model.score(num_classes, data, hyp_labels))
 
     # return all the metrics as a dict
     #
@@ -351,7 +401,7 @@ def generate_decision_surface(data:mltd.MLToolsData, model:mlt.Alg, *,
     # get the labels for each point in the meshgrid. the labels will be
     # flattened for each sample in the meshgrid
     #
-    labels, _ = model.predict(meshgrid)
+    labels, _ = check_return(model.predict(meshgrid))
 
     # get the x and y values. x and y values should be 1D arrays
     # acting as the axis values of the grid. take a row from the xx

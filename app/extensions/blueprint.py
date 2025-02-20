@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import io
 import pickle
@@ -19,7 +20,6 @@ main = Blueprint('main', __name__)
 # create a global variable to hold the models
 #
 model_cache = {}
-
 
 def clean_cache():
 
@@ -113,112 +113,67 @@ def save_model():
 @main.route('/api/load_model/', methods=['POST'])
 def load_model():
 
-    # get the file, userID, and plot bounds from the request
-    #
-    file = request.files['model']
-    user_ID = request.form.get('userID')
-    x = json.loads(request.form.get('x'))
-    y = json.loads(request.form.get('y'))
-    xrange = json.loads(request.form.get('xrange'))
-    yrange = json.loads(request.form.get('yrange'))
-
-    # read the model file
-    #
-    model_bytes = file.read()
-
-    # unpickle the model as BytesIO stream
-    #
-    model = pickle.loads(model_bytes)
-
-    # save the model to the corresponding userID
-    #
-    model_cache[user_ID] = {
-        'model': model,
-        'timestamp': datetime.now()
-    }
-
-    # create the data object
-    # this should only have a single x and y value
-    # representing the bounds of the plot
-    # no labels are needed
-    #
-    data = imld.create_data(x, y, [])
-
-    # set the mapping label
-    # make sure to flip the mapping label so it is {numeric : name}
-    #
-    data.mapping_label = {value: key for key, value in model.mapping_label.items()}
-
-    # get the x y and z values from the decision surface
-    # x and y will be 1D and z will be 2D
-    #
-    x, y, z = imld.generate_decision_surface(data, model, xrange=xrange,
-                                             yrange=yrange)
-
-    # format the response
-    #
-    response = {
-        'decision_surface': {
-            'x': x.tolist(), 
-            'y': y.tolist(), 
-            'z': z.tolist()
-        },
-        'mapping_label': model.mapping_label
-    }
-
-    # return the jsonified response
-    #
-    return jsonify(response)
-
-    # try: 
-
-    
-    # except Exception as e:
-    #     # return error message if model did not load
-    #     #
-    #     return f'Failed to load model: {e}', 500
-
-@main.route('/api/issue_log/', methods=['POST'])
-def write_issue():
-
     try:
-        # Get JSON data from the request
-        #
-        data = request.get_json()
 
-        # Extract title and message from the data
+        # get the file, userID, and plot bounds from the request
         #
-        title = data.get('title', 'No Title')
-        message = data.get('message', 'No Message')
+        file = request.files['model']
+        user_ID = request.form.get('userID')
+        x = json.loads(request.form.get('x'))
+        y = json.loads(request.form.get('y'))
+        xrange = json.loads(request.form.get('xrange'))
+        yrange = json.loads(request.form.get('yrange'))
 
-        # Get the current date in the format month/day/year
+        # read the model file
         #
-        current_date = datetime.now().strftime('%m/%d/%Y')
+        model_bytes = file.read()
 
-        # Format the log entry
+        # unpickle the model as BytesIO stream
         #
-        log_entry = f"Date: {current_date}\nTitle: {title}\nIssue: {message}\n\n"
+        model = pickle.loads(model_bytes)
 
-        # Debug line to check if the file exists in the target folder
+        # save the model to the corresponding userID
         #
-        if os.path.exists(current_app.config['LOG_FILE_PATH']):
-            print(f"{current_app.config['LOG_FILE_PATH']} exists.")
-        else:
-            print(f"{current_app.config['LOG_FILE_PATH']} does not exist, creating a new file.")
+        model_cache[user_ID] = {
+            'model': model,
+            'timestamp': datetime.now()
+        }
 
-        # Write to the file
+        # create the data object
+        # this should only have a single x and y value
+        # representing the bounds of the plot
+        # no labels are needed
         #
-        with open(current_app.config['LOG_FILE_PATH'], 'a') as file:
-            file.write(log_entry)
+        data = imld.create_data(x, y, [])
 
-        # Return a success response
+        # set the mapping label
+        # make sure to flip the mapping label so it is {numeric : name}
         #
-        return {'status': 'success', 'message': 'Issue logged successfully'}, 200
+        data.mapping_label = {value: key for key, value in model.mapping_label.items()}
 
+        # get the x y and z values from the decision surface
+        # x and y will be 1D and z will be 2D
+        #
+        x, y, z = imld.generate_decision_surface(data, model, xrange=xrange,
+                                                yrange=yrange)
+
+        # format the response
+        #
+        response = {
+            'decision_surface': {
+                'x': x.tolist(), 
+                'y': y.tolist(), 
+                'z': z.tolist()
+            },
+            'mapping_label': model.mapping_label
+        }
+
+        # return the jsonified response
+        #
+        return jsonify(response)
+    
     except Exception as e:
-        # Handle any errors and return a failure response
-        #
-        return {'status': 'error', 'message': str(e)}, 500
+        return f'Failed to load model: {e}', 500
     
 @main.route('/api/train/', methods=['POST'])
 def train():
@@ -293,8 +248,7 @@ def train():
     # Handle any exceptions and return an error message
     #          
     except Exception as e:
-        print(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify(f'Failed to train model: {str(e)}'), 500
 #
 # end of function
     
@@ -335,8 +289,7 @@ def eval():
         return jsonify(metrics)
     
     except Exception as e:
-        print(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify(f'Failed to evaluate model: {str(e)}'), 500
 #
 # end of function
     
@@ -374,7 +327,46 @@ def data_gen():
     # Handle any exceptions and return an error message
     #    
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
+        return jsonify(f'Failed to generate data: {str(e)}'), 500
 #
 # end of function
+
+@main.route('/api/issue_log/', methods=['POST'])
+def write_issue():
+
+    try:
+        # Get JSON data from the request
+        #
+        data = request.get_json()
+
+        # Extract title and message from the data
+        #
+        title = data.get('title', 'No Title')
+        message = data.get('message', 'No Message')
+
+        # Get the current date in the format month/day/year
+        #
+        current_date = datetime.now().strftime('%m/%d/%Y')
+
+        # Format the log entry
+        #
+        log_entry = f"Date: {current_date}\nTitle: {title}\nIssue: {message}\n\n"
+
+        # Debug line to check if the file exists in the target folder
+        #
+        if os.path.exists(current_app.config['LOG_FILE_PATH']):
+            print(f"{current_app.config['LOG_FILE_PATH']} exists.")
+        else:
+            print(f"{current_app.config['LOG_FILE_PATH']} does not exist, creating a new file.")
+
+        # Write to the file
+        #
+        with open(current_app.config['LOG_FILE_PATH'], 'a') as file:
+            file.write(log_entry)
+
+        # Return a success response
+        #
+        return {'status': 'success', 'message': 'Issue logged successfully'}, 200
+
+    except Exception as e:
+        return jsonify(str(e)), 500
