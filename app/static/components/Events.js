@@ -73,13 +73,20 @@ EventBus.addEventListener('train', (event) => {
 
     // write to the process log
     //
-    processLog.writePlain('Training model...');
+    processLog.writeSingleValue('Process', 'Train');
 
     // get the data from the event
     //
     const params = event.detail.params;
+    const param_names = event.detail.param_names;
     const algo = event.detail.algo;
+    const algo_name = event.detail.algoname;
     const userID = event.detail.userID;
+
+    console.log(params);
+    console.log(param_names);
+    // display the selected algorithm name to the process log
+    processLog.writeSingleValue('Selected Algorithm', algo_name);
 
     // get the training data from the training plot
     //
@@ -190,7 +197,7 @@ EventBus.addEventListener('eval', (event) => {
 
     // write to the process log
     //
-    processLog.writePlain('Evaluating data...');
+    processLog.writeSingleValue('Process', 'Eval');
 
     // get userID from the event
     //
@@ -540,7 +547,7 @@ EventBus.addEventListener('dataGen', (event) => {
             },
             body: JSON.stringify({
                 'key': event.detail.key,
-                'params': event.detail.params
+                'params': event.detail.params,
             })
         })
 
@@ -586,6 +593,13 @@ EventBus.addEventListener('dataGen', (event) => {
             //
             plot.plot(data, labelManager.getColorMappings());
 
+            // update plot shape name
+            plot.updateShapeName(event.detail.name);
+
+            processLog.writeSingleValue('Selected Data', `${plot.getShapeName()} → ${event.detail.plotID.charAt(0).toUpperCase() + event.detail.plotID.slice(1)}`);
+
+            console.log(event.detail.params);
+            console.log(event.detail.param_names);
             // update the class list in the main toolbar
             //
             mainToolbar.updateClassList(labelManager.getLabels());

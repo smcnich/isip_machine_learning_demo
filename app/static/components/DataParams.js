@@ -69,6 +69,10 @@ class DataPopup extends HTMLElement {
     //
     this.key = this.getAttribute('key') || 'two_gaussian';
 
+    // Retrieve the name from attributes
+    //
+    this.name = this.getAttribute('name') || 'Two Gaussian';
+
     // Render the HTML and styles for the component
     //
     this.render();
@@ -361,16 +365,17 @@ class DataPopup extends HTMLElement {
 
       // set the defaults through the form object
       //
-      const paramsDict = this.form.submitForm();
-      const key = this.key;
+      const [paramsDict, param_names] = this.form.submitForm();
 
       // dispatch the dataGen event with the key and parameters
       //
       EventBus.dispatchEvent(new CustomEvent('dataGen', {
         detail: {
           'plotID': this.label.toLowerCase(),
-          'key': key,
-          'params': paramsDict
+          'key': this.key,
+          'params': paramsDict,
+          'param_names': param_names,
+          'name': this.name
         }
       }));
 
@@ -632,6 +637,7 @@ class DataButton extends HTMLElement {
     train.setAttribute('label', 'Train');
     train.setAttribute('key', key);
     train.setAttribute('params', params);
+    train.setAttribute('name', label);
     dropMenu.appendChild(train);
 
     // do the same for the eval pop-up botton. not allowed to name
@@ -641,6 +647,7 @@ class DataButton extends HTMLElement {
     _eval.setAttribute('label', 'Eval');
     _eval.setAttribute('key', key);
     _eval.setAttribute('params', params);
+    _eval.setAttribute('name', label);
     dropMenu.appendChild(_eval);
   }
 

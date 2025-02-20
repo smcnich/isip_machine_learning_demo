@@ -1250,7 +1250,7 @@ class Toolbar_SetGaussian extends HTMLElement {
 
       // set the defaults through the form object
       //
-      const paramsDict = this.form.submitForm();
+      const paramsDict = this.form.submitForm().formValues;
 
       EventBus.dispatchEvent(new CustomEvent('setGaussianParams', {
         detail: paramsDict

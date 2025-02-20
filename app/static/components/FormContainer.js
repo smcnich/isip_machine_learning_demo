@@ -689,7 +689,7 @@ class FormContainer extends HTMLElement {
     //
     // end of method
 
-    submitForm(_params, _formValues, _withType) {
+    submitForm(_params, _formValues, _withType, _param_names) {
       /*
       method: FormContainer::submitForm
 
@@ -736,15 +736,26 @@ class FormContainer extends HTMLElement {
         withType = _withType;
       }
 
+      let param_names;
+      if (!_param_names) {
+        param_names = [];
+      } else {
+        param_names = _param_names;
+      }
+
       // iterate over the parameters and get the input values
       //
       for (const [key, param] of Object.entries(params.params)) {
         
+        if (!param.name.includes("and")) {
+          param_names.push(param.name);
+        }
+
         // if the form is a group, recursively call the function
         // to get the input values of the group
         //
         if (param.type == 'group') {
-          this.submitForm(param, formValues, withType);
+          this.submitForm(param, formValues, withType, param_names);
         }
 
         // if the parameter is classed based
@@ -857,7 +868,7 @@ class FormContainer extends HTMLElement {
       // return the form values as an object with each key
       // being the parameter key
       //
-      return formValues;
+      return [formValues, param_names];
     }
     // end of method
 
