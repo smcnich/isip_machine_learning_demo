@@ -73,6 +73,7 @@ EventBus.addEventListener('train', (event) => {
 
     // write to the process log
     //
+    processLog.writePlain('');
     processLog.writeSingleValue('Process', 'Train');
 
     // get the data from the event
@@ -85,8 +86,16 @@ EventBus.addEventListener('train', (event) => {
 
     console.log(params);
     console.log(param_names);
+
     // display the selected algorithm name to the process log
+    processLog.writePlain('');
     processLog.writeSingleValue('Selected Algorithm', algo_name);
+
+    const paramValues = Object.values(event.detail.params); // Get values in order
+
+    event.detail.param_names.forEach((name, index) => {
+        processLog.writeSingleValue(name, paramValues[index]);
+    });
 
     // get the training data from the training plot
     //
@@ -197,6 +206,7 @@ EventBus.addEventListener('eval', (event) => {
 
     // write to the process log
     //
+    processLog.writePlain('');
     processLog.writeSingleValue('Process', 'Eval');
 
     // get userID from the event
