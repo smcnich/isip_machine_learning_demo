@@ -558,9 +558,10 @@ EventBus.addEventListener('dataGen', (event) => {
                 return response.json();
             }
             else {
-                EventBus.dispatchEvent(new CustomEvent('continue'));
-                processLog.writePlain('Data could not be generated due to a server error. Please try again.');
-                throw new Error('Network response was not ok.');
+                return response.json().then((errorData) => {
+                    EventBus.dispatchEvent(new CustomEvent('continue'));
+                    processLog.writePlain(errorData);
+                });
             }
         })
 

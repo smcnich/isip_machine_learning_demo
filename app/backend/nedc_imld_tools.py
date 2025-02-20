@@ -45,7 +45,7 @@ def check_return(func, *args, **kwargs):
     # unnecessary information. simply take the root cause of the error
     # i.e. "Singluar matrix is none"
     #
-    if res == (None, None):
+    if any(x is None for x in res):
         raise Exception(capture.getvalue().split(':')[-1].strip().capitalize())
 
     # exit gracefully
@@ -142,7 +142,7 @@ def generate_data(dist_name:str, params:dict):
 
     # create a ML Tools data object using the class method
     #
-    X, y = check_return(mltd.MLToolsData.generate_data, dist_name, params)
+    X, y = mltd.MLToolsData.generate_data(dist_name, params)
 
     # get the labels from the data
     #
@@ -202,6 +202,8 @@ def train(model:mlt.Alg, data:mltd.MLToolsData):
     # get the performance metrics of the model on the test data
     #
     metrics = predict(model, data)
+
+    print('hello')
 
     # return the trained model and the performance metrics
     #
