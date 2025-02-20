@@ -106,6 +106,7 @@ class Plot extends HTMLElement {
     //
     this.plotData = [];
     this.data = null;
+    this.ShapeName = null;
 
     // Event listener for resizing the plot
     //
@@ -172,8 +173,31 @@ class Plot extends HTMLElement {
   //
   // end of method
   
+  getShapeName() {
+    /*
+    method: Plot::getShapeName
+
+    args:
+      None
+
+    return:
+      Object: an object containing the data that was plotted
+
+    description:  
+      This method returns the data that was plotted on the plot. This is useful for saving
+      the data to a file or sending it to the backend.
+    */
+    return this.ShapeName;
+  }
+  //
+  // end of method
+
   updateData() {
     this.data = this.traces_to_data();
+  }
+
+  updateShapeName(shape_name) {
+    this.ShapeName = shape_name;
   }
 
   initPlot() {

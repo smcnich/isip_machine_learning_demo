@@ -255,6 +255,23 @@ class ProcessLog extends HTMLElement {
         logDiv.scrollTop = logDiv.scrollHeight;        
     }
 
+    writeSingleValue(label, value) {
+        // Get the log object
+        //
+        let logObject = this.shadowRoot.querySelector('.scroll-object');
+
+        logObject.innerHTML += `
+        <div>
+            <b>${label}:</b> ${value}
+        </div>
+        `;
+
+        // Scroll to the bottom of the log container
+        //
+        let logDiv = this.shadowRoot.querySelector('.scroll-div'); // This is the scroll container
+        logDiv.scrollTop = logDiv.scrollHeight;         
+    }
+
     writeMetrics(label, metrics) {
         /*
         method: ProcessLog::writeMetrics
@@ -275,14 +292,14 @@ class ProcessLog extends HTMLElement {
         let logObject = this.shadowRoot.querySelector('.scroll-object');
 
         // write a metrics header
-        this.writeHeader(`${label} Metrics:`, 'h3');
+        this.writeHeader(`Performance: ${label}`, 'h3');
 
         // iterate over each metric in the log and write it to the process log
         //
         Object.keys(metrics).forEach((key) => {
             if (key != "Confusion Matrix") {
                 logObject.innerHTML += `
-                    <div style="display: inline-block; margin-right: 50px;">
+                    <div>
                         <b>${key}:</b> ${metrics[key].toFixed(2)}%
                     </div>
                     `;

@@ -90,7 +90,7 @@ class AlgoTool extends HTMLElement {
 
       // save the data to the sender, to it can be saved 
       //
-      sender.data.params = this.form.submitForm(null, null, 1);
+      [sender.data.params, param_names] = this.form.submitForm(null, null, 1);
       sender.data.name = algoName;
     });
 
@@ -453,6 +453,8 @@ class AlgoTool extends HTMLElement {
           //
           let plot = button.getAttribute('id');
 
+          const [paramsDict, param_names] = this.form.submitForm();
+
           // if the plot is train, train the model
           // and set the trained flag to true
           //
@@ -462,7 +464,9 @@ class AlgoTool extends HTMLElement {
               detail: {
                 'userID': userID,
                 'algo': this.selectedValue.toString(),
-                'params': this.form.submitForm()
+                'algoname': this.selectedName.toString(),
+                'params': paramsDict,
+                'param_names': param_names
                 }
             }));
             
