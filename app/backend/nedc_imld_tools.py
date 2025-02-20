@@ -203,8 +203,6 @@ def train(model:mlt.Alg, data:mltd.MLToolsData):
     #
     metrics = predict(model, data)
 
-    print('hello')
-
     # return the trained model and the performance metrics
     #
     return model, metrics
@@ -298,8 +296,7 @@ def score(model:mlt.Alg, data:mltd.MLToolsData, hyp_labels:list):
 
     # score the model
     #
-    conf_matrix, sens, spec, prec, acc, err, f1 = \
-        check_return(model.score(num_classes, data, hyp_labels))
+    conf_matrix, sens, spec, prec, acc, err, f1 = model.score(num_classes, data, hyp_labels)
 
     # return all the metrics as a dict
     #
@@ -403,7 +400,7 @@ def generate_decision_surface(data:mltd.MLToolsData, model:mlt.Alg, *,
     # get the labels for each point in the meshgrid. the labels will be
     # flattened for each sample in the meshgrid
     #
-    labels, _ = check_return(model.predict(meshgrid))
+    labels, _ = check_return(model.predict, meshgrid)
 
     # get the x and y values. x and y values should be 1D arrays
     # acting as the axis values of the grid. take a row from the xx
