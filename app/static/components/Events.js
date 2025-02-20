@@ -597,10 +597,18 @@ EventBus.addEventListener('dataGen', (event) => {
             // update plot shape name
             plot.updateShapeName(event.detail.name);
 
+            processLog.writePlain('');
             processLog.writeSingleValue('Selected Data', `${plot.getShapeName()} → ${event.detail.plotID.charAt(0).toUpperCase() + event.detail.plotID.slice(1)}`);
 
             console.log(event.detail.params);
             console.log(event.detail.param_names);
+
+            const paramValues = Object.values(event.detail.params); // Get values in order
+
+            event.detail.param_names.forEach((name, index) => {
+                processLog.writeSingleValue(name, paramValues[index]);
+            });
+
             // update the class list in the main toolbar
             //
             mainToolbar.updateClassList(labelManager.getLabels());
