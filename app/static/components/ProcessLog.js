@@ -439,6 +439,22 @@ class ProcessLog extends HTMLElement {
     //
     // end of method
   
+    // Function to generate a full-width separator using dashes
+    addFullWidthSeparator() {
+        let logDiv = this.shadowRoot.querySelector('.scroll-object'); // Log container
+        
+        if (!logDiv) return;
+
+        let logWidth = logDiv.clientWidth; // Get the width of the log container in pixels
+        let charWidth = 5.5; // Approximate width of a dash (-) in pixels (depends on font)
+        
+        let dashCount = Math.floor(logWidth / charWidth); // Calculate how many dashes fit
+        let separator = '-'.repeat(dashCount); // Generate the separator line
+
+        // Add the separator to the log
+        logDiv.innerHTML += `<div>${separator}</div>`;
+    }
+
   }
   //
   // end of class

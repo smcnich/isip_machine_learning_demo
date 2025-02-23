@@ -71,9 +71,11 @@ EventBus.addEventListener('train', (event) => {
     //
     const start = Date.now()
 
+    // Add a full-width separator
+    processLog.addFullWidthSeparator();
+
     // write to the process log
     //
-    processLog.writePlain('');
     processLog.writeSingleValue('Process', 'Train');
 
     // get the data from the event
@@ -203,9 +205,11 @@ EventBus.addEventListener('eval', (event) => {
     //
     const start = Date.now()
 
+    // Add a full-width separator
+    processLog.addFullWidthSeparator();
+
     // write to the process log
     //
-    processLog.writePlain('');
     processLog.writeSingleValue('Process', 'Eval');
 
     // get userID from the event
@@ -606,9 +610,11 @@ EventBus.addEventListener('dataGen', (event) => {
             // update plot shape name
             plot.updateShapeName(event.detail.name);
 
+            // Add a full-width separator
+            processLog.addFullWidthSeparator();
+
             // display the selected data distribution to the process log
             //
-            processLog.writePlain('');
             processLog.writeSingleValue('Selected Data', `${plot.getShapeName()} → ${event.detail.plotID.charAt(0).toUpperCase() + event.detail.plotID.slice(1)}`);
 
             // get the param values and corresponding param names
