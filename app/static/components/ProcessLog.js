@@ -326,6 +326,42 @@ class ProcessLog extends HTMLElement {
     }
     //
     // end of method
+    
+    // Function to write algorithm parameters to the log
+    writeAlgorithmParams(paramValues, param_names) {
+        /*
+        method: ProcessLog::writeAlgorithmParams
+
+        args:
+        paramValues (Array): The values of the algorithm parameters to be logged.
+        param_names (Array): The names of the corresponding algorithm parameters.
+
+        return:
+        None
+
+        description:
+        This method iterates over the provided parameter names and values, formatting them for logging.
+        If a parameter contains a matrix (identified by the presence of square brackets), the matrix is parsed
+        and logged row by row. Otherwise, the parameter is logged as a single value.
+        Each parameter name is prefixed with three non-breaking spaces for indentation.
+        */
+
+        param_names.forEach((name, index) => {
+            if (JSON.stringify(paramValues[index]).includes('[')) {
+                var matrix = this.parseMatrix(JSON.stringify(paramValues[index]));
+                this.writeSingleValue(`&nbsp;&nbsp;&nbsp;${name}`, `[${matrix[0]}]`);
+
+                for (let i = 1; i < matrix.length; i++) {
+                    name_padding = `<span style="color: white">${name}:<span>`;
+                    this.writeSingleValue(`&nbsp;&nbsp;&nbsp;${name_padding}`, `[${matrix[i]}]`);
+                }
+            } else {
+                this.writeSingleValue(`&nbsp;&nbsp;&nbsp;${name}`, paramValues[index]);
+            }
+        })
+    }
+    //
+    // end of method
 
     // Function to write a single value to the log
     writeSingleValue(label, value) {
@@ -381,7 +417,7 @@ class ProcessLog extends HTMLElement {
         let logObject = this.shadowRoot.querySelector('.scroll-object');
 
         // write a metrics header
-        this.writeHeader(`Performance: ${label}`, 'h3');
+        this.writeHeader(`<br>Performance: ${label}`, 'h3');
 
         // iterate over each metric in the log and write it to the process log
         //
@@ -389,13 +425,11 @@ class ProcessLog extends HTMLElement {
             if (key != "Confusion Matrix") {
                 logObject.innerHTML += `
                     <div>
-                        <b>${key}:</b> ${metrics[key].toFixed(2)}%
+                        <b>&nbsp;&nbsp;&nbsp;${key}:</b> ${metrics[key].toFixed(2)}%
                     </div>
                     `;
             }
         });
-
-        this.writePlain('');
 
         // Scroll to the bottom of the log container
         //

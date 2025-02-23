@@ -79,23 +79,22 @@ EventBus.addEventListener('train', (event) => {
     // get the data from the event
     //
     const params = event.detail.params;
-    const param_names = event.detail.param_names;
     const algo = event.detail.algo;
     const algo_name = event.detail.algoname;
     const userID = event.detail.userID;
-
-    console.log(params);
-    console.log(param_names);
 
     // display the selected algorithm name to the process log
     processLog.writePlain('');
     processLog.writeSingleValue('Selected Algorithm', algo_name);
 
+    // get the param values and corresponding param names
+    //
     const paramValues = Object.values(event.detail.params); // Get values in order
+    const param_names = event.detail.param_names;
 
-    event.detail.param_names.forEach((name, index) => {
-        processLog.writeSingleValue(name, paramValues[index]);
-    });
+    // write the process log for train
+    //
+    processLog.writeAlgorithmParams(paramValues, param_names);
 
     // get the training data from the training plot
     //
@@ -607,12 +606,19 @@ EventBus.addEventListener('dataGen', (event) => {
             // update plot shape name
             plot.updateShapeName(event.detail.name);
 
+            // display the selected data distribution to the process log
+            //
             processLog.writePlain('');
             processLog.writeSingleValue('Selected Data', `${plot.getShapeName()} → ${event.detail.plotID.charAt(0).toUpperCase() + event.detail.plotID.slice(1)}`);
 
+            // get the param values and corresponding param names
+            //
             const paramValues = Object.values(event.detail.params).map(value => JSON.stringify(value));
+            const param_names = event.detail.param_names;
 
-            processLog.writeDataParams(paramValues, event.detail.param_names);
+            // write the process log for data gen
+            //
+            processLog.writeDataParams(paramValues, param_names);
 
             // update the class list in the main toolbar
             //
