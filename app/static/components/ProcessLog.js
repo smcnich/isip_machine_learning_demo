@@ -254,8 +254,95 @@ class ProcessLog extends HTMLElement {
         let logDiv = this.shadowRoot.querySelector('.scroll-div'); // This is the scroll container
         logDiv.scrollTop = logDiv.scrollHeight;        
     }
+    //
+    // end of method
 
+    // Function to parse the matrix string into a 2D array
+    parseMatrix(inputString) {
+        /*
+        method: ProcessLog::parseMatrix
+
+        args:
+        inputString (String): The matrix string to be parsed into a 2D array.
+
+        return:
+        (Array): A 2D array representation of the input matrix string.
+
+        description:
+        This function extracts and converts a string-formatted matrix into an actual JavaScript 2D array.
+        */
+
+        return inputString
+            .slice(2, -2)   // Remove the outer brackets
+            .split('],[')   // Split by the inner array separator
+            .map(row => row.split(',').map(Number));  // Convert each row into an array of numbers
+    }
+    //
+    // end of method
+
+    // Function to write data parameters to the log
+    writeDataParams(paramValues, param_names) {
+        /*
+        method: ProcessLog::writeDataParams
+
+        args:
+        paramValues (Array): The values of the parameters to be logged.
+        param_names (Array): The names of the parameters corresponding to the values.
+        type (String): The type of parameters being processed.
+
+        return:
+        None
+
+        description:
+        This method iterates over parameter names and values, formatting and writing them to the process log.
+        If a parameter represents a matrix, it is parsed and logged row by row.
+        */
+
+        var class_index = 0;
+
+        param_names.forEach((name, index) => {
+            let class_padding;
+            let name_padding;
+
+            if (name.includes('Number')) {
+                this.writeSingleValue(`Class ${class_index}`, `${name}: ${paramValues[index]}`);
+                class_index = class_index + 1;
+            } else {
+                class_padding = `<span style="color: white">Classs ${class_index}:</span>`;
+                
+                if (paramValues[index].includes('[')) {
+                    var matrix = this.parseMatrix(paramValues[index]);
+                    this.writePlain(`${class_padding}${name}: [${matrix[0]}]`);
+
+                    for (let i = 1; i < matrix.length; i++) {
+                        name_padding = `<span style="color: white">${name}:</span>`;
+                        this.writePlain(`${class_padding}${name_padding} [${matrix[i]}]`);
+                    }
+                } else {
+                    this.writePlain(`${class_padding}${name}: ${paramValues[index]}`);
+                }
+            }
+        });
+    }
+    //
+    // end of method
+
+    // Function to write a single value to the log
     writeSingleValue(label, value) {
+        /*
+        method: ProcessLog::writeSingleValue
+
+        args:
+        label (String): The label for the value being logged.
+        value (String): The value to be logged.
+
+        return:
+        None
+
+        description:
+        This method writes a labeled value to the process log, formatting it for readability.
+        */
+
         // Get the log object
         //
         let logObject = this.shadowRoot.querySelector('.scroll-object');
@@ -271,6 +358,8 @@ class ProcessLog extends HTMLElement {
         let logDiv = this.shadowRoot.querySelector('.scroll-div'); // This is the scroll container
         logDiv.scrollTop = logDiv.scrollHeight;         
     }
+    //
+    // end of method
 
     writeMetrics(label, metrics) {
         /*
