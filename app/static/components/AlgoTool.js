@@ -2,7 +2,7 @@ import { EventBus } from "./Events.js";
 
 class AlgoTool extends HTMLElement {
   /*
-  class: AlgoTool
+  class: AlgoTool 
 
   description:
     this class is to contain the functionality, styling, and structure of the algorithm toolbar.
