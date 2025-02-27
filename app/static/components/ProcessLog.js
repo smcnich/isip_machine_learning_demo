@@ -333,14 +333,14 @@ class ProcessLog extends HTMLElement {
                 this.writeSingleValue(`Class ${class_index}`, `${name}: ${paramValues[index]}`);
                 class_index = class_index + 1;
             } else {
-                class_padding = `<span style="color: white">Classs ${class_index}:</span>`;
+                class_padding = `<span style="color: white; user-select: none;">Classs ${class_index}:</span>`;
                 
                 if (paramValues[index].includes('[')) {
                     var matrix = this.parseMatrix(paramValues[index]);
                     this.writePlain(`${class_padding}${name}: [${matrix[0]}]`);
 
                     for (let i = 1; i < matrix.length; i++) {
-                        name_padding = `<span style="color: white">${name}:</span>`;
+                        name_padding = `<span style="color: white; user-select: none;">${name}:</span>`;
                         this.writePlain(`${class_padding}${name_padding} [${matrix[i]}]`);
                     }
                 } else {
@@ -380,7 +380,7 @@ class ProcessLog extends HTMLElement {
                 this.writeSingleValue(`Covariances`, `[${matrix[0]}]`);
 
                 for (let i = 1; i < matrix.length; i++) {
-                    name_padding = `<span style="color: white">Covariancess:</span>`;
+                    name_padding = `<span style="color: white; user-select: none;">Covariancess:</span>`;
                     this.writePlain(`${name_padding} [${matrix[i]}]`);
                 }
             } else {
@@ -421,7 +421,7 @@ class ProcessLog extends HTMLElement {
                 this.writeSingleValue(`&nbsp;&nbsp;&nbsp;${name}`, `[${matrix[0]}]`);
 
                 for (let i = 1; i < matrix.length; i++) {
-                    name_padding = `<span style="color: white">${name}:<span>`;
+                    name_padding = `<span style="color: white; user-select: none;">${name}:<span>`;
                     this.writeSingleValue(`&nbsp;&nbsp;&nbsp;${name_padding}`, `[${matrix[i]}]`);
                 }
             } else {
