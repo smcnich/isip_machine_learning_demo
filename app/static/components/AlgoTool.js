@@ -41,18 +41,10 @@ class AlgoTool extends HTMLElement {
     //
     this.name = this.constructor.name;
 
-    // create a variable to hold the process log component
-    //
-    this.processLog = document.querySelector('process-log');
-
     // create a variable to hold the form and select values
     //
     this.form = null;
     this.selectedValue = null;
-
-    // intialize the web socket
-    //
-    this.socket = io();
   }
   //
   // end of method
@@ -281,14 +273,6 @@ class AlgoTool extends HTMLElement {
             height: 10%;
           }
 
-          #progress-bar-container {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            width: 100%;
-            height: 5%;
-          }
-
           button { 
             height: 70%;
             width: 45%;
@@ -376,21 +360,10 @@ class AlgoTool extends HTMLElement {
             width: 100%;
             height: 100%;
           }
-
-          progress-bar {
-            width: 45%;  /* Same width as the buttons */
-            height: 70%; /* Same height as the buttons */
-            margin: 0 10px;
-          }
-
         </style>
 
         <!-- Add your HTML here -->
         <div class="main">
-          <div id="progress-bar-container">
-            <progress-bar id="trainProgressBar"></progress-bar>
-            <progress-bar id="evalProgressBar"></progress-bar>
-          </div>
           <div id="button-container">
             <button id="train" class=disabled>Train</button>
             <button id="eval" class=disabled>Evaluate</button>
@@ -402,27 +375,6 @@ class AlgoTool extends HTMLElement {
           <div id="paramBox"></div>
         </div>
       `;
-
-      // get elements for train and eval progress bar
-      //
-      const trainProgressBar = this.shadowRoot.querySelector('#trainProgressBar');
-      const evalProgressBar = this.shadowRoot.querySelector('#evalProgressBar');
-  
-      // listen to web socket for updates to train progress bar key
-      //
-      this.socket.on('trainProgressBar', (data) => {
-        // update progress value of trian progress bar
-        //
-        trainProgressBar.setProgress(data.trainProgress);
-      });
-
-      // listen to web socket for updates to eval progress bar key
-      //
-      this.socket.on('evalProgressBar', (data) => {
-        // update progress value of eval progress bar
-        //
-        evalProgressBar.setProgress(data.evalProgress);
-      })
 
       // get the algo select element to be used to monitor when the value changes
       //
@@ -609,58 +561,6 @@ class AlgoTool extends HTMLElement {
   }
   //
   // end of method
-
-  set_train_progress(percentage) {
-    /*
-    method: AlgoTool::set_train_progress
-
-    args:
-     percentage (Number): The percentage of the evaluation progress bar
-                          as a whole number between 0 and 100
-
-    return:
-     None
-
-    description:
-     this method sets the progress of the train progress bar. 
-     the percentage is a whole number between 0 and 100.
-    */
-    
-
-    // get the train progress bar
-    //
-    const pb = this.shadowRoot.getElementById('trainProgressBar');
-
-    // set the progress of the train progress bar
-    //
-    pb.setProgress(percentage);
-  }
-
-  set_eval_progress(percentage) {
-    /*
-    method: AlgoTool::set_eval_progress
-
-    args:
-     percentage (Number): The percentage of the evaluation progress bar
-                          as a whole number between 0 and 100
-
-    return:
-     None
-
-    description:
-     this method sets the progress of the eval progress bar. 
-     the percentage is a whole number between 0 and 100.
-    */
-    
-
-    // get the train progress bar
-    //
-    const pb = this.shadowRoot.getElementById('evalProgressBar');
-
-    // set the progress of the train progress bar
-    //
-    pb.setProgress(percentage);
-  }
 
   change_train_state(state) {
     /*

@@ -40,7 +40,3 @@ class App(Flask):
         self.static_folder = config.STATIC
     
 app = App()
-
-@app.before_request
-def log_request():
-    print(f"Request path: {request.path}")

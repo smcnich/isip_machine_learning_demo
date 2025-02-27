@@ -2,7 +2,6 @@ from os.path import abspath
 
 from .extensions.base import app
 from .extensions.blueprint import main
-from .extensions.socketio import socketio
 from .extensions.scheduler import scheduler
 
 
@@ -17,15 +16,10 @@ class IMLD():
         #
         app.register_blueprint(main)
 
-        # create a socketio instance that will be used to emit real-time updates
-        # through the app
-        #
-        socketio.init_app(app)
-
         # Initialize and start the scheduler
         #
         scheduler.init_app(app)
         scheduler.start()
 
     def run(self):
-        socketio.run(app, debug=True, log_output=False)
+        app.run(debug=True)

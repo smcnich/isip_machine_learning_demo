@@ -11,8 +11,6 @@ import nedc_ml_tools_data as mltd
 import nedc_imld_tools as imld
 import nedc_ml_tools as mlt
 
-from .socketio import callback
-
 # Create a Blueprint
 #
 main = Blueprint('main', __name__)
@@ -281,8 +279,6 @@ def eval():
         #
         data = imld.create_data(x, y, labels)
 
-        callback('evalProgressBar', {'evalProgress': 30})
-
         # evaluate the model
         #
         metrics, parameter_outcomes = imld.predict(model, data)
@@ -293,8 +289,6 @@ def eval():
             'metrics': metrics,
             'parameter_outcomes': convert_numpy(parameter_outcomes)
         }
-
-        callback('evalProgressBar', {'evalProgress': 100})
 
         # return the jsonified response
         #

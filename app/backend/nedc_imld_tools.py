@@ -11,9 +11,8 @@ class MLToolsError(Exception):
     def __init__(self, message):
         self.message = message
 
-
     def __str__(self):
-        return self.message
+        return self.message.split(':')[-1].strip().capitalize()
 
 def check_return(func, *args, **kwargs):
     '''
