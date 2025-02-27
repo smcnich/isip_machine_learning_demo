@@ -292,6 +292,7 @@ class DataPopup extends HTMLElement {
 
     // create a dynamic form container for the distribution key
     //
+    this.method = this.params.method;
     this.form = new FormContainer(this.params, style);
 
     // Append the form to the popup before the button container
@@ -371,11 +372,11 @@ class DataPopup extends HTMLElement {
       //
       EventBus.dispatchEvent(new CustomEvent('dataGen', {
         detail: {
-          'plotID': this.label.toLowerCase(),
-          'key': this.key,
+          'plotID': this.label.toLocaleLowerCase(),
+          'method': this.method,
           'params': paramsDict,
           'param_names': param_names,
-          'name': this.name
+          'name': this.name       
         }
       }));
 

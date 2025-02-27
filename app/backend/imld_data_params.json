@@ -1,6 +1,7 @@
 {
   "two_gaussian": {
     "name": "Two Gaussian",
+    "method": "gaussian",
     "params": {
       "meancov1": {
         "name": "Mean and Covariance 1",
@@ -55,6 +56,7 @@
 
   "four_gaussian": {
     "name": "Four Gaussian",
+    "method": "gaussian",
     "params": {
       "meancov1": {
         "name": "Mean and Covariance 1",
@@ -157,6 +159,7 @@
 
   "overlapping_gaussian": {
     "name": "Overlapping Gaussian",
+    "method": "gaussian",
     "params": {
       "meancov1": {
         "name": "Mean and Covariance 1",
@@ -211,6 +214,7 @@
 
   "two_ellipses": {
     "name": "Two Ellipses",
+    "method": "gaussian",
     "params": {
       "meancov1": {
         "name": "Mean and Covariance 1",
@@ -265,6 +269,7 @@
 
   "four_ellipses": {
     "name": "Four Ellipses",
+    "method": "gaussian",
     "params": {
       "meancov1": {
         "name": "Mean and Covariance 1",
@@ -367,6 +372,7 @@
 
   "rotated_ellipses": {
     "name": "Rotated Ellipses",
+    "method": "gaussian",
     "params": {
       "meancov1": {
         "name": "Mean and Covariance 1",
@@ -421,6 +427,7 @@
 
   "toroidal": {
     "name": "Toroidal",
+    "method": "toroidal",
     "params": {
       "npts_ring": {
         "name": "Number of Points (Ring)",
@@ -475,6 +482,7 @@
 
   "yin_yang": {
     "name": "Yin Yang",
+    "method": "yin_yang",
     "params": {
       "npts_yin": {
         "name": "Number of Points (Yin)",

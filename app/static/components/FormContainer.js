@@ -700,7 +700,7 @@ class FormContainer extends HTMLElement {
        Object: a JSON object with the values of the form
 
       description:
-       this method is called when the form is submitted. tt will collect the values
+       this method is called when the form is submitted. it will collect the values
        of the form and return them as a JSON object.
       */
 

@@ -7,6 +7,14 @@ import nedc_ml_tools as mlt
 import nedc_ml_tools_data as mltd
 from nedc_file_tools import load_parameters
 
+class MLToolsError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
+    def __str__(self):
+        return self.message
+
 def check_return(func, *args, **kwargs):
     '''
     function: check_return
@@ -45,8 +53,11 @@ def check_return(func, *args, **kwargs):
     # unnecessary information. simply take the root cause of the error
     # i.e. "Singluar matrix is none"
     #
-    if any(x is None for x in res):
-        raise Exception(capture.getvalue().split(':')[-1].strip().capitalize())
+    if res is None or \
+    (isinstance(res, (list, tuple)) and any(x is None for x in res)):
+        # raise Exception(capture.getvalue().split(':')[-1].strip().capitalize())
+        raise MLToolsError(capture.getvalue())
+    
 
     # exit gracefully
     #
@@ -140,33 +151,50 @@ def generate_data(dist_name:str, params:dict):
      generate a MLToolsData object given a distribution name and the parameters
     '''
 
+    if dist_name == 'gaussian':
+
+        # group keys by their numeric suffix
+        # 
+        grouped_data = {}
+
+        # iterate through the parameters and group them by their numeric suffix
+        #
+        for key, value in params.items():
+
+            # extract the base name and the number
+            #
+            prefix, num = key[:-1], key[-1]
+
+            # convert the number to an integer
+            #
+            num = int(num)
+
+            # if the number is not in the grouped data, create a new dictionary
+            #
+            if num not in grouped_data:
+                grouped_data[num] = {}
+
+            if prefix == 'mean':
+                value = list(np.array(value).flatten())
+
+            # assign value to corresponding group
+            #
+            grouped_data[num][prefix] = value
+
+        # create a list of the grouped values
+        #
+        params = list(grouped_data.values())
+
     # create a ML Tools data object using the class method
     #
-    X, y = mltd.MLToolsData.generate_data(dist_name, params)
+    data_obj = mltd.MLToolsData.generate_data(dist_name, params)
+    data = data_obj.data
 
-    # get the labels from the data
+    # get the data and labels from the ML Tools data object
     #
-    '''
-    labels = set(data.labels)
-    
-    # get the indexes of each class
-    #
-    class_idxs = []
-    for label in labels:
-        class_idxs.append(np.where(data.labels == label))
-
-    # format the data into a list of lists. each entry into the list
-    # will be the data for a single class
-    #
-    X, y = [], []
-    for idx in class_idxs:
-        X.append(data.data[idx])
-        y.append(data.labels[idx])
-    '''
-        
-    labels = y.tolist()
-    x = X[:,0].tolist()
-    y = X[:,1].tolist()
+    labels = data_obj.labels.tolist()
+    x = data[:, 0].tolist()
+    y = data[:, 1].tolist()
 
     # exit gracefully
     #
@@ -198,6 +226,7 @@ def train(model:mlt.Alg, data:mltd.MLToolsData):
     # train the model
     #
     check_return(model.train, data)
+    # model.train(data)
 
     # get the performance metrics of the model on the test data
     #
@@ -401,6 +430,7 @@ def generate_decision_surface(data:mltd.MLToolsData, model:mlt.Alg, *,
     # flattened for each sample in the meshgrid
     #
     labels, _ = check_return(model.predict, meshgrid)
+    # labels, _ = model.predict(meshgrid)
 
     # get the x and y values. x and y values should be 1D arrays
     # acting as the axis values of the grid. take a row from the xx

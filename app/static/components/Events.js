@@ -46,6 +46,10 @@ const gaussParams = {
     'cov': [[0.025, 0], [0, 0.025]]
 }
 
+function capitalize(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 // Listen for the 'train' event emitted from AlgoTool Component
 //
 EventBus.addEventListener('train', (event) => {
@@ -135,6 +139,7 @@ EventBus.addEventListener('train', (event) => {
             return response.json().then((errorData) => {
                 EventBus.dispatchEvent(new CustomEvent('continue'));
                 processLog.writePlain(errorData);
+                throw new Error(errorData);
             });
         }
     })
@@ -142,16 +147,6 @@ EventBus.addEventListener('train', (event) => {
     // get the data from the response
     //
     .then((data) => {
-
-        // set the label mappings in the label manager
-        //
-        labelManager.setMappings(data.mapping_label);
-
-        // change the z values to numerics based on the mapping
-        // labels
-        //
-        data.decision_surface.z = 
-            labelManager.mapLabels(data.decision_surface.z);
 
         // plot the decision surface on the training plot
         //
@@ -263,6 +258,7 @@ EventBus.addEventListener('eval', (event) => {
             return response.json().then((errorData) => {
                 EventBus.dispatchEvent(new CustomEvent('continue'));
                 processLog.writePlain(errorData);
+                throw new Error(errorData);
             });
         }
     })
@@ -325,6 +321,7 @@ EventBus.addEventListener('saveModel', () => {
                 return response.json().then((errorData) => {
                     EventBus.dispatchEvent(new CustomEvent('continue'));
                     processLog.writePlain(errorData);
+                    throw new Error(errorData);
                 });
             }
 
@@ -454,6 +451,7 @@ EventBus.addEventListener('loadModel', (event) => {
                     return response.json().then((errorData) => {
                         EventBus.dispatchEvent(new CustomEvent('continue'));
                         processLog.writePlain(errorData);
+                        throw new Error(errorData);
                     });
                 }
             })
@@ -559,8 +557,8 @@ EventBus.addEventListener('dataGen', (event) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                'key': event.detail.key,
-                'params': event.detail.params,
+                'method': event.detail.method,
+                'params': event.detail.params
             })
         })
 
@@ -574,6 +572,7 @@ EventBus.addEventListener('dataGen', (event) => {
                 return response.json().then((errorData) => {
                     EventBus.dispatchEvent(new CustomEvent('continue'));
                     processLog.writePlain(errorData);
+                    throw new Error(errorData);
                 });
             }
         })
@@ -599,23 +598,24 @@ EventBus.addEventListener('dataGen', (event) => {
                 // if it already exists, it is ok
                 //
                 if (labelManager.addLabel(label)) {
-                    processLog.writePlain(`Added class: ${uniqLabels[i]}`);
+                    processLog.writePlain(`Added class: ${label.name}`);
                 }
             }
 
             // plot the response data on the plot
             //
-            plot.plot(data, labelManager.getColorMappings());
+            plot.plot(data, labelManager);
 
             // update plot shape name
-            plot.updateShapeName(event.detail.name);
+            // plot.updateShapeName(event.detail.name);
 
             // Add a full-width separator
             processLog.addFullWidthSeparator();
 
             // display the selected data distribution to the process log
             //
-            processLog.writeSingleValue('Selected Data', `${plot.getShapeName()} → ${event.detail.plotID.charAt(0).toUpperCase() + event.detail.plotID.slice(1)}`);
+            processLog.writeSingleValue('Selected Data', 
+                `${event.detail.name} → ${capitalize(event.detail.plotID)}`);
 
             // get the param values and corresponding param names
             //
@@ -625,10 +625,6 @@ EventBus.addEventListener('dataGen', (event) => {
             // write the process log for data gen
             //
             processLog.writeDataParams(paramValues, param_names);
-
-            // update the class list in the main toolbar
-            //
-            mainToolbar.updateClassList(labelManager.getLabels());
 
             // continue the application
             //
@@ -643,8 +639,28 @@ EventBus.addEventListener('dataGen', (event) => {
         return response.json().then((errorData) => {
             EventBus.dispatchEvent(new CustomEvent('continue'));
             processLog.writePlain(errorData);
+            throw new Error(errorData);
         });
     }
+});
+
+EventBus.addEventListener('updateLabels', (event) => {
+    /*
+    eventListener: updateLabels
+
+    dispatcher: LabelManager
+
+    args:
+     event.detail.labels (List): the list of labels from the label manager
+
+    description:
+     update the list of labels in the main toolbar classes dropdown
+    */
+
+
+    // update the class list in the main toolbar
+    //
+    mainToolbar.updateClassList(event.detail.labels);
 });
 
 EventBus.addEventListener('setBounds', (event) => {
@@ -921,7 +937,7 @@ EventBus.addEventListener('loadData', (event) => {
 
                 // plot the response data on the plot
                 //
-                plot.plot(data, labelManager.getColorMappings());
+                plot.plot(data, labelManager);
 
                 // update the class list in the main toolbar
                 //
@@ -1139,7 +1155,7 @@ EventBus.addEventListener('enableDraw', (event) => {
 
     // get the label from the label manager
     //
-    const label = labelManager.getLabel(className);
+    const label = labelManager.getLabelByName(className);
 
     // enable drawing on the train and eval plots
     //

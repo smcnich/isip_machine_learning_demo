@@ -1,13 +1,10 @@
 import os
-import sys
 import json
 import io
 import pickle
 from collections import OrderedDict
 from datetime import datetime
 from flask import Blueprint, render_template, request, jsonify, current_app, send_file
-
-import traceback
 
 import nedc_ml_tools_data as mltd
 import nedc_imld_tools as imld
@@ -205,19 +202,16 @@ def train():
         # create the data object
         #
         data = imld.create_data(x, y, labels)
-        callback('trainProgressBar', {'trainProgress': 5})
 
         # train the model
         #
         model, metrics = imld.train(model, data)
-        callback('trainProgressBar', {'trainProgress': 20})
 
         # get the x y and z values from the decision surface
         # x and y will be 1D and z will be 2D
         #
         x, y, z = imld.generate_decision_surface(data, model, xrange=xrange,
                                                  yrange=yrange)
-        callback('trainProgressBar', {'trainProgress': 80})
 
         # format the response
         #
@@ -230,7 +224,7 @@ def train():
             # flip the mapping label to it is {label name : numeric value} as 
             # opposed to {numeric value : label name} because that is easier
             # to work with on the front end
-            'mapping_label': {value: key for key, value in data.mapping_label.items()},
+            # 'mapping_label': {value: key for key, value in data.mapping_label.items()},
             'metrics': metrics
         }
 
@@ -240,8 +234,6 @@ def train():
             'model': model,
             'timestamp': datetime.now()
         }
-        
-        callback('trainProgressBar', {'trainProgress': 100})
         
         # return the jsonified response
         #
@@ -305,14 +297,14 @@ def data_gen():
     # Extract the key and parameters from the received data
     #
     if data:
-        key = data['key']
+        dist_name = data['method']
         paramsDict = data['params']
 
     try:
 
         # generate values for labels, x, y
         #
-        labels, x, y = imld.generate_data(key, paramsDict)
+        labels, x, y = imld.generate_data(dist_name, paramsDict)
 
         # Prepare the response data
         #

@@ -289,7 +289,7 @@ class Plot extends HTMLElement {
   //
   // end of method
 
-  createTraces(data, colorMappings) {
+  createTraces(data, labelManager) {
 
     // make the all the data labels are the same
     //
@@ -304,24 +304,26 @@ class Plot extends HTMLElement {
     //
     let traces = {};
     for (let i = 0; i < data.labels.length; i++) {
-      
-      // get the label of the index
+
+      // get the Label object from the label manager
+      // using the numeric mapping present in the data
       //
-      let label = data.labels[i];
+      let label = labelManager.getLabelByMapping(data.labels[i]);
 
       // if the label is not a already created
       //
-      if (!(label in traces)) {
+      if (!(label.mapping in traces)) {
 
-        traces[label] = {
+        traces[label.mapping] = {
           x: [],
           y: [],
           mode: 'markers',
           type: 'scattergl',
-          name: label,
+          name: label.name,
+          mapping: label.mapping,
           marker: { 
             size: 2, 
-            color: colorMappings[label.toLowerCase()]
+            color: label.color
           },
           hoverinfo: 'none'
         }
@@ -329,8 +331,8 @@ class Plot extends HTMLElement {
 
       // add the x and y values to the trace
       //
-      traces[label].x.push(data.x[i]);
-      traces[label].y.push(data.y[i]);
+      traces[label.mapping].x.push(data.x[i]);
+      traces[label.mapping].y.push(data.y[i]);
     }
 
     // convert the object of objects tob an array of objects
@@ -373,7 +375,7 @@ class Plot extends HTMLElement {
     Plotly.newPlot(this.plotDiv, this.plotData, this.layout, this.config);
   }
 
-  plot(data, colorMappings) {
+  plot(data, labelManager) {
     /*
     method: Plot::plot
 
@@ -385,6 +387,9 @@ class Plot extends HTMLElement {
                           x: [1, 2, 3, 4, 5, 6, ...],
                           y: [1, 2, 3, 4, 5, 6, ...]
                         }
+     labelManager (LabelManager): an instance of the LabelManager class that
+                                  contains the labels, colors, and mappings
+                                  for each label in the data.
     
     return:
      None
@@ -404,7 +409,7 @@ class Plot extends HTMLElement {
 
     // Prepare plot data by creating a trace for each label
     //
-    this.plotData = this.createTraces(this.data, colorMappings);
+    this.plotData = this.createTraces(this.data, labelManager);
 
     // check if the layout data is null, if so, use the default layout values
     //
@@ -554,7 +559,7 @@ class Plot extends HTMLElement {
     }
 
     // recreate the color scale to be in the format of:
-    //  [[0, <color>], [0.25, <color], ..., [1, <color>]]
+    //  [[0, <color>], [0.25, <color>], ..., [1, <color>]]
     // normalize the index of each color in the scale 
     // to be between 0 and 1 as this is required by plotly
     //
@@ -677,7 +682,7 @@ class Plot extends HTMLElement {
         // iterate over each point in the trace and add the data to the arrays
         //
         for (let i = 0; i < trace.x.length; i++) {
-          labels.push(trace.name);
+          labels.push(trace.mapping);
           x.push(trace.x[i]);
           y.push(trace.y[i]);
         }
@@ -803,7 +808,7 @@ class Plot extends HTMLElement {
     // try to find the index of the proper class trace
     //
     let traceIdx = this.plotData.findIndex((trace) => {
-      return trace.name.toLowerCase() === label.name.toLowerCase();
+      return trace.mapping === label.mapping;
     });
 
     // if the trace does not exist, create a new trace
@@ -816,6 +821,7 @@ class Plot extends HTMLElement {
         mode: 'markers',
         type: 'scattergl',
         name: label.name,
+        mapping: label.mapping,
         marker: { 
           size: 2,
           color: label.color

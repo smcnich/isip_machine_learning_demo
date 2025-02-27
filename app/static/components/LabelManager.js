@@ -1,8 +1,22 @@
+import { EventBus } from "./Events.js";
+
 export class Label {
     constructor(labelName, color) {
-        this.name = labelName;
+
+        if (isNumber(labelName)) {
+            this.name = `Class ${labelName}`;
+            this.mapping = labelName;
+        }
+        else {
+            this.name = labelName;
+            this.mapping = null;
+        }
+
         this.color = color;
-        this.mapping = null;
+    }
+
+    getMapping() {
+        return this.mapping;
     }
 
     setMapping(mapping) {
@@ -17,21 +31,86 @@ export class Label {
 export class LabelManager {
     constructor() {
         this.labels = [];
-        this.mappings = {};
+        this.names = []
+        this.mappings = [];
+        this.map = {};
     }
 
     getLabels() {
         return this.labels;
     }
 
-    getLabel(labelName) {
+    getLabelByName(labelName) {
+        /*
+        method: LabelManager::getLabelByName
+
+        args:
+         labelName (String): the name of the class to get the label object
+                             for
+                        
+        return:
+         Label: the label object associated with the class name
+
+        description:
+         returns the label object associated with the class name
+         this is used to get the label object for a given class name
+        */
+
+        // find the class name within the labels and return it if found,
+        // false if not found
+        //
         return this.labels.find((label) => {
             return label.name.toLowerCase() === labelName.toLowerCase();
         });
     }
+    //
+    // end of method
+
+    getLabelByMapping(mapping) {
+        /*
+        method: LabelManager::getLabelByMapping
+
+        args:
+         mapping (Number): the numeric mapping of the class
+
+        return:
+         Label: the label object associated with the mapping
+
+        description:
+         returns the label object associated with the mapping
+        */
+
+        // find the label with the given mapping
+        //
+        return this.labels.find((label) => {
+            return label.mapping === mapping;
+        });
+    }
+    //
+    // end of method
 
     getMappings() {
         return this.mappings;
+    }
+
+    getMapping(labelName) {
+        /*
+        method: LabelManager::getMapping
+
+        args:
+         labelName (String): the name of the class to get the mapping for
+
+        return:
+         Number: the numeric mapping of the class
+
+        description:
+         returns the numeric mapping of the class
+        */
+
+        // get the lowercase version of the class name
+        // if the class name is not a string, do not make lowercase
+        //
+        return this.map[labelName.toLowerCase()];
     }
 
     getColors() {
@@ -45,15 +124,39 @@ export class LabelManager {
     }
 
     getColorMappings() {
+        /*
+        method: LabelManager::getColorMappings
 
-        const colorMappings = {};
-        
+        args:
+         None
+
+        return:
+         Object: a map with they key being a labels numeric mapping, and the
+                 value being the color of the label
+
+        description:
+         returns a mapping of the class name to the color of the class
+         this is used to map the colors to the classes in the plot
+        */
+
+        // iterate over the labels and create a mapping of the class name
+        // to the color
+        //
+        const colorMappings = {};        
         this.labels.forEach((label) => {
-            colorMappings[label.name.toLowerCase()] = label.color;
+
+            // get the lowercase version of the class name
+            // if the class name is not a string, do not make lowercase
+            //
+            colorMappings[label.mapping] = label.color;
         });
 
+        // return the mapping of the class name to the color
+        //
         return colorMappings;
     }
+    //
+    // end of function
 
     setMappings(mappings) {
 
@@ -67,20 +170,37 @@ export class LabelManager {
         // set the mapping for each label
         //
         this.labels.forEach((label) => {
-            label.setMapping(this.mappings[label.name.toLowerCase()]);  
+
+            // get the lowercase version of the class name
+            // if the class name is not a string, do not make lowercase
+            //
+            label.setMapping(this.mappings[label.name?.toLowerCase?.()]);  
         });
     }
 
     addLabel(labelObj) {
+        /*
+        method: LabelManager::addLabel
 
-        // get the lowercase version of the class name
-        //
-        const labelName = labelObj.name.toLowerCase();
+        args:
+         labelObj (Label): the label object to add to the list of classes
+
+        return:
+         Boolean: true if the class was added, false if it was not
+
+        description:
+         adds a class to the list of classes
+         if the class already exists, then it will not be added
+        */
 
         // check if the class name already exists
         //
         const labelExists = this.labels.some((label) => {
-            return label.name.toLowerCase() === labelName;
+
+            // get the lowercase version of the class name
+            // if the class name is not a string, do not make lowercase
+            //
+            return label.name.toLowerCase() === labelObj.name.toLowerCase()
         });
 
         // if the label exists then return false
@@ -89,16 +209,46 @@ export class LabelManager {
             return false;
         }
 
-        // add the class to the list of classes
+        // if the label does not have a mapping, then set it to the next 
+        // available numeric mapping
+        //
+        if (!labelObj.mapping) {
+
+            // if there are no mappings, then set the mapping to 0
+            //
+            if (this.mappings.length === 0) {
+                labelObj.mapping = 0;
+            }
+
+            // if there are mappings, then set the mapping to the next
+            // available numeric mapping
+            //
+            else {
+                labelObj.mapping = Math.max(...this.mappings) + 1;
+            }
+        }
+
+        // add the label to the internal data structures
         //
         this.labels.push(labelObj);
+        this.names.push(labelObj.name);
+        this.mappings.push(labelObj.mapping);
+        this.map[labelObj.name] = labelObj.mapping;
+
+        // dispatch an event to update the labels in the plot
+        //
+        EventBus.dispatchEvent(new CustomEvent('updateLabels', {
+            detail: {
+                labels: this.labels
+            }
+        }));
 
         // return true to indicate that the class was added
         // 
         return true;
     }
     //
-    // remove a class from the list of classes
+    // end of method
 
     mapLabels(labels, mappings=this.mappings) {
         /*
@@ -131,9 +281,10 @@ export class LabelManager {
             } 
             
             // else, return the mapped value
+            // if the item is a string, convert it to lowercase
             //
             else {
-                return mappings[item.toLowerCase()];
+                return mappings[item?.toLowerCase?.()];
             }
           });
           // this will create a new array with the mapped values
@@ -174,6 +325,15 @@ export class LabelManager {
         // so return true
         //
         if (this.labels.length < origLength) {
+
+            // dispatch an event to update the labels in the plot
+            //
+            EventBus.dispatchEvent(new CustomEvent('updateLabels', {
+                detail: {
+                    labels: this.labels
+                }
+            }));
+
             return true;
         }
 
@@ -202,4 +362,28 @@ export class LabelManager {
         //
         this.labels = [];
     }
+    //
+    // end of method
 }
+
+function isNumber(value) {
+    /*
+    function: isNumber
+
+    args:
+     value (String): the value to check if it is a number
+
+    returns:
+     Boolean: true if the value is a number, false if it is not
+
+    description:
+     checks if a string value is a number
+    */
+
+    // try to convert the value to a number. if the result is
+    // NaN, then the value is not a number
+    //
+    return !isNaN(Number(value))
+}
+//
+// end of function
