@@ -3,6 +3,7 @@
 # file: $NEDC_NFC/class/python/nedc_ml_tools/nedc_ml_tools.py
 #
 # revision history:
+# 20250226 (SP): added QSVM, QNN and QRBM classes
 # 20250222 (PM): Moved MLToolsData class to its own file
 # 20250107 (SP): added TRANSFORMER class
 # 20240821 (DB): fixed an interface issue with scoring
@@ -15,6 +16,7 @@
 # 20230114 (PM): completed the implementation
 # 20230110 (JP): reviewed and refactored
 # 20221220 (PM): initial version
+#
 #
 # This class contains a collection of classes and methods that consolidate
 # some of our most common machine learning algorithms. Currently, we support:
@@ -63,6 +65,7 @@ import nedc_debug_tools as ndt
 import nedc_file_tools as nft
 import nedc_cov_tools as nct
 import nedc_trans_tools as ntt
+import nedc_qml_tools as nqt
 from nedc_ml_tools_data import MLToolsData
 
 #---------------------------- Example -----------------------------------------
@@ -710,6 +713,162 @@ TRANS_MDL_KEY_NAME = ALG_MDL_KEY_NAME
 TRANS_MDL_KEY_MODEL = ALG_MDL_KEY_MODEL
 
 #------------------------------------------------------------------------------
+# Alg = QSVM: define dictionary keys for parameters
+#
+# define the algorithm name
+#
+QSVM_NAME = "QSVM"
+
+# the parameter block for QSVM looks like this:
+#
+#  defaultdict(<class 'dict'>, {
+#   'name': 'QSVM"
+#   'params': {
+#               name          : QSVM
+#               model_name    : qsvm
+#               provider_name : qiskit
+#               hardware      : cpu
+#               encoder_name  : zz
+#               kernel_name   : fidelity
+#               entanglement  : full
+#               reps          : 2
+#               n_qubits      : 4
+#               shots         : 1024
+#    }
+#  })
+
+# define quantum ML algorithms related common parameters keys
+#
+QML_PRM_KEY_MDL_NAME = "model_name"
+QML_PRM_KEY_PROVIDER = "provider_name"
+QML_PRM_KEY_HARDWARE = "hardware"
+QML_PRM_KEY_ENCODER = "encoder_name"
+QML_PRM_KEY_ENTANGLEMENT = "entanglement"
+QML_PRM_KEY_FEAT_REPS = "featuremap_reps"
+QML_PRM_KEY_ANSATZ_REPS = "ansatz_reps"
+QML_PRM_KEY_NQUBITS = "n_qubits"
+QML_PRM_KEY_SHOTS = "shots"
+
+# define QSVM algorithms related common model keys
+#
+QSVM_PRM_KEY_NAME = ALG_PRM_KEY_NAME
+QSVM_PRM_KEY_PARAM = ALG_PRM_KEY_PARAM
+QSVM_PRM_KEY_PROVIDER = QML_PRM_KEY_PROVIDER
+QSVM_PRM_KEY_HARDWAR = QML_PRM_KEY_HARDWARE
+QSVM_PRM_KEY_ENCODER = QML_PRM_KEY_ENCODER
+QSVM_PRM_KEY_ENTANGLEMENT = QML_PRM_KEY_ENTANGLEMENT
+QSVM_PRM_KEY_NQUBITS = QML_PRM_KEY_NQUBITS
+QSVM_PRM_KEY_FEAT_REPS = QML_PRM_KEY_FEAT_REPS
+QSVM_PRM_KEY_ANSATZ_REPS = QML_PRM_KEY_ANSATZ_REPS
+QSVM_PRM_KEY_MDL_NAME = QML_PRM_KEY_MDL_NAME
+QSVM_PRM_KEY_SHOTS = QML_PRM_KEY_SHOTS
+QSVM_PRM_KEY_KERNEL = "kernel_name"
+
+# The model for QSVM contains:
+# {'name': 'QSVM', 'model':
+# defaultdict(None, {'name': 'QSVM, 'model': <nedc_qml_tools.QSVM object at
+# 0x7f887741a1d0>})
+#
+QSVM_MDL_KEY_NAME = ALG_MDL_KEY_NAME
+QSVM_MDL_KEY_MODEL = ALG_MDL_KEY_MODEL
+
+#------------------------------------------------------------------------------
+# Alg = QNN: define dictionary keys for parameters
+#
+# define the algorithm name
+#
+QNN_NAME = "QNN"
+
+# the parameter block for QNN looks like this:
+#
+#  defaultdict(<class 'dict'>, {
+#   'name': 'QNN"
+#   'params': {
+#               name             : QNN
+#               model_name       : qnn
+#               provider_name    : qiskit
+#               encoder_name     : zz
+#               ansatz_name      : real_amplitudes
+#               hardware         : COBYLA
+#               optim_name       : COBYLA
+#               optim_max_steps  : 50   
+#               entanglement     : full
+#               reps             : 2
+#               n_qubits         : 2
+#               meas_type        : sampler
+#    }
+#  })
+
+
+# define QSVM algorithms related common model keys
+#
+QNN_PRM_KEY_NAME = ALG_PRM_KEY_NAME
+QNN_PRM_KEY_PARAM = ALG_PRM_KEY_PARAM
+QNN_PRM_KEY_PROVIDER = QML_PRM_KEY_PROVIDER
+QNN_PRM_KEY_HARDWAR = QML_PRM_KEY_HARDWARE
+QNN_PRM_KEY_ENCODER = QML_PRM_KEY_ENCODER
+QNN_PRM_KEY_ENTANGLEMENT = QML_PRM_KEY_ENTANGLEMENT
+QNN_PRM_KEY_NQUBITS = QML_PRM_KEY_NQUBITS
+QNN_PRM_KEY_REPS = QML_PRM_KEY_FEAT_REPS
+QNN_PRM_KEY_ANSATZ_REPS = QML_PRM_KEY_ANSATZ_REPS
+QNN_PRM_KEY_MDL_NAME = QML_PRM_KEY_MDL_NAME
+QNN_PRM_KEY_MEAS_TYPE = "meas_type"
+QNN_PRM_KEY_ANSATZ = "ansatz_name"
+QNN_PRM_KEY_MAXSTEPS = "optim_max_steps"
+QNN_PRM_KEY_OPTIM = "optim_name"
+
+# The model for QNN contains:
+# {'name': 'QNN', 'model':
+# defaultdict(None, {'name': 'QNN, 'model': <nedc_qml_tools.QNN object at
+# 0x7fd6626e2b10>})
+#
+QNN_MDL_KEY_NAME = ALG_MDL_KEY_NAME
+QNN_MDL_KEY_MODEL = ALG_MDL_KEY_MODEL
+
+#------------------------------------------------------------------------------
+# Alg = QRBM: define dictionary keys for parameters
+#
+# define the algorithm name
+#
+QRBM_NAME = "QRBM"
+
+# the parameter block for QRBM looks like this:
+#
+#  defaultdict(<class 'dict'>, {
+#   'name': 'QRBM"
+#   'params': {
+#               name             : QRBM
+#               model_name       : qrbm
+#               n_hiddem         : 10
+#               shots            : 2
+#               chain_strength   : 2
+#    }
+#  })
+
+
+# define QRBM algorithms related common model keys
+#
+QRBM_PRM_KEY_NAME = ALG_PRM_KEY_NAME
+QRBM_PRM_KEY_PARAM = ALG_PRM_KEY_PARAM
+QRBM_PRM_KEY_MDL_NAME = QML_PRM_KEY_MDL_NAME
+QRBM_PRM_KEY_SHOTS = QML_PRM_KEY_SHOTS
+QRBM_PRM_KEY_PROVIDER = QML_PRM_KEY_PROVIDER
+QRBM_PRM_KEY_ENCODER = QML_PRM_KEY_ENCODER
+QRBM_PRM_KEY_NHIDDEN = "n_hidden"
+QRBM_PRM_KEY_CS = "chain_strength"
+QRBM_PRM_KEY_N_NEIGHBORS = "knn_n_neighbors"
+
+
+# The model for QRBM contains:
+# {'name': 'QRBM', 'model':
+# defaultdict(None, {'name': 'QRBM, 'model': QRBMClassifier
+# (provider=DWaveProvider))
+#
+QRBM_MDL_KEY_NAME = ALG_MDL_KEY_NAME
+QRBM_MDL_KEY_MODEL = ALG_MDL_KEY_MODEL
+
+#------------------------------------------------------------------------------
+
 
 # declare global debug and verbosity objects so we can use them
 # in both functions and classes
@@ -1772,6 +1931,12 @@ class PCA:
             print("%s (line: %s) %s: training a model" %
                 (__FILE__, ndt.__LINE__, ndt.__NAME__))
 
+        if self.model_d is not None:
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Doesn't support training on pre-trained model"))
+            return None, None
+
         # get sorted_labels and sorted_samples
         #
         data = data.sort()
@@ -2160,6 +2325,11 @@ class QDA:
             print("%s (line: %s) %s: training a model" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__))
 
+        if self.model_d is not None:
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Doesn't support training on pre-trained model"))
+            return None, None
 
         data = data.sort()
         uni_label = np.unique(data.labels)
@@ -2525,6 +2695,12 @@ class LDA:
         if dbgl_g == ndt.FULL:
             print("%s (line: %s) %s: training a model" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__))
+
+        if self.model_d is not None:
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Doesn't support training on pre-trained model"))
+            return None, None
 
         # calculate number of classes
         #
@@ -2914,6 +3090,12 @@ class QLDA:
         if dbgl_g == ndt.FULL:
             print("%s (line: %s) %s: training a model" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__))
+
+        if self.model_d is not None:
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Doesn't support training on pre-trained model"))
+            return None, None
 
         # calculate number of classes
         #
@@ -3313,6 +3495,12 @@ class NB:
             print("%s (line: %s) %s: training a model" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__))
 
+        if self.model_d is not None:
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Doesn't support training on pre-trained model"))
+            return None, None
+
         # calculate number of classes
         #
         data = data.sort()
@@ -3541,6 +3729,12 @@ class EUCLIDEAN:
             print("%s (line: %s) %s: training a model" %
                 (__FILE__, ndt.__LINE__, ndt.__NAME__))
 
+        if self.model_d is not None:
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Doesn't support training on pre-trained model"))
+            return None, None
+
         # get sorted_labels and sorted_samples
         #
         data = data.sort()
@@ -3711,6 +3905,12 @@ class KNN:
             print("%s (line: %s) %s: training a model" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__))
 
+        if self.model_d is not None:
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Doesn't support training on pre-trained model"))
+            return None, None
+
         # making the final data
         #
         samples = np.array(data.data)
@@ -3859,6 +4059,12 @@ class RNF:
         if dbgl_g == ndt.FULL:
             print("%s (line: %s) %s: training a model" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__))
+
+        if self.model_d is not None:
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Doesn't support training on pre-trained model"))
+            return None, None
 
         # making the final data
         #
@@ -4028,6 +4234,12 @@ class SVM:
             print("%s (line: %s) %s: training a model" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__))
 
+        if self.model_d is not None:
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Doesn't support training on pre-trained model"))
+            return None, None
+
         # making the final data
         #
         samples = np.array(data.data)
@@ -4184,6 +4396,12 @@ class KMEANS:
         if dbgl_g == ndt.FULL:
             print("%s (line: %s) %s: training a model" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__))
+
+        if self.model_d is not None:
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Doesn't support training on pre-trained model"))
+            return None, None
 
         # making the final data
         #
@@ -4346,6 +4564,12 @@ class MLP:
         if dbgl_g == ndt.FULL:
             print("%s (line: %s) %s: training a model" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__))
+
+        if self.model_d is not None:
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Doesn't support training on pre-trained model"))
+            return None, None
 
         # making the final data
         #
@@ -4522,6 +4746,12 @@ class RBM:
             print("%s (line: %s) %s: training a model" %
                   (__FILE__, ndt.__LINE__, ndt.__NAME__))
 
+        if self.model_d is not None:
+            print("Error: %s (line: %s) %s: %s" %
+                (__FILE__, ndt.__LINE__, ndt.__NAME__,
+                "Doesn't support training on pre-trained model"))
+            return None, None
+
         # making the final data
         #
         samples = np.array(data.data)
@@ -4651,6 +4881,8 @@ class TRANSFORMER:
         # set the model
         #
         self.model_d[TRANS_MDL_KEY_NAME] = self.__class__.__name__
+        self.model_d[TRANS_MDL_KEY_MODEL] = defaultdict(dict)
+        
 
     #
     # end of method
@@ -4849,7 +5081,7 @@ class TRANSFORMER:
         # assign the model to the model_d['model']
         #
         self.model_d[TRANS_MDL_KEY_MODEL] = state_dict
-
+        
         # get the predicted labels
         #
         ypred, _ = self.predict(data=data)
@@ -4890,7 +5122,7 @@ class TRANSFORMER:
         # get the samples
         #
         samples = np.array(data.data)
-
+        
         # get the parameters
         #
         self.lr = float(self.params_d[TRANS_PRM_KEY_PARAM]
@@ -4979,6 +5211,588 @@ class TRANSFORMER:
 
 #------------------------------------------------------------------------------
 
+class QSVM:
+    """
+    Class: QSVM
+
+    description:
+     This is a class that implements QSVM
+    """
+    def __init__(self):
+        """
+        method: constructor
+
+        arguments:
+         none
+
+        return:
+         none
+
+        description:
+         this is the default constructor for the class.
+        """
+
+        # set the class name
+        #
+        QSVM.__CLASS_NAME__ = self.__class__.__name__
+
+        # initialize variables for the parameter block and model
+        #
+        self.params_d = defaultdict(dict)
+        self.model_d = defaultdict()
+
+        # initialize a parameter dictionary
+        #
+        self.params_d[QSVM_PRM_KEY_NAME] = self.__class__.__name__
+        self.params_d[QSVM_PRM_KEY_PARAM] = defaultdict(dict)
+
+        # set the model
+        #
+        self.model_d[QSVM_MDL_KEY_NAME] = self.__class__.__name__
+        self.model_d[QSVM_MDL_KEY_MODEL] = defaultdict(dict)
+
+    #
+    # end of method
+
+    #--------------------------------------------------------------------------
+    #
+    # computational methods: train/predict
+    #
+    #--------------------------------------------------------------------------
+
+    def train(self,
+              data: MLToolsData,
+              write_train_labels: bool,
+              fname_train_labels: str,
+              ):
+
+        """
+        method: train
+        arguments:
+        data: a list of numpy float matrices of feature vectors
+        write_train_labels: a boolean to whether write the train data
+        fname_train_labels: the filename of the train file
+
+        return:
+         model: a PyTorch state_dict containing the model
+         error: training error rate
+
+        description:
+         none
+        """
+
+        # display an informational message
+        #
+        if dbgl_g == ndt.FULL:
+            print("%s (line: %s) %s: training a model" %
+                  (__FILE__, ndt.__LINE__, ndt.__NAME__))
+
+        # get the samples
+        #
+        samples =  np.array(data.data)
+
+        # getting the labels
+        #
+        labels = np.array(data.labels)
+
+        # get the parameters
+        #
+        self.mdl_name = str(self.params_d[QSVM_PRM_KEY_PARAM]
+                                         [QSVM_PRM_KEY_MDL_NAME])
+        self.provider_name = str(self.params_d[QSVM_PRM_KEY_PARAM]
+                                              [QSVM_PRM_KEY_PROVIDER])
+        self.hardware = str(self.params_d[QSVM_PRM_KEY_PARAM]
+                                         [QSVM_PRM_KEY_HARDWAR])
+        self.encoder = str(self.params_d[QSVM_PRM_KEY_PARAM]
+                                        [QSVM_PRM_KEY_ENCODER])
+        self.entanglement = str(self.params_d[QSVM_PRM_KEY_PARAM]
+                                             [QSVM_PRM_KEY_ENTANGLEMENT])
+        self.n_qubits = int(self.params_d[QSVM_PRM_KEY_PARAM]
+                                         [QSVM_PRM_KEY_NQUBITS])
+        self.feat_reps = int(self.params_d[QSVM_PRM_KEY_PARAM]
+                                          [QSVM_PRM_KEY_FEAT_REPS])
+        self.shots = int(self.params_d[QSVM_PRM_KEY_PARAM]
+                                      [QSVM_PRM_KEY_SHOTS])
+        self.kernel_name = str(self.params_d[QSVM_PRM_KEY_PARAM]
+                                            [QSVM_PRM_KEY_KERNEL])
+        
+        # create the model
+        #
+        qsvm_model = nqt.QML(model_name=self.mdl_name,
+                             provider_name=
+                             self.provider_name,
+                             hardware=self.hardware,
+                             encoder_name=self.encoder,
+                             entanglement=
+                             self.entanglement,
+                             n_qubits=self.n_qubits,
+                             featuremap_reps=self.feat_reps,
+                             shots=self.shots,
+                             kernel_name=self.kernel_name)
+                                                   
+        # get the trained model
+        #
+        self.model_d[QSVM_MDL_KEY_MODEL] = qsvm_model.fit(samples, labels)
+        
+        # get the error rate for the training samples
+        #
+        error_rate, y_pred = qsvm_model.score(samples, labels)
+        
+        # if write_train_labels is True, write the labels to the file
+        #
+        if write_train_labels:
+            data.write(oname = fname_train_labels, label = ypred)
+        
+        # exit gracefully
+        #
+        return self.model_d, error_rate
+    #
+    # end of method
+
+    def predict(self,
+                data: MLToolsData,
+                model = None):
+        """
+        method: predict
+
+        arguments:
+         data: a numpy float matrix of feature vectors (each row is a vector)
+         model: an algorithm model (None = use the internal model)
+
+        return:
+         labels: a list of predicted labels
+
+        description:
+         none
+        """
+
+        # display an informational message
+        #
+        if dbgl_g == ndt.FULL:
+            print("%s (line: %s) %s: entering predict" %
+                  (__FILE__, ndt.__LINE__, ndt.__NAME__))
+            
+        # get the samples
+        #
+        samples = np.array(data.data)
+        
+        # get the trained model
+        #
+        model = self.model_d[QSVM_MDL_KEY_MODEL]
+                                                    
+        # get the predicted labels
+        #
+        p_labels = model.predict(samples)
+
+        # currently QSVM does not support posterior calculation
+        #
+        posteriors = None
+
+        # exit gracefully
+        #
+        return p_labels, posteriors
+    #
+    # end of method
+
+#
+# end of QSVM
+
+#------------------------------------------------------------------------------
+
+class QNN:
+    """
+    Class: QNN
+
+    description:
+     This is a class that implements QNN
+    """
+    def __init__(self):
+        """
+        method: constructor
+
+        arguments:
+         none
+
+        return:
+         none
+
+        description:
+         this is the default constructor for the class.
+        """
+
+        # set the class name
+        #
+        QNN.__CLASS_NAME__ = self.__class__.__name__
+
+        # initialize variables for the parameter block and model
+        #
+        self.params_d = defaultdict(dict)
+        self.model_d = defaultdict()
+
+        # initialize a parameter dictionary
+        #
+        self.params_d[QNN_PRM_KEY_NAME] = self.__class__.__name__
+        self.params_d[QNN_PRM_KEY_PARAM] = defaultdict(dict)
+
+        # set the model
+        #
+        self.model_d[QNN_MDL_KEY_NAME] = self.__class__.__name__
+        self.model_d[QNN_MDL_KEY_MODEL] = defaultdict(dict)
+
+
+    #
+    # end of method
+
+    #--------------------------------------------------------------------------
+    #
+    # computational methods: train/predict
+    #
+    #--------------------------------------------------------------------------
+
+    def train(self,
+              data: MLToolsData,
+              write_train_labels: bool,
+              fname_train_labels: str,
+              ):
+
+        """
+        method: train
+        arguments:
+        data: a list of numpy float matrices of feature vectors
+        write_train_labels: a boolean to whether write the train data
+        fname_train_labels: the filename of the train file
+
+        return:
+         model: a PyTorch state_dict containing the model
+         error: training error rate
+
+        description:
+         none
+        """
+
+        # display an informational message
+        #
+        if dbgl_g == ndt.FULL:
+            print("%s (line: %s) %s: training a model" %
+                  (__FILE__, ndt.__LINE__, ndt.__NAME__))
+
+        # get the samples
+        #
+        samples =  np.array(data.data)
+
+        # getting the labels
+        #
+        labels = np.array(data.labels)
+
+        # get the parameters
+        #
+        self.mdl_name = str(self.params_d[QNN_PRM_KEY_PARAM]
+                                         [QNN_PRM_KEY_MDL_NAME])
+        self.provider_name = str(self.params_d[QNN_PRM_KEY_PARAM]
+                                              [QNN_PRM_KEY_PROVIDER])
+        self.hardware = str(self.params_d[QNN_PRM_KEY_PARAM]
+                                         [QNN_PRM_KEY_HARDWAR])
+        self.encoder = str(self.params_d[QNN_PRM_KEY_PARAM]
+                                        [QNN_PRM_KEY_ENCODER])
+        self.entanglement = str(self.params_d[QNN_PRM_KEY_PARAM]
+                                             [QNN_PRM_KEY_ENTANGLEMENT])
+        self.n_qubits = int(self.params_d[QNN_PRM_KEY_PARAM]
+                                         [QNN_PRM_KEY_NQUBITS])
+        self.feat_reps = int(self.params_d[QNN_PRM_KEY_PARAM]
+                                          [QNN_PRM_KEY_REPS])
+
+        self.ansatz = str(self.params_d[QNN_PRM_KEY_PARAM]
+                                       [QNN_PRM_KEY_ANSATZ])
+        self.ansatz_reps = int(self.params_d[QNN_PRM_KEY_PARAM]
+                                            [QNN_PRM_KEY_ANSATZ_REPS])
+        self.optim_name = str(self.params_d[QNN_PRM_KEY_PARAM]
+                                            [QNN_PRM_KEY_OPTIM])
+        self.optim_max_steps = int(self.params_d[QNN_PRM_KEY_PARAM]
+                                                [QNN_PRM_KEY_MAXSTEPS])
+        self.meas_type = str(self.params_d[QNN_PRM_KEY_PARAM]
+                                          [QNN_PRM_KEY_MEAS_TYPE])
+        
+        # create the model
+        #
+        qnn_model = nqt.QML(model_name=self.mdl_name,
+                            provider_name=
+                            self.provider_name,
+                            hardware=self.hardware,
+                            encoder_name=self.encoder,
+                            entanglement=
+                            self.entanglement,
+                            n_qubits=self.n_qubits,
+                            featuremap_reps=self.feat_reps,
+                            ansatz=self.ansatz,
+                            ansatz_reps=self.ansatz_reps,
+                            optim_name=self.optim_name,
+                            optim_max_steps=self.optim_max_steps,
+                            measurement_type=self.meas_type,
+                            n_classes = data.num_of_classes
+                            )
+                                                   
+        # get the trained model
+        #
+        self.model_d[QNN_MDL_KEY_MODEL] = qnn_model.fit(samples, labels)
+        
+        # get the error rate for the training samples
+        #
+        error_rate, ypred = qnn_model.score(samples, labels)
+        
+        # if write_train_labels is True, write the labels to the file
+        #
+        if write_train_labels:
+            data.write(oname = fname_train_labels, label = ypred)
+        
+        # exit gracefully
+        #
+        return self.model_d, error_rate
+    #
+    # end of method
+
+    def predict(self,
+                data: MLToolsData,
+                model = None):
+        """
+        method: predict
+
+        arguments:
+         data: a numpy float matrix of feature vectors (each row is a vector)
+         model: an algorithm model (None = use the internal model)
+
+        return:
+         labels: a list of predicted labels
+
+        description:
+         none
+        """
+
+        # display an informational message
+        #
+        if dbgl_g == ndt.FULL:
+            print("%s (line: %s) %s: entering predict" %
+                  (__FILE__, ndt.__LINE__, ndt.__NAME__))
+            
+        # get the samples
+        #
+        samples = np.array(data.data)
+        
+        # get the trained model
+        #
+        model = self.model_d[QNN_MDL_KEY_MODEL]
+                                                    
+        # get the predicted labels
+        #
+        p_labels = model.predict(samples)
+
+        # currently QNN does not support posterior calculation
+        #
+        posteriors = None
+
+        # exit gracefully
+        #
+        return p_labels, posteriors
+    #
+    # end of method
+
+#
+# end of QNN
+
+#------------------------------------------------------------------------------
+
+class QRBM:
+    """
+    Class: QRBM
+
+    description:
+     This is a class that implements QRBM
+    """
+    def __init__(self):
+        """
+        method: constructor
+
+        arguments:
+         none
+
+        return:
+         none
+
+        description:
+         this is the default constructor for the class.
+        """
+
+        # set the class name
+        #
+        QRBM.__CLASS_NAME__ = self.__class__.__name__
+
+        # initialize variables for the parameter block and model
+        #
+        self.params_d = defaultdict(dict)
+        self.model_d = defaultdict()
+
+        # initialize a parameter dictionary
+        #
+        self.params_d[QRBM_PRM_KEY_NAME] = self.__class__.__name__
+        self.params_d[QRBM_PRM_KEY_PARAM] = defaultdict(dict)
+
+        # set the model
+        #
+        self.model_d[QRBM_MDL_KEY_NAME] = self.__class__.__name__
+        self.model_d[QRBM_MDL_KEY_MODEL] = defaultdict(dict)
+
+
+    #
+    # end of method
+
+    #--------------------------------------------------------------------------
+    #
+    # computational methods: train/predict
+    #
+    #--------------------------------------------------------------------------
+
+    def train(self,
+              data: MLToolsData,
+              write_train_labels: bool,
+              fname_train_labels: str,
+              ):
+
+        """
+        method: train
+        arguments:
+        data: a list of numpy float matrices of feature vectors
+        write_train_labels: a boolean to whether write the train data
+        fname_train_labels: the filename of the train file
+
+        return:
+         model: a PyTorch state_dict containing the model
+         error: training error rate
+
+        description:
+         none
+        """
+
+        # display an informational message
+        #
+        if dbgl_g == ndt.FULL:
+            print("%s (line: %s) %s: training a model" %
+                  (__FILE__, ndt.__LINE__, ndt.__NAME__))
+
+        # get the samples
+        #
+        samples =  np.array(data.data)
+
+        # getting the labels
+        #
+        labels = np.array(data.labels)
+
+        # get the parameters
+        #
+        self.mdl_name = str(self.params_d[QRBM_PRM_KEY_PARAM]
+                                         [QRBM_PRM_KEY_MDL_NAME])
+        self.provider_name = str(self.params_d[QRBM_PRM_KEY_PARAM]
+                                              [QRBM_PRM_KEY_PROVIDER])
+        self.n_hidden = int(self.params_d[QRBM_PRM_KEY_PARAM]
+                                         [QRBM_PRM_KEY_NHIDDEN])
+        self.shots = int(self.params_d[QRBM_PRM_KEY_PARAM]
+                                      [QRBM_PRM_KEY_SHOTS])
+        self.cs = int(self.params_d[QRBM_PRM_KEY_PARAM]
+                                    [QRBM_PRM_KEY_CS])
+        self.n_neighbors = int(self.params_d[QRBM_PRM_KEY_PARAM]
+                                      [QRBM_PRM_KEY_N_NEIGHBORS])
+        self.encoder = str(self.params_d[QRBM_PRM_KEY_PARAM]
+                                      [QRBM_PRM_KEY_ENCODER])
+        
+        # get the number of visible node which is the number of features
+        # in the dataset
+        #
+        self.n_visible = samples[0].shape[0]
+        
+        
+        # create the model
+        #
+        qrbm_knn_model = nqt.QML(model_name=self.mdl_name,
+                                 provider_name=
+                                 self.provider_name,
+                                 encoder_name=self.encoder,
+                                 n_hidden=self.n_hidden,
+                                 n_visible=self.n_visible,
+                                 shots=self.shots,
+                                 chain_strength=self.cs,
+                                 n_neighbors=self.n_neighbors,
+                                )
+                                                   
+        # get the trained model
+        #
+        self.model_d[QRBM_MDL_KEY_MODEL] = qrbm_knn_model.fit(samples, labels)
+        
+        # get the error rate for the training samples
+        #
+        error_rate, ypred = qrbm_knn_model.score(samples, labels)
+        
+        # if write_train_labels is True, write the labels to the file
+        #
+        if write_train_labels:
+            data.write(oname = fname_train_labels, label = ypred)
+        
+        # exit gracefully
+        #
+        return self.model_d, error_rate
+    #
+    # end of method
+
+    def predict(self,
+                data: MLToolsData,
+                model = None):
+        """
+        method: predict
+
+        arguments:
+         data: a numpy float matrix of feature vectors (each row is a vector)
+         model: an algorithm model (None = use the internal model)
+
+        return:
+         labels: a list of predicted labels
+
+        description:
+         none
+        """
+
+        # display an informational message
+        #
+        if dbgl_g == ndt.FULL:
+            print("%s (line: %s) %s: entering predict" %
+                  (__FILE__, ndt.__LINE__, ndt.__NAME__))
+            
+        # get the samples
+        #
+        samples = np.array(data.data)
+
+        # get the number of visible node which is the number of features
+        # in the dataset
+        #
+        self.n_visible = samples[0].shape[0]
+        
+        # get the trained model
+        #
+        model = self.model_d[QRBM_MDL_KEY_MODEL]
+                                                    
+        # get the predicted labels
+        #
+        p_labels = model.predict(samples)
+
+        # currently QRBM does not support posterior calculation
+        #
+        posteriors = None
+
+        # exit gracefully
+        #
+        return p_labels, posteriors
+    #
+    # end of method
+
+#
+# end of QRBM
+
 #------------------------------------------------------------------------------
 #
 # definitions dependent on the above classes go here
@@ -4991,7 +5805,7 @@ ALGS = {PCA_NAME: PCA(), LDA_NAME:LDA(), QDA_NAME:QDA(),
         QLDA_NAME: QLDA(), NB_NAME:NB(), KNN_NAME:KNN(),
         RNF_NAME:RNF(), SVM_NAME:SVM(), KMEANS_NAME:KMEANS(),
         MLP_NAME:MLP(), EUCLIDEAN_NAME: EUCLIDEAN(), RBM_NAME:RBM(),
-        TRANSFORMER_NAME:TRANSFORMER()}
+        TRANSFORMER_NAME:TRANSFORMER(), QSVM_NAME:QSVM(), QNN_NAME:QNN(), QRBM_NAME:QRBM()}
 #
 # end of file
 
