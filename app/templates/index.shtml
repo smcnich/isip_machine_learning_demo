@@ -38,13 +38,11 @@
 
   <!--Load libraries-->
   <!--              -->
-  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
 
   <!-- Load custom components -->
   <!--                        -->
-  
   <script type="module" src="static/components/Events.js"></script>
   <script src="static/components/ShareBtn.js"></script>
   <script src="static/components/MainToolbar.js"></script>
@@ -55,7 +53,6 @@
   <script type="module" src="static/components/ToolbarComponents.js"></script>
   <script type="module" src="static/components/DataParams.js"></script>
   <script src="static/components/FormContainer.js"></script>
-  <script src="static/components/ProgressBar.js"></script>
   <script src="static/components/HelpComponents.js"></script>
   <script type="module" src="static/components/ClassesComponents.js"></script>
   <script type="module" src="static/components/PatternsComponents.js"></script>

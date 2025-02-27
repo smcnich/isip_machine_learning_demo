@@ -4,8 +4,6 @@ class Toolbar_Button extends HTMLElement {
     constructor() {
       super();
       this.attachShadow({ mode: 'open' });
-      this.processLog = document.querySelector('process-log');
-      this.socket = io();
     }
   
     connectedCallback() {

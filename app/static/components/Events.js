@@ -138,7 +138,7 @@ EventBus.addEventListener('train', (event) => {
         else {
             return response.json().then((errorData) => {
                 EventBus.dispatchEvent(new CustomEvent('continue'));
-                processLog.writePlain(errorData);
+                processLog.writeError(errorData);
                 throw new Error(errorData);
             });
         }
@@ -217,7 +217,7 @@ EventBus.addEventListener('eval', (event) => {
     //
     const dsData = trainPlot.getDecisionSurface()
     if (dsData == null) {
-        this.processLog.writePlain('Could not evaluate model. Please train the model first.');
+        this.processLog.writeError('Could not evaluate model. Please train the model first.');
         return null;
     }
 
@@ -257,7 +257,7 @@ EventBus.addEventListener('eval', (event) => {
         else {
             return response.json().then((errorData) => {
                 EventBus.dispatchEvent(new CustomEvent('continue'));
-                processLog.writePlain(errorData);
+                processLog.writeError(errorData);
                 throw new Error(errorData);
             });
         }
@@ -320,7 +320,7 @@ EventBus.addEventListener('saveModel', () => {
             else {
                 return response.json().then((errorData) => {
                     EventBus.dispatchEvent(new CustomEvent('continue'));
-                    processLog.writePlain(errorData);
+                    processLog.writeError(errorData);
                     throw new Error(errorData);
                 });
             }
@@ -370,7 +370,7 @@ EventBus.addEventListener('saveModel', () => {
     }
     catch (error) {
         EventBus.dispatchEvent(new CustomEvent('continue'));
-        processLog.writePlain('Could not save model.');
+        processLog.writeError('Could not save model.');
     }    
 
 });
@@ -450,7 +450,7 @@ EventBus.addEventListener('loadModel', (event) => {
                 else {
                     return response.json().then((errorData) => {
                         EventBus.dispatchEvent(new CustomEvent('continue'));
-                        processLog.writePlain(errorData);
+                        processLog.writeError(errorData);
                         throw new Error(errorData);
                     });
                 }
@@ -571,7 +571,7 @@ EventBus.addEventListener('dataGen', (event) => {
             else {
                 return response.json().then((errorData) => {
                     EventBus.dispatchEvent(new CustomEvent('continue'));
-                    processLog.writePlain(errorData);
+                    processLog.writeError(errorData);
                     throw new Error(errorData);
                 });
             }
@@ -638,7 +638,7 @@ EventBus.addEventListener('dataGen', (event) => {
     catch {
         return response.json().then((errorData) => {
             EventBus.dispatchEvent(new CustomEvent('continue'));
-            processLog.writePlain(errorData);
+            processLog.writeError(errorData);
             throw new Error(errorData);
         });
     }
@@ -969,7 +969,7 @@ EventBus.addEventListener('loadData', (event) => {
     // catch any error
     //
     catch (err) {      
-        processLog.writePlain('Unable to load data file.');
+        processLog.writeError('Unable to load data file.');
         EventBus.dispatchEvent(new CustomEvent('continue'));
     }
 });
@@ -1006,7 +1006,7 @@ EventBus.addEventListener('saveData', (event) => {
         // if the plotData is empty, nothing can be saved
         //
         if (!plotData) {        
-            processLog.writePlain(`No ${plotID} data to save.`);
+            processLog.writeError(`No ${plotID} data to save.`);
             return;
         }
 
@@ -1095,7 +1095,7 @@ EventBus.addEventListener('saveData', (event) => {
     // catch any errors
     //
     catch (err) {
-        processLog.writePlain('Unable to save data file.');
+        processLog.writeError('Unable to save data file.');
         EventBus.dispatchEvent(new CustomEvent('continue'));
     }
 });
@@ -1274,11 +1274,8 @@ EventBus.addEventListener('clearPlot', (event) => {
         labelManager.clear();
         mainToolbar.updateClassList(labelManager.getLabels());
 
-        // reset the progress bars
+        // dispatch event to disable drawing
         //
-        algoTool.set_train_progress(0);
-        algoTool.set_eval_progress(0);
-
         EventBus.dispatchEvent(new CustomEvent('disableDraw'));
     }
 

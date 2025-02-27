@@ -42,10 +42,6 @@ class ProcessLog extends HTMLElement {
         // get the name of the class
         //
         this.name = this.constructor.name;
-
-        // initialize the web socket
-        //
-        this.socket = io();
     }
     //
     // end of method
@@ -67,10 +63,6 @@ class ProcessLog extends HTMLElement {
         // render the component to the webpage
         //
         this.render();
-
-        this.socket.on('log', (data) => {
-            this.writePlain(data.data);
-        });
     }
     //
     // end of method
@@ -155,6 +147,7 @@ class ProcessLog extends HTMLElement {
              background: #512e82;
              border-radius: 100vw;
           } 
+
         </style>
         
         <!-- Structure for log content within a scrollable div -->
@@ -201,13 +194,13 @@ class ProcessLog extends HTMLElement {
         method: ProcessLog::writePlain
         
         args:
-         log: string - the log message to be written to the log container
+         log (String): the log message to be written to the log container
   
         return:
          None
   
         description:
-         This method writes a log message to the log container in plain text
+         this method writes a log message to the log container in plain text
         */
   
         // Get the log object
@@ -222,6 +215,37 @@ class ProcessLog extends HTMLElement {
         //
         let logDiv = this.shadowRoot.querySelector('.scroll-div'); // This is the scroll container
         logDiv.scrollTop = logDiv.scrollHeight;        
+    }
+    //
+    // end of method
+
+    writeError(msg) {
+        /*
+        method: ProcessLog::writeError
+
+        args:
+         msg (String): the error message to be written to the log container
+
+        return:
+         None
+
+        description:
+         write an error message to the log container in red text and different
+         spacing to make it stand out from other log messages.
+        */
+
+        // get the log object
+        //
+        let logObject = this.shadowRoot.querySelector('.scroll-object');
+  
+        // append the log message to the log container
+        //
+        logObject.innerHTML += `<br><span style="color:red">${msg}</span><br>`;
+  
+        // scroll to the bottom of the log container
+        //
+        let logDiv = this.shadowRoot.querySelector('.scroll-div');
+        logDiv.scrollTop = logDiv.scrollHeight;   
     }
     //
     // end of method
@@ -369,14 +393,15 @@ class ProcessLog extends HTMLElement {
         method: ProcessLog::writeSingleValue
 
         args:
-        label (String): The label for the value being logged.
-        value (String): The value to be logged.
+         label (String): The label for the value being logged.
+         value (String): The value to be logged.
 
         return:
-        None
+         None
 
         description:
-        This method writes a labeled value to the process log, formatting it for readability.
+         this method writes a labeled value to the process log, formatting it 
+         for readability.
         */
 
         // Get the log object
@@ -454,6 +479,8 @@ class ProcessLog extends HTMLElement {
         // Add the separator to the log
         logDiv.innerHTML += `<div>${separator}</div>`;
     }
+    //
+    // end of method
 
   }
   //
